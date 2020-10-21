@@ -1,0 +1,11 @@
+POST http://localhost:3500/auth/login
+Content-Type: application/json
+
+{
+    "username": "Pat",
+    "password": "hej"
+}
+
+###
+GET http://localhost:3500/api
+Cookie: authcookie=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiUGF0IiwiaWF0IjoxNjAzMjkwMDY5LCJleHAiOjE2MDMyOTAzNjl9.SmCkz2cLgshNM9X4EAl9y4_0NJqCes6vRaucIe7c_mU; Max-Age=0; Path=/; Expires=Wed, 21 Oct 2020 14:21:10 GMT; HttpOnly
