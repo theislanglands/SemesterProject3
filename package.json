@@ -4,19 +4,28 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "@types/dotenv": "^8.2.0",
+    "bcrypt": "^5.0.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
-    "nginx": "0.0.0"
+    "nginx": "0.0.0",
+    "require": "^2.4.20"
   },
   "devDependencies": {
+    "@types/bcrypt": "^3.0.0",
+    "@types/express": "^4.17.8",
+    "@types/jsonwebtoken": "^8.5.0",
     "@typescript-eslint/eslint-plugin": "^4.5.0",
     "@typescript-eslint/parser": "^4.5.0",
     "eslint": "^7.11.0",
     "prettier": "2.1.2"
   },
   "scripts": {
-    "test": "jest"
+    "test": "npm run lint & npm run prettier & jest",
+    "build": "tsc",
+    "start": "node dist/jwt-project/authserver.js & dist/jwt-project/authserver.js",
+    "commit": "git-cz"
   },
   "repository": {
     "type": "git",
