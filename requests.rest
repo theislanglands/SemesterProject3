@@ -1,4 +1,4 @@
-POST http://localhost:3500/auth/login
+POST http://localhost:3300/auth/login
 Content-Type: application/json
 
 {
@@ -7,5 +7,5 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:3500/api
-Cookie: authcookie=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiUGF0IiwiaWF0IjoxNjAzMjkwMDY5LCJleHAiOjE2MDMyOTAzNjl9.SmCkz2cLgshNM9X4EAl9y4_0NJqCes6vRaucIe7c_mU; Max-Age=0; Path=/; Expires=Wed, 21 Oct 2020 14:21:10 GMT; HttpOnly
+GET http://localhost:3300/api
+Cookie: authcookie=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiUGF0IiwiaWF0IjoxNjAzMzUyOTU5LCJleHAiOjE2MDMzNTMyNTl9.dpdFLWwoO_nj3Uq-wlgQIDqhHfzcUPBMD0RIaJhRIjc; Max-Age=0; Path=/; Expires=Thu, 22 Oct 2020 07:49:20 GMT; HttpOnly; Secure

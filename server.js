@@ -40,7 +40,8 @@ app.post('/auth/login', (req, res) => {
 
     if (user.password == req.body.password) {
         const token = jwt.sign({user: username}, secret, {expiresIn: '5m'})
-        res.cookie('authcookie', token, {maxAge: 10, httpOnly: true, secure: true}).send()
+        var oneWeek = 5 * 60 * 1000;
+        res.cookie('authcookie', token, {maxAge: oneWeek, httpOnly: true, secure: false, sameSite: "lax"}).send()
     } else {
         console.log("Invalid password")
     }
@@ -52,6 +53,8 @@ app.get('/home', (req, res) => {
 
 function authenticateToken(req, res, next) {
     const authcookie = req.cookies.authcookie
+    console.log(authcookie)
+    console.log(req.cookies)
     jwt.verify(authcookie, secret, (err, data) => {
         if (err) {
             res.sendStatus(403)
