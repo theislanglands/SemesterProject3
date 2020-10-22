@@ -8,7 +8,7 @@ const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 
 const jwt = require('jsonwebtoken')
-const { send } = require('process')
+
 
 app.get('/', function(req, res) {
     res.sendFile(path.join(__dirname + '/index.html'))
