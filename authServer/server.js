@@ -9,10 +9,9 @@ const cookieParser = require('cookie-parser');
 
 const jwt = require('jsonwebtoken');
 
-app.get('/', function (req, res) {
+app.get('/', function(req, res) {
     res.sendFile(path.join(__dirname + '/index.html'));
 });
-
 // Middlewares
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
