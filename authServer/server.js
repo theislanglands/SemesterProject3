@@ -33,15 +33,17 @@ let secret = 'tihifnis'
 app.post('/auth/login', (req, res) => {
     let username = req.body.username
     const user = users.find(user => user.username == req.body.username)
-    console.log(user)
+    
     if (user == null) {
         return res.status(400).send(`Cannot find user with username: ${username}`)
     }
 
+    console.log(user)
+
     if (user.password == req.body.password) {
         const token = jwt.sign({user: username}, secret, {expiresIn: '5m'})
-        var oneWeek = 5 * 60 * 1000;
-        res.cookie('authcookie', token, {maxAge: oneWeek, httpOnly: true, secure: false, sameSite: "lax"}).send()
+        var fiveMins = 5 * 60 * 1000;
+        res.cookie('authcookie', token, {maxAge: fiveMins, httpOnly: true, secure: false, sameSite: "lax"}).send()
     } else {
         console.log("Invalid password")
     }
