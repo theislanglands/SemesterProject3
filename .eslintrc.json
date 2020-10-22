@@ -6,11 +6,16 @@
     },
     "extends": [
         "standard",
-        "plugin:prettier/recommended"
+        "prettier/recommended",
+        "prettier/flowtype",
+        "prettier/react",
+        "prettier/standard"
     ],
     "parserOptions": {
         "ecmaVersion": 12
     },
     "rules": {
-    }
+        "prettier/prettier": "error"
+    },
+    "plugins": ["prettier"]
 }
