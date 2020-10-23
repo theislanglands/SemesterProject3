@@ -33,6 +33,10 @@ const refreshTokens = [];
 
 let secret = 'tihifnis';
 let refreshSecret = 'vrysecuresecret';
+
+const fiveMins = 5 * 60 * 1000;
+const oneWeek = 7 * 24 * 3600 * 1000;
+
 app.post('/auth/login', (req, res) => {
     let username = req.body.username;
     const user = users.find((user) => user.username === req.body.username);
@@ -44,11 +48,11 @@ app.post('/auth/login', (req, res) => {
     console.log(user);
 
     if (user.password == req.body.password) {
-        const accesstoken = generateAccessToken(user);
-        const refreshToken = generateRefreshToken(user);
+        const accesstoken = generateAccessToken({ username: user.username });
+        const refreshToken = generateRefreshToken({ username: user.username });
+        console.log(refreshToken);
         refreshTokens.push(refreshToken);
-        var fiveMins = 5 * 60 * 1000;
-        var oneWeek = 7 * 24 * 3600 * 1000;
+
         res.cookie('authcookie', accesstoken, {
             maxAge: fiveMins,
             httpOnly: false,
@@ -73,9 +77,7 @@ app.get('/home', (req, res) => {
 
 function authenticateToken(req, res, next) {
     const authcookie = req.cookies.authcookie;
-    console.log(authcookie);
-    console.log(req.cookies);
-    jwt.verify(authcookie, process.env.SECRET, (err, data) => {
+    jwt.verify(authcookie, secret, (err, data) => {
         if (err) {
             res.sendStatus(403);
         } else if (data.user) {
@@ -93,6 +95,7 @@ function authenticateRefreshToken(req, res, next) {
                 res.sendStatus(403);
             } else if (data.user) {
                 req.user = data.user;
+                console.log('Refresh cookie verified');
             }
             next();
         });
@@ -109,4 +112,26 @@ function generateRefreshToken(user) {
 
 app.get('/api', authenticateToken, (req, res) => {
     console.log('Cookie checked, success');
+});
+
+app.get('/auth/refresh', authenticateRefreshToken, (req, res) => {
+    const refreshToken = req.cookies.refreshcookie;
+    if (refreshTokens.includes(refreshToken)) {
+        const decodedToken = jwt.decode(refreshToken);
+        const accessToken = generateAccessToken({ username: decodedToken.username });
+        const reRefreshToken = generateRefreshToken({ username: decodedToken.username });
+        res.cookie('authcookie', accessToken, {
+            maxAge: fiveMins,
+            httpOnly: false,
+            secure: true,
+            sameSite: 'lax'
+        });
+        res.cookie('refreshcookie', reRefreshToken, {
+            maxAge: oneWeek,
+            httpOnly: true,
+            secure: true,
+            sameSite: 'lax'
+        });
+        res.send();
+    }
 });
