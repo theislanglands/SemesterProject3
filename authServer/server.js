@@ -10,7 +10,7 @@ const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 
 app.get('/', function (req, res) {
-    res.sendFile(path.join(__dirname + '/index.html'));
+    res.sendFile(path.join(__dirname + '/html/index.html'));
 });
 // Middlewares
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -72,7 +72,11 @@ app.post('/auth/login', (req, res) => {
 });
 
 app.get('/home', (req, res) => {
-    res.sendFile(path.join(__dirname + '/home.html'));
+    res.sendFile(path.join(__dirname + '/html/index.html'));
+});
+
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname + '/html/login-page.html'));
 });
 
 function authenticateToken(req, res, next) {
@@ -82,8 +86,8 @@ function authenticateToken(req, res, next) {
             res.sendStatus(403);
         } else if (data.user) {
             req.user = data.user;
-            next();
         }
+        next();
     });
 }
 
@@ -110,8 +114,8 @@ function generateRefreshToken(user) {
     return jwt.sign(user, refreshSecret, { expiresIn: '7d' });
 }
 
-app.get('/api', authenticateToken, (req, res) => {
-    console.log('Cookie checked, success');
+app.get('/music', authenticateToken, (req, res) => {
+    res.sendFile(path.join(__dirname + '/html/music.html'));
 });
 
 app.get('/auth/refresh', authenticateRefreshToken, (req, res) => {
