@@ -9,6 +9,7 @@ var emailUrl;
 const nodemailer = require('nodemailer');
 
 require('dotenv').config({ path: '.env' });
+console.log(process.env.URL_SECRET);
 var urlCrypt = require('url-crypt')(process.env.URL_SECRET);
 
 // Expectations
