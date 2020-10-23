@@ -1,4 +1,9 @@
 .DS_Store
+
+authServer/node_modules
+gmailserver/node_modules
+userAPI/node_modules
+
 # Created by https://www.toptal.com/developers/gitignore/api/intellij,vscode,dotenv,node
 # Edit at https://www.toptal.com/developers/gitignore?templates=intellij,vscode,dotenv,node
 
