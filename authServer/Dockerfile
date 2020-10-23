@@ -2,7 +2,7 @@ FROM node:latest
 
 COPY package*.json ./
 
-RUN npm install -y
+RUN npm install -g -y
 
 # Bundles app source
 COPY . .
