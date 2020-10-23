@@ -1,33 +1,19 @@
 {
-  "name": "template",
+  "name": "authserver",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "devStart": "nodemon server.js",
-    "test": "lint"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://gitlab.sdu.dk/semester-project-e2020/team-10-connection-security/template.git"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "cookie-parser": "^1.4.5",
-    "dotenv": "^8.2.0",
-    "eslint": "^7.11.0",
-    "eslint-config-standard": "^15.0.0",
-    "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.2",
-    "jsonwebtoken": "^8.5.1",
-    "prettier-eslint": "^11.0.0"
-  },
   "dependencies": {
-    "@types/node": "^14.14.2",
     "body-parser": "^1.19.0",
-    "express": "^4.17.1"
+    "cookie-parser": "^1.4.5",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "path": "^0.12.7"
   }
 }
