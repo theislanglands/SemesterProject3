@@ -1,28 +1,27 @@
 <!DOCTYPE html>
 <html>
-  <script>
-    function getSubmition() {
-      let username = document.getElementById("username").value;
-      let password = document.getElementById("password").value;
+    <script>
+        function getSubmition() {
+            let username = document.getElementById('username').value;
+            let password = document.getElementById('password').value;
 
-      console.log(username + password);
+            console.log(username + password);
 
-      return [username, password];
-    }
-  </script>
-  <body>
-    <h1>My First Heading</h1>
-    <p>My first paragraph.</p>
+            return [username, password];
+        }
+    </script>
+    <body>
+        <h1>My First Heading</h1>
+        <p>My first paragraph.</p>
 
-    <form>
-      <label for="username">Username:</label>
-      <input type="text" id="username" name="username" /><br /><br />
-      <label for="password">Password:</label>
-      <input type="password" id="password" name="password" /><br /><br />
-      <button type="button" id="submit" onclick="getSubmition()" name="submit">
-        submit</button
-      ><br />
-      <a href="forgotPasword-page.html">Forgot Password?</a>
-    </form>
-  </body>
+        <form>
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" /><br /><br />
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" /><br /><br />
+            <button type="button" id="submit" onclick="getSubmition()" name="submit">submit</button
+            ><br />
+            <a href="forgotPasword-page.html">Forgot Password?</a>
+        </form>
+    </body>
 </html>

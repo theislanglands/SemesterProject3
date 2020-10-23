@@ -7,9 +7,10 @@ var endEmail;
 var emailUrl;
 
 const nodemailer = require('nodemailer');
+const cookieparser = require('cookie-parser');
+const fetch = require('node-fetch');
 
 require('dotenv').config({ path: '.env' });
-console.log(process.env.URL_SECRET);
 var urlCrypt = require('url-crypt')(process.env.URL_SECRET);
 
 // Expectations
@@ -65,15 +66,7 @@ var urlencodedParser = bodyparser.urlencoded({
 });
 
 server.use(express.static('html'));
-server.post('/resetPassword_form', urlencodedParser, function (req, res) {
-    let password = req.body.password;
-    let confPassword = req.body.confirmPassword;
-    if (confPassword == password) {
-    }
-    console.log(password);
-    console.log(confPassword);
-    console.log(req);
-});
+server.use(cookieparser());
 
 server.post('/forgotPass', urlencodedParser, function (req, res) {
     endEmail = req.body.email;
@@ -84,7 +77,7 @@ server.post('/forgotPass', urlencodedParser, function (req, res) {
     //encrypt
     var hash = urlCrypt.cryptObj(urlParams);
     console.log(hash);
-    mailDetails = createMailDetails(serverEmail, endEmail, 'http://127.0.0.1:80/reset?' + hash);
+    mailDetails = createMailDetails(serverEmail, endEmail, 'http://localhost:80/reset?' + hash);
     let bool = sendMail(mailTransporter, mailDetails);
     if (bool) {
         urlencodedParser;
@@ -97,22 +90,36 @@ server.post('/forgotPass', urlencodedParser, function (req, res) {
 server.get('/reset', urlencodedParser, function (req, res) {
     let url = req.url;
     let encoded = url.split('?');
-    res.set('Authorization', 'basic ' + encoded[1]);
-    console.log(url);
     let decoded = decodeUrl(url, '?');
     let splitedDecoded = decoded.split('?');
     emailUrl = splitedDecoded[0];
-
     if (isExpired(splitedDecoded, 1, 1)) {
+        res.cookie('mailtoken', emailUrl);
         res.sendFile(__dirname + '/html/resetPassword.html');
     } else {
         console.log('false');
         res.sendStatus(404);
     }
 });
-server.post('/resetPassword_form', function (req, res) {
-    console.log(req.body);
-    res.sendStatus(200);
+server.post('/resetPassword_form', urlencodedParser, function (req, res) {
+    const mail = req.cookies.mailtoken;
+    let password = req.body.password;
+    let confirmpassword = req.body.confirmPassword;
+    if (password === confirmpassword) {
+        console.log('Password: ' + password + ' Email: ' + mail);
+        // the password and the mail will be passed with fetch to the database API
+        //
+        //
+        // fetch('http://localhost:80/users/changePassword', {
+        //     method: 'post',
+        //     headers: {
+        //         'Content-Type' : 'application/json'
+        //     },
+        //     body: JSON.stringify({mail:mail, newPassword:password})
+        // })
+        // .then(function(res){ console.log(res) })
+        // .catch(function(res){ console.log(res) })
+    }
 });
 
 var server1 = server.listen(8081, function () {
