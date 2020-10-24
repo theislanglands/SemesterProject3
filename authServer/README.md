@@ -93,8 +93,8 @@ function authenticateToken(req, res, next) {
             res.sendStatus(403);
         } else if (data.user) {
             req.user = data.user;
-            next();
         }
+        next();
     });
 }
 
