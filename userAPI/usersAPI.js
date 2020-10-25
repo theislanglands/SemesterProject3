@@ -147,6 +147,8 @@ function deleteUser(user) {
 const express = require('express');
 const server = express();
 
+server.use(express.static('html'));
+
 server.post('/users/checkCredentials', function (req, res) {
     let email = req.body.email;
     let password = req.body.password;
