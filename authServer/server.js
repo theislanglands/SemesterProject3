@@ -9,18 +9,10 @@ const cookieParser = require('cookie-parser');
 
 const jwt = require('jsonwebtoken');
 
-app.get('/', function (req, res) {
-    res.sendFile(path.join(__dirname + '/html/index.html'));
-});
 // Middlewares
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
-
-//Listen
-app.listen(3300, () => {
-    console.log('Connected');
-});
 
 const users = [
     {
@@ -36,6 +28,46 @@ let refreshSecret = 'vrysecuresecret';
 
 const fiveMins = 5 * 60 * 1000;
 const oneWeek = 7 * 24 * 3600 * 1000;
+
+app.get('/', function (req, res) {
+    res.sendFile(path.join(__dirname + '/html/index.html'));
+});
+
+app.get('/home', (req, res) => {
+    res.sendFile(path.join(__dirname + '/html/index.html'));
+});
+
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname + '/html/login-page.html'));
+});
+
+app.get('/music', authenticateToken, (req, res) => {
+    res.sendFile(path.join(__dirname + '/html/music.html'));
+});
+
+app.use(express.static('html'));
+
+app.get('/auth/refresh', authenticateRefreshToken, (req, res) => {
+    const refreshToken = req.cookies.refreshcookie;
+    if (refreshTokens.includes(refreshToken)) {
+        const decodedToken = jwt.decode(refreshToken);
+        const accessToken = generateAccessToken({ username: decodedToken.username });
+        const reRefreshToken = generateRefreshToken({ username: decodedToken.username });
+        res.cookie('authcookie', accessToken, {
+            maxAge: fiveMins,
+            httpOnly: false,
+            secure: true,
+            sameSite: 'lax'
+        });
+        res.cookie('refreshcookie', reRefreshToken, {
+            maxAge: oneWeek,
+            httpOnly: true,
+            secure: true,
+            sameSite: 'lax'
+        });
+        res.send();
+    }
+});
 
 app.post('/auth/login', (req, res) => {
     let username = req.body.username;
@@ -69,14 +101,6 @@ app.post('/auth/login', (req, res) => {
     } else {
         console.log('Invalid password');
     }
-});
-
-app.get('/home', (req, res) => {
-    res.sendFile(path.join(__dirname + '/html/index.html'));
-});
-
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname + '/html/login-page.html'));
 });
 
 function authenticateToken(req, res, next) {
@@ -114,28 +138,7 @@ function generateRefreshToken(user) {
     return jwt.sign(user, refreshSecret, { expiresIn: '7d' });
 }
 
-app.get('/music', authenticateToken, (req, res) => {
-    res.sendFile(path.join(__dirname + '/html/music.html'));
-});
-
-app.get('/auth/refresh', authenticateRefreshToken, (req, res) => {
-    const refreshToken = req.cookies.refreshcookie;
-    if (refreshTokens.includes(refreshToken)) {
-        const decodedToken = jwt.decode(refreshToken);
-        const accessToken = generateAccessToken({ username: decodedToken.username });
-        const reRefreshToken = generateRefreshToken({ username: decodedToken.username });
-        res.cookie('authcookie', accessToken, {
-            maxAge: fiveMins,
-            httpOnly: false,
-            secure: true,
-            sameSite: 'lax'
-        });
-        res.cookie('refreshcookie', reRefreshToken, {
-            maxAge: oneWeek,
-            httpOnly: true,
-            secure: true,
-            sameSite: 'lax'
-        });
-        res.send();
-    }
+//Listen
+app.listen(3300, () => {
+    console.log("Connected");
 });
