@@ -3,36 +3,26 @@ services:
     nginx:
         build:
             context: ./reverse_proxy/
-# Expose is defined as: Ports are not exposed to host machines, only exposed to other services. 
-# ports: Activates the container to listen for specified port(s) from the world outside of the 
-# docker(can be same host machine or a different machine) AND also accessible world inside docker
+        # Expose is defined as: Ports are not exposed to host machines, only exposed to other services.
+        # ports: Activates the container to listen for specified port(s) from the world outside of the
+        # docker(can be same host machine or a different machine) AND also accessible world inside docker
         ports:
             - 80:80
             - 443:443
             - 3030:3030
             - 3031:3031
-            - 3032:3032
         volumes:
             - ./reverse_proxy/cert_key/:/etc/nginx/certs
             - ./reverse_proxy/nginx.conf:/etc/nginx/nginx.conf
-
 
     authservice:
         build:
             context: ./authServer/
         expose:
             - '3300'
- 
+
     gmailservice:
         build:
             context: ./gmailserver/
         expose:
             - '8081'
-
-    userapiservice:
-        build:
-            context: ./userAPI/
-        expose:
-            - '8082'
-
-
