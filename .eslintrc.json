@@ -5,8 +5,8 @@
         "es2021": true
     },
     "extends": [
-        "standard",
-        "prettier/recommended",
+        "eslint:recommended",
+        "plugin:prettier/recommended",
         "prettier/flowtype",
         "prettier/react",
         "prettier/standard"
