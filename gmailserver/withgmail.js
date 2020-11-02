@@ -11,7 +11,6 @@ const cookieparser = require('cookie-parser');
 const fetch = require('node-fetch');
 
 require('dotenv').config({ path: '.env' });
-var urlCrypt = require('url-crypt')(process.env.URL_SECRET);
 
 const crypto = require('crypto');
 
@@ -132,8 +131,10 @@ server.get('/reset', urlencodedParser, function (req, res) {
     let email = splitedDecrypted[0];
     encryptedEmail = encrypt(email);
 
-    if (isExpired(splitedDecrypted, 1, 1)) {
-        res.cookie('mailtoken', encryptedEmail);
+    if (isExpired(splitedDecrypted, 1, 30)) {
+        res.cookie('mailtoken', encryptedEmail, {
+            maxAge: 900000
+        });
         res.sendFile(__dirname + '/html/resetPassword.html');
     } else {
         console.log('false');
@@ -146,6 +147,7 @@ server.post('/resetPassword_form', urlencodedParser, function (req, res) {
 
     let password = req.body.password;
     let confirmpassword = req.body.confirmPassword;
+
     // sammenligning skal gøres på frontend og ikke her.
     if (password === confirmpassword) {
         console.log('Password: ' + password + ' Email: ' + mail);
@@ -170,13 +172,6 @@ var server1 = server.listen(8081, function () {
 
     console.log('Example app listening at http://%s:%s', host, port);
 });
-
-function decodeUrl(url, split) {
-    let splitedUrl = url.split(split);
-    let a = splitedUrl[1];
-    let decoded = urlCrypt.decryptObj(a);
-    return decoded;
-}
 
 function isExpired(splitedDecodedArr, indexOfTime, valideInMinutes) {
     let timeCreated = parseInt(splitedDecodedArr[indexOfTime]);
