@@ -141,9 +141,12 @@ server.get('/reset', urlencodedParser, function (req, res) {
     }
 });
 server.post('/resetPassword_form', urlencodedParser, function (req, res) {
-    const mail = req.cookies.mailtoken;
+    const encryptedMail = req.cookies.mailtoken;
+    let decryptedMail = decrypt(encryptedMail);
+
     let password = req.body.password;
     let confirmpassword = req.body.confirmPassword;
+    // sammenligning skal gøres på frontend og ikke her.
     if (password === confirmpassword) {
         console.log('Password: ' + password + ' Email: ' + mail);
         // the password and the mail will be passed with fetch to the database API
