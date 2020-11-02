@@ -13,6 +13,24 @@ const fetch = require('node-fetch');
 require('dotenv').config({ path: '.env' });
 var urlCrypt = require('url-crypt')(process.env.URL_SECRET);
 
+const crypto = require('crypto');
+
+const algorithm = 'aes-128-cbc';
+const key = '123456789123456789123456789';
+
+function encrypt(text) {
+    var mykey = crypto.createCipher(algorithm, key);
+    var mystr = mykey.update(text, 'utf8', 'hex');
+    mystr += mykey.final('hex');
+    return mystr;
+}
+function decrypt(text) {
+    var mykey = crypto.createDecipher(algorithm, key);
+    var mystr = mykey.update(text, 'hex', 'utf8');
+    mystr += mykey.final('utf8');
+    return mystr;
+}
+
 // Expectations
 // expect(backAgain).to.eql(data);
 
@@ -68,16 +86,33 @@ var urlencodedParser = bodyparser.urlencoded({
 server.use(express.static('html'));
 server.use(cookieparser());
 
+function encode(text) {
+    let bufferObj = Buffer.from(text, 'utf8');
+    let encodedString = bufferObj.toString('base64');
+    return encodedString;
+}
+function decode(text) {
+    let bufferObj = Buffer.from(text, 'base64');
+    let decodedString = bufferObj.toString('utf8');
+    return decodedString;
+}
+
 server.post('/forgotPass', urlencodedParser, function (req, res) {
     endEmail = req.body.email;
+    encodedEmail = encode(endEmail);
     mailTransporter = createMailTransporter(mailService, serverEmail, serverEmailPass);
     let date = new Date();
     let dateString = date.getTime();
-    let urlParams = endEmail + '?' + dateString;
+    let urlParams = encodedEmail + '?' + dateString;
     //encrypt
-    var hash = urlCrypt.cryptObj(urlParams);
-    console.log(hash);
-    mailDetails = createMailDetails(serverEmail, endEmail, 'http://localhost:80/reset?' + hash);
+    //var encrypted = urlCrypt.cryptObj(urlParams);
+    var encrypted = encrypt(urlParams);
+    console.log(encrypted);
+    mailDetails = createMailDetails(
+        serverEmail,
+        endEmail,
+        'http://localhost:8081/reset?' + encrypted
+    );
     let bool = sendMail(mailTransporter, mailDetails);
     if (bool) {
         urlencodedParser;
@@ -89,12 +124,16 @@ server.post('/forgotPass', urlencodedParser, function (req, res) {
 
 server.get('/reset', urlencodedParser, function (req, res) {
     let url = req.url;
-    let encoded = url.split('?');
-    let decoded = decodeUrl(url, '?');
-    let splitedDecoded = decoded.split('?');
-    emailUrl = splitedDecoded[0];
-    if (isExpired(splitedDecoded, 1, 1)) {
-        res.cookie('mailtoken', emailUrl);
+    console.log(url);
+    let encrypted = url.split('?');
+    let decrypted = decrypt(encrypted[1]);
+    console.log(decrypted);
+    let splitedDecrypted = decrypted.split('?');
+    let email = splitedDecrypted[0];
+    encryptedEmail = encrypt(email);
+
+    if (isExpired(splitedDecrypted, 1, 1)) {
+        res.cookie('mailtoken', encryptedEmail);
         res.sendFile(__dirname + '/html/resetPassword.html');
     } else {
         console.log('false');
