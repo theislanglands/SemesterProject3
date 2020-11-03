@@ -2,9 +2,11 @@
 <html>
     <body>
         <h3>Reset password</h3>
-        <form action="http://localhost:8081/forgotPass" method="POST">
-            email: <input type="text" name="email" /> <br />
-            <input type="submit" value="Submit" />
+        <form>
+            email: <input type="text" id="email" /> <br />
+            <input type="button" value="Submit" id="submit" />
         </form>
+        <div id="response"></div>
     </body>
+    <script src="forgotPasswordFront.js"></script>
 </html>

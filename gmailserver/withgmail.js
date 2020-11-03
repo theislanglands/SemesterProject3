@@ -9,6 +9,7 @@ var emailUrl;
 const nodemailer = require('nodemailer');
 const cookieparser = require('cookie-parser');
 const fetch = require('node-fetch');
+const validator = require('validator');
 
 require('dotenv').config({ path: '.env' });
 
@@ -18,16 +19,18 @@ const algorithm = 'aes-128-cbc';
 const key = '123456789123456789123456789';
 
 function encrypt(text) {
-    var mykey = crypto.createCipher(algorithm, key);
-    var mystr = mykey.update(text, 'utf8', 'hex');
-    mystr += mykey.final('hex');
-    return mystr;
+    //Undersg iv, fordi denne funtion er outdated
+    var cipher = crypto.createCipher(algorithm, key);
+    var encrypted = cipher.update(text, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    return encrypted;
 }
 function decrypt(text) {
-    var mykey = crypto.createDecipher(algorithm, key);
-    var mystr = mykey.update(text, 'hex', 'utf8');
-    mystr += mykey.final('utf8');
-    return mystr;
+    //Undersg iv, fordi denne funtion er outdated
+    var decipher = crypto.createDecipher(algorithm, key);
+    var decrypted = decipher.update(text, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
 }
 
 // Expectations
@@ -76,8 +79,10 @@ function sendMail(mailTransporter, mailDetails) {
 const express = require('express');
 const server = express();
 const bodyparser = require('body-parser');
+const https = require('https');
 
 // Create application/x-www-form-urlencoded parser
+//LÆS OP PÅ DETTE
 var urlencodedParser = bodyparser.urlencoded({
     extended: false
 });
@@ -97,40 +102,42 @@ function decode(text) {
 }
 
 server.post('/forgotPass', urlencodedParser, function (req, res) {
-    endEmail = req.body.email;
-    encodedEmail = encode(endEmail);
-    mailTransporter = createMailTransporter(mailService, serverEmail, serverEmailPass);
-    let date = new Date();
-    let dateString = date.getTime();
-    let urlParams = encodedEmail + '?' + dateString;
-    //encrypt
-    //var encrypted = urlCrypt.cryptObj(urlParams);
-    var encrypted = encrypt(urlParams);
-    console.log(encrypted);
-    mailDetails = createMailDetails(
-        serverEmail,
-        endEmail,
-        'http://localhost:8081/reset?' + encrypted
-    );
-    let bool = sendMail(mailTransporter, mailDetails);
-    if (bool) {
-        urlencodedParser;
-        res.sendStatus(200);
+    let endMail;
+    if (validator.isEmail(req.body.email)) {
+        endEmail = validator.escape(req.body.email);
+
+        encodedEmail = encode(endEmail);
+        mailTransporter = createMailTransporter(mailService, serverEmail, serverEmailPass);
+        let date = new Date();
+        let dateString = date.getTime();
+        let urlParams = encodedEmail + '?' + dateString;
+        var encrypted = encrypt(urlParams);
+        mailDetails = createMailDetails(
+            serverEmail,
+            endEmail,
+            'http://localhost:8081/reset?' + encrypted
+        );
+        let bool = sendMail(mailTransporter, mailDetails);
+        if (bool) {
+            res.send(JSON.stringify({ msg: 'An email has been sent to you', isSent: true }));
+        } else {
+            //res.sendStatus(406);
+        }
     } else {
-        //res.sendStatus(406);
+        res.send(JSON.stringify({ msg: 'not a real Email', isSent: false }));
     }
 });
 
 server.get('/reset', urlencodedParser, function (req, res) {
     let url = req.url;
     console.log(url);
-    let encrypted = url.split('?');
-    let decrypted = decrypt(encrypted[1]);
-    console.log(decrypted);
+    let encryptedString = url.split('?')[1];
+    let decrypted = decrypt(encryptedString);
     let splitedDecrypted = decrypted.split('?');
     let email = splitedDecrypted[0];
-    encryptedEmail = encrypt(email);
+    //kald database om email eksisterer
 
+    encryptedEmail = encrypt(email);
     if (isExpired(splitedDecrypted, 1, 30)) {
         res.cookie('mailtoken', encryptedEmail, {
             maxAge: 900000
@@ -144,13 +151,14 @@ server.get('/reset', urlencodedParser, function (req, res) {
 server.post('/resetPassword_form', urlencodedParser, function (req, res) {
     const encryptedMail = req.cookies.mailtoken;
     let decryptedMail = decrypt(encryptedMail);
-
+    //mailen er stadig encoded
+    //se om mail eksisterer i database.
     let password = req.body.password;
     let confirmpassword = req.body.confirmPassword;
 
     // sammenligning skal gøres på frontend og ikke her.
     if (password === confirmpassword) {
-        console.log('Password: ' + password + ' Email: ' + mail);
+        console.log('Password: ' + password + ' Email: ' + decode(decryptedMail));
         // the password and the mail will be passed with fetch to the database API
         //
         //
