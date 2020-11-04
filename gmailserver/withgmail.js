@@ -105,12 +105,11 @@ server.post('/forgotPass', urlencodedParser, function (req, res) {
     let endMail;
     if (validator.isEmail(req.body.email)) {
         endEmail = validator.escape(req.body.email);
-
-        encodedEmail = encode(endEmail);
         mailTransporter = createMailTransporter(mailService, serverEmail, serverEmailPass);
         let date = new Date();
-        let dateString = date.getTime();
-        let urlParams = encodedEmail + '?' + dateString;
+        let dateString = date.getTime().toString();
+        console.log('DateString: ' + dateString);
+        let urlParams = encode(endEmail + '?' + dateString);
         var encrypted = encrypt(urlParams);
         mailDetails = createMailDetails(
             serverEmail,
@@ -130,15 +129,16 @@ server.post('/forgotPass', urlencodedParser, function (req, res) {
 
 server.get('/reset', urlencodedParser, function (req, res) {
     let url = req.url;
-    console.log(url);
     let encryptedString = url.split('?')[1];
-    let decrypted = decrypt(encryptedString);
-    let splitedDecrypted = decrypted.split('?');
-    let email = splitedDecrypted[0];
+    let clear = decode(decrypt(encryptedString));
+    console.log('clear: ' + clear);
+    let splitedClear = clear.split('?');
+    console.log(splitedClear);
+    let email = splitedClear[0];
     //kald database om email eksisterer
 
-    encryptedEmail = encrypt(email);
-    if (isExpired(splitedDecrypted, 1, 30)) {
+    encryptedEmail = encrypt(encode(email));
+    if (isExpired(splitedClear, 1, 30)) {
         res.cookie('mailtoken', encryptedEmail, {
             maxAge: 900000
         });
@@ -150,28 +150,28 @@ server.get('/reset', urlencodedParser, function (req, res) {
 });
 server.post('/resetPassword_form', urlencodedParser, function (req, res) {
     const encryptedMail = req.cookies.mailtoken;
+    console.log('Encrypted mailToken: ' + encryptedMail);
     let decryptedMail = decrypt(encryptedMail);
     //mailen er stadig encoded
     //se om mail eksisterer i database.
     let password = req.body.password;
-    let confirmpassword = req.body.confirmPassword;
+    console.log('testPass: ' + req.body.password);
 
     // sammenligning skal gøres på frontend og ikke her.
-    if (password === confirmpassword) {
-        console.log('Password: ' + password + ' Email: ' + decode(decryptedMail));
-        // the password and the mail will be passed with fetch to the database API
-        //
-        //
-        // fetch('http://localhost:80/users/changePassword', {
-        //     method: 'post',
-        //     headers: {
-        //         'Content-Type' : 'application/json'
-        //     },
-        //     body: JSON.stringify({mail:mail, newPassword:password})
-        // })
-        // .then(function(res){ console.log(res) })
-        // .catch(function(res){ console.log(res) })
-    }
+
+    console.log('Password: ' + password + ' Email: ' + decode(decryptedMail));
+    // the password and the mail will be passed with fetch to the database API
+    //
+    //
+    // fetch('http://localhost:80/users/changePassword', {
+    //     method: 'post',
+    //     headers: {
+    //         'Content-Type' : 'application/json'
+    //     },
+    //     body: JSON.stringify({mail:mail, newPassword:password})
+    // })
+    // .then(function(res){ console.log(res) })
+    // .catch(function(res){ console.log(res) })
 });
 
 var server1 = server.listen(8081, function () {
@@ -181,8 +181,9 @@ var server1 = server.listen(8081, function () {
     console.log('Example app listening at http://%s:%s', host, port);
 });
 
-function isExpired(splitedDecodedArr, indexOfTime, valideInMinutes) {
-    let timeCreated = parseInt(splitedDecodedArr[indexOfTime]);
+function isExpired(splitedDecryptedArr, indexOfTime, valideInMinutes) {
+    decoded = splitedDecryptedArr;
+    let timeCreated = parseInt(decoded[indexOfTime]);
     var timeExpired = timeCreated + valideInMinutes * 60 * 1000;
     console.log(timeExpired);
     let now = new Date();
