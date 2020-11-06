@@ -1,3 +1,4 @@
+//Mail variables
 var serverEmail = 'cstgruppe10@gmail.com';
 var serverEmailPass = 'P3J2z3YLwDHe';
 var mailService = 'gmail';
@@ -5,6 +6,9 @@ var mailTransporter;
 var mailDetails;
 var endEmail;
 var emailUrl;
+var mailTitle = 'Test mail';
+
+var hyperlinkInEmail = 'https://localhost/gmail/reset';
 
 const nodemailer = require('nodemailer');
 const cookieparser = require('cookie-parser');
@@ -58,7 +62,7 @@ function createMailDetails(serverEmail, endEmail, link) {
     return (details = {
         from: serverEmail,
         to: endEmail,
-        subject: 'Test mail',
+        subject: mailTitle,
         // HTML body
         html:
             `<p><b>Hello</b> to myself </p>
@@ -115,11 +119,7 @@ server.post('/forgotPass', urlencodedParser, function (req, res) {
         console.log('DateString: ' + dateString);
         let urlParams = encode(endEmail + '?' + dateString);
         var encrypted = encrypt(urlParams);
-        mailDetails = createMailDetails(
-            serverEmail,
-            endEmail,
-            'https://localhost/gmail/reset?' + encrypted
-        );
+        mailDetails = createMailDetails(serverEmail, endEmail, hyperlinkInEmail + '?' + encrypted);
         let bool = sendMail(mailTransporter, mailDetails);
         if (bool) {
             res.send(JSON.stringify({ msg: 'An email has been sent to you', isSent: true }));
@@ -182,7 +182,7 @@ var server1 = server.listen(8081, function () {
     var host = server1.address().address;
     var port = server1.address().port;
 
-    console.log('Example app listening at http://%s:%s', host, port);
+    console.log('EmailService listening at http://%s:%s', host, port);
 });
 
 function isExpired(splitedDecryptedArr, indexOfTime, valideInMinutes) {
