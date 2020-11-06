@@ -15,21 +15,25 @@ require('dotenv').config({ path: '.env' });
 
 const crypto = require('crypto');
 
-const algorithm = 'aes-128-cbc';
 const key = '123456789123456789123456789';
+
+const algorithm = 'aes-128-cbc';
 
 function encrypt(text) {
     //Undersg iv, fordi denne funtion er outdated
     var cipher = crypto.createCipher(algorithm, key);
     var encrypted = cipher.update(text, 'utf8', 'hex');
     encrypted += cipher.final('hex');
+    //console.log(typeof encrypted);
     return encrypted;
 }
 function decrypt(text) {
     //Undersg iv, fordi denne funtion er outdated
+    console.log(typeof text);
     var decipher = crypto.createDecipher(algorithm, key);
     var decrypted = decipher.update(text, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
+    //console.log(typeof decrypted);
     return decrypted;
 }
 
@@ -131,7 +135,7 @@ server.get('/reset', urlencodedParser, function (req, res) {
     let url = req.url;
     let encryptedString = url.split('?')[1];
     let clear = decode(decrypt(encryptedString));
-    console.log('clear: ' + clear);
+
     let splitedClear = clear.split('?');
     console.log(splitedClear);
     let email = splitedClear[0];
@@ -159,7 +163,7 @@ server.post('/resetPassword_form', urlencodedParser, function (req, res) {
 
     // sammenligning skal gøres på frontend og ikke her.
 
-    console.log('Password: ' + password + ' Email: ' + decode(decryptedMail));
+    console.log('Password: ' + password + ' Email: '); // + //decode(decryptedMail));
     // the password and the mail will be passed with fetch to the database API
     //
     //
