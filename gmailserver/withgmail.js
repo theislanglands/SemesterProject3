@@ -162,7 +162,7 @@ server.post('/resetPassword_form', urlencodedParser, function (req, res) {
 
     // sammenligning skal gøres på frontend og ikke her.
 
-    console.log('Password: ' + password + ' Email: '); // + //decode(decryptedMail));
+    console.log('Password: ' + password + ' Email: ' + decode(decryptedMail));
     // the password and the mail will be passed with fetch to the database API
     //
     //
