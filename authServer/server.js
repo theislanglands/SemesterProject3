@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const fs = require('fs');
 
 const path = require('path');
 
@@ -22,6 +23,11 @@ const users = [
 ];
 
 const refreshTokens = [];
+
+const privateKey = fs.readFileSync('./private.key', 'utf8');
+const publicKey = fs.readFileSync('./public.key', 'utf8');
+
+
 
 let secret = 'tihifnis';
 let refreshSecret = 'vrysecuresecret';
@@ -88,13 +94,13 @@ app.post('/auth/login', (req, res) => {
         res.cookie('authcookie', accesstoken, {
             maxAge: fiveMins,
             httpOnly: false,
-            secure: true,
+            secure: false, //kun midlertidig
             sameSite: 'lax'
         });
         res.cookie('refreshcookie', refreshToken, {
             maxAge: oneWeek,
             httpOnly: true,
-            secure: true,
+            secure: false, //kun midlertidig
             sameSite: 'lax'
         });
         res.send();
@@ -105,7 +111,7 @@ app.post('/auth/login', (req, res) => {
 
 function authenticateToken(req, res, next) {
     const authcookie = req.cookies.authcookie;
-    jwt.verify(authcookie, secret, (err, data) => {
+    jwt.verify(authcookie, publicKey, (err, data) => {
         if (err) {
             res.sendStatus(403);
         } else if (data.user) {
@@ -131,7 +137,7 @@ function authenticateRefreshToken(req, res, next) {
 }
 
 function generateAccessToken(user) {
-    return jwt.sign(user, secret, { expiresIn: '5m' });
+    return jwt.sign(user, privateKey, { expiresIn: '5m', algorithm: "RS256" });
 }
 
 function generateRefreshToken(user) {
