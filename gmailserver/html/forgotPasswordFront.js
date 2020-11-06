@@ -20,6 +20,9 @@ window.addEventListener('load', (event) => {
 
                 input.value = '';
                 input.disabled = data.isSent;
+            })
+            .catch((error) => {
+                console.log('some error happened');
             });
         console.log(msg);
     });
