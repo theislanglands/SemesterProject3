@@ -177,7 +177,7 @@ spec:
         spec:
             containers:
                 - name: auth-server
-                  image: gitlab.sdu.dk:5050/semester-project-e2020/team-10-connection-security/template:auth-service
+                  image: IMAGE_IS_INSERTED_USING_GITLAB-auth-server
                   imagePullPolicy: Always
                   ports:
                       - containerPort: 3300
@@ -215,7 +215,7 @@ spec:
         spec:
             containers:
                 - name: gmail-server
-                  image: gitlab.sdu.dk:5050/semester-project-e2020/team-10-connection-security/template:gmail-service
+                  image: IMAGE_IS_INSERTED_USING_GITLAB-gmail-server
                   imagePullPolicy: Always
                   ports:
                       - containerPort: 8081
