@@ -17,7 +17,7 @@ const crypto = require('crypto');
 
 const key = '123456789123456789123456789';
 
-const algorithm = 'aes-128-gcm';
+const algorithm = 'aes-128-cbc';
 
 function encrypt(text) {
     //Undersg iv, fordi denne funtion er outdated
