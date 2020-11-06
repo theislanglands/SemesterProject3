@@ -7,6 +7,8 @@ var mailDetails;
 var endEmail;
 var emailUrl;
 var mailTitle = 'Test mail';
+var mailHtml = `<p><b>Hello</b></p>
+        <p>Here's a link, where you can reset your password: `;
 
 var hyperlinkInEmail = 'https://localhost/gmail/reset';
 
@@ -64,9 +66,7 @@ function createMailDetails(serverEmail, endEmail, link) {
         to: endEmail,
         subject: mailTitle,
         // HTML body
-        html:
-            `<p><b>Hello</b> to myself </p>
-        <p>Here's a nyan cat for you as an embedded attachment: ` + hyperlink
+        html: mailHtml + hyperlink
     });
 }
 
@@ -110,9 +110,8 @@ function decode(text) {
 }
 
 server.post('/forgotPass', urlencodedParser, function (req, res) {
-    let endMail;
-    if (validator.isEmail(req.body.email)) {
-        endEmail = validator.escape(req.body.email);
+    let endEmail = validator.escape(req.body.email);
+    if (validator.isEmail(endEmail)) {
         mailTransporter = createMailTransporter(mailService, serverEmail, serverEmailPass);
         let date = new Date();
         let dateString = date.getTime().toString();
@@ -142,7 +141,7 @@ server.get('/reset', urlencodedParser, function (req, res) {
     //kald database om email eksisterer
 
     encryptedEmail = encrypt(encode(email));
-    if (isExpired(splitedClear, 1, 30)) {
+    if (isExpired(splitedClear, 1, 1)) {
         res.cookie('mailtoken', encryptedEmail, {
             maxAge: 900000
         });
