@@ -15,98 +15,73 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-const users = [
-    {
-        username: 'Pat',
-        password: 'hej'
-    }
-];
-
-const refreshTokens = [];
 
 const privateKey = fs.readFileSync('./private.key', 'utf8');
 const publicKey = fs.readFileSync('./public.key', 'utf8');
 
-
-
-let secret = 'tihifnis';
 let refreshSecret = 'vrysecuresecret';
 
 const fiveMins = 5 * 60 * 1000;
 const oneWeek = 7 * 24 * 3600 * 1000;
 
-app.get('/', function (req, res) {
-    res.sendFile(path.join(__dirname + '/html/index.html'));
-});
-
-app.get('/home', (req, res) => {
-    res.sendFile(path.join(__dirname + '/html/index.html'));
-});
-
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname + '/html/login-page.html'));
-});
-
-app.get('/music', authenticateToken, (req, res) => {
-    res.sendFile(path.join(__dirname + '/html/music.html'));
-});
-
-app.use(express.static('html'));
-
 app.get('/auth/refresh', authenticateRefreshToken, (req, res) => {
     const refreshToken = req.cookies.refreshcookie;
-    if (refreshTokens.includes(refreshToken)) {
-        const decodedToken = jwt.decode(refreshToken);
-        const accessToken = generateAccessToken({ username: decodedToken.username });
-        const reRefreshToken = generateRefreshToken({ username: decodedToken.username });
-        res.cookie('authcookie', accessToken, {
-            maxAge: fiveMins,
-            httpOnly: false,
-            secure: true,
-            sameSite: 'lax'
-        });
-        res.cookie('refreshcookie', reRefreshToken, {
-            maxAge: oneWeek,
-            httpOnly: true,
-            secure: true,
-            sameSite: 'lax'
-        });
-        res.send();
-    }
+    const payload = jwt.decode(refreshToken);
+    verifyRefreshId(payload.refreshId).then(bool=> {
+        if (bool) {
+            const decodedRefreshToken = jwt.decode(refreshToken);
+            const accessToken = generateAccessToken({username: decodedRefreshToken.username});
+            const newRefreshToken = generateRefreshToken({username: decodedRefreshToken.username, refreshId: decodedRefreshToken.refreshId});
+            res.cookie('authcookie', accessToken, {
+                maxAge: fiveMins,
+                httpOnly: false,
+                secure: true,
+                sameSite: 'lax'
+            });
+            res.cookie('refreshcookie', newRefreshToken, {
+                maxAge: oneWeek,
+                httpOnly: true,
+                secure: true,
+                sameSite: 'lax',
+            });
+            res.send();
+        } else {
+            //redirect to login page. "user need to login to get new access + refresh token"
+        }
+    });
 });
 
 app.post('/auth/login', (req, res) => {
     let username = req.body.username;
-    const user = users.find((user) => user.username === req.body.username);
+    login(username).then(res=> {
+        if(res){
+            console.log(user);
 
-    if (user == null) {
-        return res.status(400).send(`Cannot find user with username: ${username}`);
-    }
+            refreshId = createUUID();
 
-    console.log(user);
-
-    if (user.password == req.body.password) {
-        const accesstoken = generateAccessToken({ username: user.username });
-        const refreshToken = generateRefreshToken({ username: user.username });
-        console.log(refreshToken);
-        refreshTokens.push(refreshToken);
+            const accesstoken = generateAccessToken({ username: user.username });
+            const refreshToken = generateRefreshToken({ username: user.username, refreshId: refreshId});
+            console.log(refreshToken);
 
         res.cookie('authcookie', accesstoken, {
             maxAge: fiveMins,
             httpOnly: false,
-            secure: false, //kun midlertidig
+            secure: true, //kun midlertidig
             sameSite: 'lax'
         });
         res.cookie('refreshcookie', refreshToken, {
             maxAge: oneWeek,
             httpOnly: true,
-            secure: false, //kun midlertidig
+            secure: true, //kun midlertidig
             sameSite: 'lax'
         });
         res.send();
-    } else {
-        console.log('Invalid password');
-    }
+        }
+        else{
+            //provided username + password did not match any users in DB
+            return res.status(400).send(`Cannot find user with username: ${username}`);
+        }
+    })
 });
 
 function authenticateToken(req, res, next) {
@@ -136,15 +111,118 @@ function authenticateRefreshToken(req, res, next) {
     }
 }
 
-function generateAccessToken(user) {
-    return jwt.sign(user, privateKey, { expiresIn: '5m', algorithm: "RS256" });
+function generateAccessToken(userdata) {
+    return jwt.sign(userdata, privateKey, { expiresIn: '5m', algorithm: "RS256" });
 }
 
-function generateRefreshToken(user) {
-    return jwt.sign(user, refreshSecret, { expiresIn: '7d' });
+function generateRefreshToken(userdata) {
+    return jwt.sign(userdata, refreshSecret, { expiresIn: '7d' });
 }
 
 //Listen
 app.listen(3300, () => {
     console.log("Connected");
 });
+
+//functions for querying database
+
+function getUserPayload(username){
+    return fetch('ednPointForGettingUserPayload', {
+        method: 'POST',
+        headers: {
+            'Content-Type':'application/x-www-form-urlencoded',
+            Accept: 'application/json'
+        },
+        body: JSON.stringify({username})
+    }).then( res => {
+        return res.json();
+    }).then( data => {
+        return JSON.parse(data);
+    }).catch((error)=>{console.error('error: ', error)}
+    );
+}
+
+function login(username, password){
+    return fetch('login end point', {
+        method: 'POST',
+        headers: {
+            'Content-Type':'application/x-www-form-urlencoded',
+            Accept: 'application/json'
+        },
+        body: JSON.stringify({username, password})
+    }).then( res => {
+        return res.json();
+    }).then(data => {
+        return JSON.parse(data).someAttributeResolvingToTrueOrFalse;
+    }).catch((error)=>{console.error('error: ', error)}
+    );
+}
+
+function createUUID(){
+    //some logic for creating UUID, for the refresh ID
+}
+
+function storeRefreshId(username, refreshId, userAgent){
+
+    return fetch('putRefreshId-endpoint', {
+        method: 'POST',
+        headers: {
+            'Content-Type':'application/x-www-form-urlencoded',
+            Accept: 'application/json'
+        },
+        body: JSON.stringify({username, refreshId, userAgent})
+    }).then( res => {
+        return res.json();
+    }).then(data => {
+        return JSON.parse(data).someAttributeResolvingToTrueOrFalse;
+    }).catch((error)=>{console.error('error: ', error)}
+    );
+}
+
+function verifyRefreshId(refreshId){
+    return fetch('verifryRefreshId-endpoint', {
+        method: 'POST',
+        headers: {
+            'Content-Type':'application/x-www-form-urlencoded',
+            Accept: 'application/json'
+        },
+        body: JSON.stringify({username, refreshId, userAgent})
+    }).then( res => {
+        return res.json();
+    }).then(data => {
+        return JSON.parse(data).someAttributeResolvingToTrueOrFalse;
+    }).catch((error)=>{console.error('error: ', error)}
+    );
+}
+
+function removeRefreshId(refreshId){
+    return fetch('removeREFResh ID-endpoint', {
+        method: 'POST',
+        headers: {
+            'Content-Type':'application/x-www-form-urlencoded',
+            Accept: 'application/json'
+        },
+        body: JSON.stringify({username, refreshId, userAgent})
+    }).then( res => {
+        return res.json();
+    }).then(data => {
+        return JSON.parse(data).someAttributeResolvingToTrueOrFalse;
+    }).catch((error)=>{console.error('error: ', error)}
+    );
+}
+
+function getUserAgentsAndRefreshId(username){
+    return fetch('userAgentList -endpoint', {  
+        method: 'POST',
+        headers: {
+            'Content-Type':'application/x-www-form-urlencoded',
+            Accept: 'application/json'
+        },
+        body: JSON.stringify({username, refreshId, userAgent})
+    }).then( res => {
+        return nres.json();
+    }).then(data => {
+        return JSON.parse(data).someAttributeContiangLIST; //list<{refreshId, userAgent}>
+    }).catch((error)=>{return console.error('error: ', error)}
+    );
+}
