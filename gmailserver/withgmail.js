@@ -118,7 +118,7 @@ server.post('/forgotPass', urlencodedParser, function (req, res) {
         mailDetails = createMailDetails(
             serverEmail,
             endEmail,
-            'http://localhost:8081/reset?' + encrypted
+            'https://localhost/gmail/reset?' + encrypted
         );
         let bool = sendMail(mailTransporter, mailDetails);
         if (bool) {
