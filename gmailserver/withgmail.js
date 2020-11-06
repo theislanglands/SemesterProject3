@@ -9,26 +9,32 @@ var emailUrl;
 const nodemailer = require('nodemailer');
 const cookieparser = require('cookie-parser');
 const fetch = require('node-fetch');
+const validator = require('validator');
 
 require('dotenv').config({ path: '.env' });
-var urlCrypt = require('url-crypt')(process.env.URL_SECRET);
 
 const crypto = require('crypto');
 
-const algorithm = 'aes-128-cbc';
 const key = '123456789123456789123456789';
 
+const algorithm = 'aes-128-cbc';
+
 function encrypt(text) {
-    var mykey = crypto.createCipher(algorithm, key);
-    var mystr = mykey.update(text, 'utf8', 'hex');
-    mystr += mykey.final('hex');
-    return mystr;
+    //Undersg iv, fordi denne funtion er outdated
+    var cipher = crypto.createCipher(algorithm, key);
+    var encrypted = cipher.update(text, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    //console.log(typeof encrypted);
+    return encrypted;
 }
 function decrypt(text) {
-    var mykey = crypto.createDecipher(algorithm, key);
-    var mystr = mykey.update(text, 'hex', 'utf8');
-    mystr += mykey.final('utf8');
-    return mystr;
+    //Undersg iv, fordi denne funtion er outdated
+    console.log(typeof text);
+    var decipher = crypto.createDecipher(algorithm, key);
+    var decrypted = decipher.update(text, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    //console.log(typeof decrypted);
+    return decrypted;
 }
 
 // Expectations
@@ -77,8 +83,10 @@ function sendMail(mailTransporter, mailDetails) {
 const express = require('express');
 const server = express();
 const bodyparser = require('body-parser');
+const https = require('https');
 
 // Create application/x-www-form-urlencoded parser
+//LÆS OP PÅ DETTE
 var urlencodedParser = bodyparser.urlencoded({
     extended: false
 });
@@ -98,42 +106,46 @@ function decode(text) {
 }
 
 server.post('/forgotPass', urlencodedParser, function (req, res) {
-    endEmail = req.body.email;
-    encodedEmail = encode(endEmail);
-    mailTransporter = createMailTransporter(mailService, serverEmail, serverEmailPass);
-    let date = new Date();
-    let dateString = date.getTime();
-    let urlParams = encodedEmail + '?' + dateString;
-    //encrypt
-    //var encrypted = urlCrypt.cryptObj(urlParams);
-    var encrypted = encrypt(urlParams);
-    console.log(encrypted);
-    mailDetails = createMailDetails(
-        serverEmail,
-        endEmail,
-        'http://localhost:8081/reset?' + encrypted
-    );
-    let bool = sendMail(mailTransporter, mailDetails);
-    if (bool) {
-        urlencodedParser;
-        res.sendStatus(200);
+    let endMail;
+    if (validator.isEmail(req.body.email)) {
+        endEmail = validator.escape(req.body.email);
+        mailTransporter = createMailTransporter(mailService, serverEmail, serverEmailPass);
+        let date = new Date();
+        let dateString = date.getTime().toString();
+        console.log('DateString: ' + dateString);
+        let urlParams = encode(endEmail + '?' + dateString);
+        var encrypted = encrypt(urlParams);
+        mailDetails = createMailDetails(
+            serverEmail,
+            endEmail,
+            'http://localhost:8081/reset?' + encrypted
+        );
+        let bool = sendMail(mailTransporter, mailDetails);
+        if (bool) {
+            res.send(JSON.stringify({ msg: 'An email has been sent to you', isSent: true }));
+        } else {
+            //res.sendStatus(406);
+        }
     } else {
-        //res.sendStatus(406);
+        res.send(JSON.stringify({ msg: 'not a real Email', isSent: false }));
     }
 });
 
 server.get('/reset', urlencodedParser, function (req, res) {
     let url = req.url;
-    console.log(url);
-    let encrypted = url.split('?');
-    let decrypted = decrypt(encrypted[1]);
-    console.log(decrypted);
-    let splitedDecrypted = decrypted.split('?');
-    let email = splitedDecrypted[0];
-    encryptedEmail = encrypt(email);
+    let encryptedString = url.split('?')[1];
+    let clear = decode(decrypt(encryptedString));
 
-    if (isExpired(splitedDecrypted, 1, 1)) {
-        res.cookie('mailtoken', encryptedEmail);
+    let splitedClear = clear.split('?');
+    console.log(splitedClear);
+    let email = splitedClear[0];
+    //kald database om email eksisterer
+
+    encryptedEmail = encrypt(encode(email));
+    if (isExpired(splitedClear, 1, 30)) {
+        res.cookie('mailtoken', encryptedEmail, {
+            maxAge: 900000
+        });
         res.sendFile(__dirname + '/html/resetPassword.html');
     } else {
         console.log('false');
@@ -141,24 +153,29 @@ server.get('/reset', urlencodedParser, function (req, res) {
     }
 });
 server.post('/resetPassword_form', urlencodedParser, function (req, res) {
-    const mail = req.cookies.mailtoken;
+    const encryptedMail = req.cookies.mailtoken;
+    console.log('Encrypted mailToken: ' + encryptedMail);
+    let decryptedMail = decrypt(encryptedMail);
+    //mailen er stadig encoded
+    //se om mail eksisterer i database.
     let password = req.body.password;
-    let confirmpassword = req.body.confirmPassword;
-    if (password === confirmpassword) {
-        console.log('Password: ' + password + ' Email: ' + mail);
-        // the password and the mail will be passed with fetch to the database API
-        //
-        //
-        // fetch('http://localhost:80/users/changePassword', {
-        //     method: 'post',
-        //     headers: {
-        //         'Content-Type' : 'application/json'
-        //     },
-        //     body: JSON.stringify({mail:mail, newPassword:password})
-        // })
-        // .then(function(res){ console.log(res) })
-        // .catch(function(res){ console.log(res) })
-    }
+    console.log('testPass: ' + req.body.password);
+
+    // sammenligning skal gøres på frontend og ikke her.
+
+    console.log('Password: ' + password + ' Email: '); // + //decode(decryptedMail));
+    // the password and the mail will be passed with fetch to the database API
+    //
+    //
+    // fetch('http://localhost:80/users/changePassword', {
+    //     method: 'post',
+    //     headers: {
+    //         'Content-Type' : 'application/json'
+    //     },
+    //     body: JSON.stringify({mail:mail, newPassword:password})
+    // })
+    // .then(function(res){ console.log(res) })
+    // .catch(function(res){ console.log(res) })
 });
 
 var server1 = server.listen(8081, function () {
@@ -168,15 +185,9 @@ var server1 = server.listen(8081, function () {
     console.log('Example app listening at http://%s:%s', host, port);
 });
 
-function decodeUrl(url, split) {
-    let splitedUrl = url.split(split);
-    let a = splitedUrl[1];
-    let decoded = urlCrypt.decryptObj(a);
-    return decoded;
-}
-
-function isExpired(splitedDecodedArr, indexOfTime, valideInMinutes) {
-    let timeCreated = parseInt(splitedDecodedArr[indexOfTime]);
+function isExpired(splitedDecryptedArr, indexOfTime, valideInMinutes) {
+    decoded = splitedDecryptedArr;
+    let timeCreated = parseInt(decoded[indexOfTime]);
     var timeExpired = timeCreated + valideInMinutes * 60 * 1000;
     console.log(timeExpired);
     let now = new Date();
