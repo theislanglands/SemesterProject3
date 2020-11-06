@@ -4,7 +4,7 @@ window.addEventListener('load', (event) => {
     var msg = '';
     button.addEventListener('click', function () {
         var input = document.getElementById('email');
-        let response = fetch('http://localhost:8081/forgotPass', {
+        let response = fetch('https://localhost/gmail/forgotPass', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -20,6 +20,9 @@ window.addEventListener('load', (event) => {
 
                 input.value = '';
                 input.disabled = data.isSent;
+            })
+            .catch((error) => {
+                console.log('some error happened');
             });
         console.log(msg);
     });

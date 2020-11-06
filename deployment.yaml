@@ -85,9 +85,6 @@ data:
             proxy_pass http://gmailservice:8081/;
             proxy_http_version 1.1;
             proxy_cache_bypass $http_upgrade;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection 'upgrade';
-            proxy_set_header Host $host;
             proxy_pass_header Server;
             }
             
@@ -180,7 +177,7 @@ spec:
         spec:
             containers:
                 - name: auth-server
-                  image: gitlab.sdu.dk:5050/semester-project-e2020/team-10-connection-security/template:auth-service
+                  image: IMAGE_IS_INSERTED_USING_GITLAB-auth-server
                   imagePullPolicy: Always
                   ports:
                       - containerPort: 3300
@@ -218,7 +215,7 @@ spec:
         spec:
             containers:
                 - name: gmail-server
-                  image: gitlab.sdu.dk:5050/semester-project-e2020/team-10-connection-security/template:gmail-service
+                  image: IMAGE_IS_INSERTED_USING_GITLAB-gmail-server
                   imagePullPolicy: Always
                   ports:
                       - containerPort: 8081

@@ -1,3 +1,4 @@
+//Mail variables
 var serverEmail = 'cstgruppe10@gmail.com';
 var serverEmailPass = 'P3J2z3YLwDHe';
 var mailService = 'gmail';
@@ -5,6 +6,11 @@ var mailTransporter;
 var mailDetails;
 var endEmail;
 var emailUrl;
+var mailTitle = 'Test mail';
+var mailHtml = `<p><b>Hello</b></p>
+        <p>Here's a link, where you can reset your password: `;
+
+var hyperlinkInEmail = 'https://localhost/gmail/reset';
 
 const nodemailer = require('nodemailer');
 const cookieparser = require('cookie-parser');
@@ -17,7 +23,7 @@ const crypto = require('crypto');
 
 const key = '123456789123456789123456789';
 
-const algorithm = 'aes-128-gcm';
+const algorithm = 'aes-128-cbc';
 
 function encrypt(text) {
     //Undersg iv, fordi denne funtion er outdated
@@ -58,11 +64,9 @@ function createMailDetails(serverEmail, endEmail, link) {
     return (details = {
         from: serverEmail,
         to: endEmail,
-        subject: 'Test mail',
+        subject: mailTitle,
         // HTML body
-        html:
-            `<p><b>Hello</b> to myself </p>
-        <p>Here's a nyan cat for you as an embedded attachment: ` + hyperlink
+        html: mailHtml + hyperlink
     });
 }
 
@@ -106,20 +110,15 @@ function decode(text) {
 }
 
 server.post('/forgotPass', urlencodedParser, function (req, res) {
-    let endMail;
-    if (validator.isEmail(req.body.email)) {
-        endEmail = validator.escape(req.body.email);
+    let endEmail = validator.escape(req.body.email);
+    if (validator.isEmail(endEmail)) {
         mailTransporter = createMailTransporter(mailService, serverEmail, serverEmailPass);
         let date = new Date();
         let dateString = date.getTime().toString();
         console.log('DateString: ' + dateString);
         let urlParams = encode(endEmail + '?' + dateString);
         var encrypted = encrypt(urlParams);
-        mailDetails = createMailDetails(
-            serverEmail,
-            endEmail,
-            'http://localhost:8081/reset?' + encrypted
-        );
+        mailDetails = createMailDetails(serverEmail, endEmail, hyperlinkInEmail + '?' + encrypted);
         let bool = sendMail(mailTransporter, mailDetails);
         if (bool) {
             res.send(JSON.stringify({ msg: 'An email has been sent to you', isSent: true }));
@@ -142,7 +141,7 @@ server.get('/reset', urlencodedParser, function (req, res) {
     //kald database om email eksisterer
 
     encryptedEmail = encrypt(encode(email));
-    if (isExpired(splitedClear, 1, 30)) {
+    if (isExpired(splitedClear, 1, 1)) {
         res.cookie('mailtoken', encryptedEmail, {
             maxAge: 900000
         });
@@ -163,7 +162,9 @@ server.post('/resetPassword_form', urlencodedParser, function (req, res) {
 
     // sammenligning skal gøres på frontend og ikke her.
 
-    console.log('Password: ' + password + ' Email: '); // + //decode(decryptedMail));
+    console.log('Password: ' + password + ' Email: ' + decode(decryptedMail));
+
+    res.sendStatus(200);
     // the password and the mail will be passed with fetch to the database API
     //
     //
@@ -182,7 +183,7 @@ var server1 = server.listen(8081, function () {
     var host = server1.address().address;
     var port = server1.address().port;
 
-    console.log('Example app listening at http://%s:%s', host, port);
+    console.log('EmailService listening at http://%s:%s', host, port);
 });
 
 function isExpired(splitedDecryptedArr, indexOfTime, valideInMinutes) {

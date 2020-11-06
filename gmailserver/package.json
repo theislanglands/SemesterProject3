@@ -11,7 +11,7 @@
     "https": "^1.0.0",
     "node-fetch": "^2.6.1",
     "nodemailer": "^6.4.14",
-    "url-crypt": "^1.2.1"
+    "validator": "^13.1.17"
   },
   "devDependencies": {},
   "scripts": {

@@ -3,7 +3,7 @@ window.onload = () => {
     var pass = document.getElementById('password');
     var confPass = document.getElementById('confirmPassword');
     btn.addEventListener('click', function () {
-        const sendUrl = 'http://localhost:8081/resetPassword_form?';
+        const sendUrl = 'https://localhost/gmail/resetPassword_form?';
         const data = {
             password: pass.value,
             confirmPassword: confPass.value
@@ -11,7 +11,8 @@ window.onload = () => {
         const specs = {
             method: 'POST',
             headers: {
-                'content-type': 'application/x-www-form-urlencoded'
+                'content-type': 'application/x-www-form-urlencoded',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS, GET'
             },
             body: 'password=' + encodeURIComponent(pass.value)
         };
