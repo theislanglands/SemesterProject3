@@ -27,29 +27,25 @@ const refreshTokens = [];
 const privateKey = fs.readFileSync('./private.key', 'utf8');
 const publicKey = fs.readFileSync('./public.key', 'utf8');
 
+// Access-Control-Allow-Headers... which ones? Accept removed
+app.use(function (req, res, next) {
+    res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    next();
+});
 
-
-let secret = 'tihifnis';
-let refreshSecret = 'vrysecuresecret';
+let refreshSecret = `
+4cq9joRISzk2CFdmaAsCyf227T34ywSMvqlnaU5js53HevyYe5jjzVGdojcxtR/0
+Cl8PH1vFUdcVlLR+fBZDCDgRqY6lY4RdRx+tHDc87cwpFXBEQ5Gx1YOhCG4QNDJ5
+a3udgHqL8KZCwytPG5fjGjmOoXcAvfaFzrsg29aJ30vpYzhSdaJZpJnAbzOIv4ET
+MJbUgqwYRpsRKhkEaq/5PCQUekpOP/QxyQbLhg63eyaMC0FGiYq36FkpQTGh41hR
+DsdwnhBovGLYR8B5LN5GtPF8bwERZhqWqYjD92sZb0Frihf6IkqZO5grgFUIJ8GE
+Imd5Dp3hkUvG2gstKjWLrw==
+`;
 
 const fiveMins = 5 * 60 * 1000;
 const oneWeek = 7 * 24 * 3600 * 1000;
-
-app.get('/', function (req, res) {
-    res.sendFile(path.join(__dirname + '/html/index.html'));
-});
-
-app.get('/home', (req, res) => {
-    res.sendFile(path.join(__dirname + '/html/index.html'));
-});
-
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname + '/html/login-page.html'));
-});
-
-app.get('/music', authenticateToken, (req, res) => {
-    res.sendFile(path.join(__dirname + '/html/music.html'));
-});
 
 app.use(express.static('html'));
 
@@ -62,14 +58,16 @@ app.get('/auth/refresh', authenticateRefreshToken, (req, res) => {
         res.cookie('authcookie', accessToken, {
             maxAge: fiveMins,
             httpOnly: false,
-            secure: true,
-            sameSite: 'lax'
+            secure: false, // Must be true when HTTPS is enabled (will only be sent over HTTPS if true)
+            sameSite: 'lax',
+            domain: 'http://localhost:8080'
         });
         res.cookie('refreshcookie', reRefreshToken, {
             maxAge: oneWeek,
             httpOnly: true,
-            secure: true,
-            sameSite: 'lax'
+            secure: false, // Must be true when HTTPS is enabled (will only be sent over HTTPS if true)
+            sameSite: 'lax',
+            domain: 'http://localhost:8080'
         });
         res.send();
     }
@@ -83,24 +81,21 @@ app.post('/auth/login', (req, res) => {
         return res.status(400).send(`Cannot find user with username: ${username}`);
     }
 
-    console.log(user);
-
     if (user.password == req.body.password) {
         const accesstoken = generateAccessToken({ username: user.username });
         const refreshToken = generateRefreshToken({ username: user.username });
-        console.log(refreshToken);
         refreshTokens.push(refreshToken);
 
         res.cookie('authcookie', accesstoken, {
             maxAge: fiveMins,
             httpOnly: false,
-            secure: false, //kun midlertidig
+            secure: false, // Must be true when HTTPS is enabled (will only be sent over HTTPS if true)
             sameSite: 'lax'
         });
         res.cookie('refreshcookie', refreshToken, {
             maxAge: oneWeek,
             httpOnly: true,
-            secure: false, //kun midlertidig
+            secure: false, // Must be true when HTTPS is enabled (will only be sent over HTTPS if true)
             sameSite: 'lax'
         });
         res.send();
@@ -137,7 +132,7 @@ function authenticateRefreshToken(req, res, next) {
 }
 
 function generateAccessToken(user) {
-    return jwt.sign(user, privateKey, { expiresIn: '5m', algorithm: "RS256" });
+    return jwt.sign(user, privateKey, { expiresIn: '5m', algorithm: 'RS256' });
 }
 
 function generateRefreshToken(user) {
@@ -146,5 +141,5 @@ function generateRefreshToken(user) {
 
 //Listen
 app.listen(3300, () => {
-    console.log("Connected");
+    console.log('Connected');
 });
