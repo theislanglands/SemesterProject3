@@ -1,7 +1,7 @@
 //Mail variables
-var serverEmail = 'cstgruppe10@gmail.com';
-var serverEmailPass = 'P3J2z3YLwDHe';
-var mailService = 'gmail';
+const serverEmail = 'cstgruppe10@gmail.com';
+const serverEmailPass = 'P3J2z3YLwDHe';
+const mailService = 'gmail';
 var mailTransporter;
 var mailDetails;
 var endEmail;
@@ -20,45 +20,33 @@ const validator = require('validator');
 require('dotenv').config({ path: '.env' });
 
 const crypto = require('crypto');
-const secret = 'hey';
-
-//const key = crypto.createHash('sha256').update(String(secret)).digest('base64').substr(0, 32);
-//console.log('key: ' + key);
+const secret = 'ælaksndfkajsndflkabsdflhb';
 
 const algorithm = 'aes-128-cbc';
 
-
 const iv = crypto.randomBytes(16);
-const salt = "foobar";
-const hash = crypto.createHash("sha1");
+const salt = 'foobar';
+const hash = crypto.createHash('sha1');
 
 hash.update(salt);
 
 let key = hash.digest().slice(0, 16);
 
-
-
-
-
 function encrypt(text) {
-    //Undersg iv, fordi denne funtion er outdated
     if (typeof text == 'string') {
         var cipher = crypto.createCipheriv(algorithm, key, iv);
         var encrypted = cipher.update(text, 'utf8', 'hex');
         encrypted += cipher.final('hex');
-        //console.log(typeof encrypted);
         return encrypted;
     } else {
         console.log("The parameter wasn't a string, try agian");
     }
 }
 function decrypt(text) {
-    //Undersg iv, fordi denne funtion er outdated
     if (typeof text == 'string') {
         var decipher = crypto.createDecipheriv(algorithm, key, iv);
         var decrypted = decipher.update(text, 'hex', 'utf8');
         decrypted += decipher.final('utf8');
-        //console.log(typeof decrypted);
         return decrypted;
     } else {
         console.log("The parameter wasn't a string, try agian");
@@ -143,33 +131,41 @@ function decode(text) {
 server.post('/forgotPass', urlencodedParser, function (req, res) {
     let endEmail = validator.escape(req.body.email);
     if (validator.isEmail(endEmail)) {
-        mailTransporter = createMailTransporter(mailService, serverEmail, serverEmailPass);
-        let date = new Date();
-        let dateString = date.getTime().toString();
-        console.log('DateString: ' + dateString);
-        let urlParams = encode(endEmail + '?' + dateString);
-        if (urlParams === undefined) {
-            console.log('Encoding failiure');
-            res.sendStatus(500);
-            return;
-        }
-        var encrypted = encrypt(urlParams);
-        if (encrypted === undefined) {
-            console.log('Encrypting failiure');
-            res.sendStatus(500);
-            return;
-        }
-        mailDetails = createMailDetails(serverEmail, endEmail, hyperlinkInEmail + '?' + encrypted);
-        let bool = sendMail(mailTransporter, mailDetails);
-        if (bool) {
-            res.send(JSON.stringify({ msg: 'An email has been sent to you', isSent: true }));
-        } else {
-            res.send(
-                JSON.stringify({
-                    msg: 'An error ocuured in the server, the email wasnt able to be sent',
-                    isSent: false
-                })
+        if (isValidUser(endEmail)) {
+            mailTransporter = createMailTransporter(mailService, serverEmail, serverEmailPass);
+            let date = new Date();
+            let dateString = date.getTime().toString();
+            let urlParams = encode(endEmail + '?' + dateString);
+            if (urlParams === undefined) {
+                console.log('Encoding failiure');
+                res.sendStatus(500);
+                return;
+            }
+            var encrypted = encrypt(urlParams);
+            if (encrypted === undefined) {
+                console.log('Encrypting failiure');
+                res.sendStatus(500);
+                return;
+            }
+            mailDetails = createMailDetails(
+                serverEmail,
+                endEmail,
+                hyperlinkInEmail + '?' + encrypted
             );
+            let bool = sendMail(mailTransporter, mailDetails);
+            if (bool) {
+                res.send(JSON.stringify({ msg: 'An email has been sent to you', isSent: true }));
+            } else {
+                res.send(
+                    JSON.stringify({
+                        msg: 'An error ocuured in the server, the email wasnt able to be sent',
+                        isSent: false
+                    })
+                );
+            }
+        } else {
+            res.send(JSON.stringify({ msg: 'No users have this email', isSent: false }));
+            return;
         }
     } else {
         res.send(JSON.stringify({ msg: 'not a real Email', isSent: false }));
@@ -185,7 +181,7 @@ server.get('/reset', urlencodedParser, function (req, res) {
         let splitedClear;
         if (clear !== undefined) {
             splitedClear = clear.split('?');
-            email = splitedClear[0];
+            email = validator.escape(splitedClear[0]);
         } else {
             res.sendStatus(406);
             return;
@@ -221,9 +217,9 @@ server.post('/resetPassword_form', urlencodedParser, function (req, res) {
         res.sendStatus(406);
         return;
     }
-    console.log('Encrypted mailToken: ' + encryptedMail);
-    let decryptedMail = decrypt(encryptedMail);
-    if (encryptedMail === undefined) {
+
+    let decodedMail = decode(decrypt(encryptedMail));
+    if (decodedMail === undefined) {
         console.log('an error ocurred on decryption');
         res.sendStatus(500);
         return;
@@ -238,22 +234,12 @@ server.post('/resetPassword_form', urlencodedParser, function (req, res) {
     }
 
     // sammenligning skal gøres på frontend og ikke her.
-
-    console.log('Password: ' + password + ' Email: ' + decode(decryptedMail));
-
-    res.sendStatus(200);
-    // the password and the mail will be passed with fetch to the database API
-    //
-    //
-    // fetch('http://localhost:80/users/changePassword', {
-    //     method: 'post',
-    //     headers: {
-    //         'Content-Type' : 'application/json'
-    //     },
-    //     body: JSON.stringify({mail:mail, newPassword:password})
-    // })
-    // .then(function(res){ console.log(res) })
-    // .catch(function(res){ console.log(res) })
+    let sucess = postNewPassword(decodedMail, password);
+    if (succes) {
+        res.send(JSON.stringify({ msg: 'the users password has been reset', success: true }));
+    } else {
+        res.send(JSON.stringify({ msg: 'an user has ocured', success: false }));
+    }
 });
 
 var server1 = server.listen(8081, function () {
@@ -267,13 +253,55 @@ function isExpired(splitedDecryptedArr, indexOfTime, valideInMinutes) {
     decoded = splitedDecryptedArr;
     let timeCreated = parseInt(decoded[indexOfTime]);
     var timeExpired = timeCreated + valideInMinutes * 60 * 1000;
-    console.log(timeExpired);
     let now = new Date();
     now = now.getTime();
-    console.log(now);
     if (timeExpired > now) {
         return true;
     } else {
         return false;
     }
+}
+
+function isValidUser(email) {
+    fetch('http://localhost/userdb/isValidUser', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Accept: 'application/json'
+        },
+        body: encodeURIComponent(email)
+    })
+        .then(function (res) {
+            res.json();
+        })
+        .then((data) => {
+            return data.isUser;
+        })
+        .catch((error) => {
+            console.log('some error happened');
+            return false;
+        });
+}
+
+function postNewPassword(email, password) {
+    // the password and the mail will be passed with fetch to the database API
+
+    fetch('http://localhost/userdb/changePassword', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Accept: 'application/json'
+        },
+        body: encodeURIComponent(JSON.stringify({ mail: mail, newPassword: password }))
+    })
+        .then(function (res) {
+            res.json();
+        })
+        .then((data) => {
+            return data.success;
+        })
+        .catch((error) => {
+            console.log('some error happened');
+            return false;
+        });
 }
