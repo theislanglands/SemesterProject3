@@ -22,11 +22,23 @@ require('dotenv').config({ path: '.env' });
 const crypto = require('crypto');
 const secret = 'hey';
 
-const key = crypto.createHash('sha256').update(String(secret)).digest('base64').substr(0, 32);
-console.log('key: ' + key);
+//const key = crypto.createHash('sha256').update(String(secret)).digest('base64').substr(0, 32);
+//console.log('key: ' + key);
 
 const algorithm = 'aes-128-cbc';
+
+
 const iv = crypto.randomBytes(16);
+const salt = "foobar";
+const hash = crypto.createHash("sha1");
+
+hash.update(salt);
+
+let key = hash.digest().slice(0, 16);
+
+
+
+
 
 function encrypt(text) {
     //Undersg iv, fordi denne funtion er outdated
@@ -136,13 +148,13 @@ server.post('/forgotPass', urlencodedParser, function (req, res) {
         let dateString = date.getTime().toString();
         console.log('DateString: ' + dateString);
         let urlParams = encode(endEmail + '?' + dateString);
-        if (urlParams == undefined) {
+        if (urlParams === undefined) {
             console.log('Encoding failiure');
             res.sendStatus(500);
             return;
         }
         var encrypted = encrypt(urlParams);
-        if (encrypted == undefined) {
+        if (encrypted === undefined) {
             console.log('Encrypting failiure');
             res.sendStatus(500);
             return;
@@ -167,11 +179,11 @@ server.post('/forgotPass', urlencodedParser, function (req, res) {
 server.get('/reset', urlencodedParser, function (req, res) {
     let url = req.url;
     let encryptedString = url.split('?')[1];
-    if (encryptedString != undefined) {
+    if (encryptedString !== undefined) {
         let clear = decode(decrypt(encryptedString));
         let email;
         let splitedClear;
-        if (clear != undefined) {
+        if (clear !== undefined) {
             splitedClear = clear.split('?');
             email = splitedClear[0];
         } else {
@@ -180,7 +192,7 @@ server.get('/reset', urlencodedParser, function (req, res) {
         }
         //kald database om email eksisterer
         encryptedEmail = encrypt(encode(email));
-        if (encryptedEmail != undefined) {
+        if (encryptedEmail !== undefined) {
             if (isExpired(splitedClear, 1, 1)) {
                 res.cookie('mailtoken', encryptedEmail, {
                     maxAge: 900000
