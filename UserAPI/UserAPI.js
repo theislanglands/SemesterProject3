@@ -1,4 +1,5 @@
 var users = [];
+
 var conSecs = [];
 class User {
     constructor(userId, email, username, password, fName, lName, subType, admin) {
@@ -15,10 +16,10 @@ class User {
         this.password = newPassword;
     }
 }
-
+users.push(new User(1, 'markus@giganten.dk', 'markus123', '123', 'markus', 'munk', 1, true));
 class ConSec {
-    constructor(userKey, refreshID, userAgent) {
-        this.userKey = userKey;
+    constructor(userId, refreshID, userAgent) {
+        this.userId = userId;
         this.refreshID = refreshID;
         this.userAgent = userAgent;
     }
@@ -104,21 +105,27 @@ function isCredentialsValid(username, password) {
     }
 }
 const express = require('express');
+const { pathToFileURL } = require('url');
 const server = express();
+const bodyParser = require('body-parser');
+server.use(bodyParser.urlencoded({ extended: true }));
 
 server.use(express.static('html'));
 
 server.post('/checkCredentials', function (req, res) {
     let username = req.body.username;
+    console.log(username);
     let password = req.body.password;
+    console.log(password);
     let answer = isCredentialsValid(username, password);
+    console.log(answer);
     res.send(answer);
 });
 
 // /users/storeRefreshId
 server.post('/storeRefreshId', function (req, res) {
     let username = req.body.username;
-    let refreshID = req.body.refreshId;
+    let refreshId = req.body.refreshId;
     let userAgent = req.body.userAgent;
 
     let userId = getUserByUsername(username).userId;

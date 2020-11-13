@@ -271,15 +271,15 @@ function isValidUser(email) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            Accept: 'application/json'
+            Accept: 'text/plain'
         },
-        body: encodeURIComponent(email)
+        body: 'email=' + encodeURIComponent(email)
     })
         .then(function (res) {
-            res.json();
+            res.text();
         })
         .then((data) => {
-            return data.isUser;
+            return data;
         })
         .catch((error) => {
             console.log('some error happened');
@@ -294,15 +294,15 @@ function postNewPassword(email, password) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            Accept: 'application/json'
+            Accept: 'text/plain'
         },
-        body: encodeURIComponent(JSON.stringify({ mail: mail, newPassword: password }))
+        body: 'email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password)
     })
         .then(function (res) {
-            res.json();
+            res.text();
         })
         .then((data) => {
-            return data.success;
+            return data;
         })
         .catch((error) => {
             console.log('some error happened');

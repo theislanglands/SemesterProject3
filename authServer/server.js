@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const fetch = require('node-fetch');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 
@@ -21,7 +22,7 @@ const publicKey = fs.readFileSync('./public.key', 'utf8');
 
 // Access-Control-Allow-Headers... which ones? Accept removed
 app.use(function (req, res, next) {
-    res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
+    res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type');
     res.header('Access-Control-Allow-Credentials', 'true');
     next();
@@ -40,7 +41,7 @@ const dbURL = 'http://localhost:8082';
 const fiveMins = 5 * 60 * 1000;
 const oneWeek = 7 * 24 * 3600 * 1000;
 
-app.get('/auth/refresh', authenticateRefreshToken, (req, res) => {
+app.post('/auth/refresh', authenticateRefreshToken, (req, res) => {
     const refreshToken = req.cookies.refreshcookie;
     const payload = jwt.decode(refreshToken);
     //check for refresh id in DB
@@ -68,25 +69,32 @@ app.get('/auth/refresh', authenticateRefreshToken, (req, res) => {
             });
             res.send();
         } else {
+            console.log('buh');
             //redirect to login page. "user need to login to get new access + refresh token"
         }
     });
-
-            
 });
 
 app.post('/auth/login', (req, res) => {
     const username = req.body.username;
+    const userAgent = req.headers.userAgent;
+    console.log(username);
     const password = req.body.password;
     login(username, password).then((bool1) => {
         if (bool1) {
             const refreshId = uuidv4();
             getUserPayload(username).then((userPayload) => {
-                storeRefreshId(username, refreshId).then((bool) => {
+                playLoad = {
+                    userId: userPayload[0],
+                    username: userPayload[1],
+                    subType: userPayload[2],
+                    admin: userPayload[3]
+                };
+                storeRefreshId(username, refreshId, userAgent).then((bool) => {
                     if (bool) {
-                        const accesstoken = generateAccessToken(userPayload);
+                        const accesstoken = generateAccessToken(playLoad);
                         const refreshToken = generateRefreshToken({
-                            username: user.username,
+                            username: playLoad.username,
                             refreshId: refreshId
                         });
 
@@ -159,19 +167,19 @@ app.listen(3300, () => {
 //functions for querying database
 
 function getUserPayload(username) {
-    return fetch('/getUserPayload', {
+    return fetch(dbURL + '/getUserPayload', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             Accept: 'text/plain'
         },
-        body: JSON.stringify({ username })
+        body: 'username=' + encodeURIComponent(username)
     })
         .then((res) => {
-            return res.body.data;
+            return res.text();
         })
         .then((data) => {
-            return JSON.parse(data);
+            return data;
         })
         .catch((error) => {
             console.error('error: ', error);
@@ -185,13 +193,19 @@ function login(username, password) {
             'Content-Type': 'application/x-www-form-urlencoded',
             Accept: 'text/plain'
         },
-        body: JSON.stringify({ username, password })
+        body:
+            'username=' +
+            encodeURIComponent(username) +
+            '&' +
+            'password=' +
+            encodeURIComponent(password)
     })
         .then((res) => {
-            return res.json();
+            return res.text();
         })
         .then((data) => {
-            return JSON.parse(data).someAttributeResolvingToTrueOrFalse;
+            console.log(data);
+            return data;
         })
         .catch((error) => {
             console.error('error: ', error);
@@ -205,13 +219,19 @@ function storeRefreshId(username, refreshId, userAgent) {
             'Content-Type': 'application/x-www-form-urlencoded',
             Accept: 'text/plain'
         },
-        body: JSON.stringify({ username, refreshId, userAgent })
+        body:
+            'username=' +
+            encodeURIComponent(username) +
+            '&refreshId=' +
+            encodeURIComponent(refreshId) +
+            '&userAgent=' +
+            encodeURIComponent(userAgent)
     })
         .then((res) => {
-            return res.json();
+            return res.text();
         })
         .then((data) => {
-            return JSON.parse(data).someAttributeResolvingToTrueOrFalse;
+            return data;
         })
         .catch((error) => {
             console.error('error: ', error);
