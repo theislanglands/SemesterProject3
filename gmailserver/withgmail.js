@@ -267,7 +267,7 @@ function isExpired(splitedDecryptedArr, indexOfTime, valideInMinutes) {
 }
 
 function isValidUser(email) {
-    fetch('http://localhost/userdb/isValidUser', {
+    fetch('http://localhost/users/isEmail', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -290,7 +290,7 @@ function isValidUser(email) {
 function postNewPassword(email, password) {
     // the password and the mail will be passed with fetch to the database API
 
-    fetch('http://localhost/userdb/changePassword', {
+    fetch('http://localhost/users/changePassword', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
