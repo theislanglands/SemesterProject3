@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const fs = require('fs');
+const { v4: uuidv4 } = require('uuid');
 
 const path = require('path');
 
@@ -14,15 +15,6 @@ const jwt = require('jsonwebtoken');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
-
-const users = [
-    {
-        username: 'Pat',
-        password: 'hej'
-    }
-];
-
-const refreshTokens = [];
 
 const privateKey = fs.readFileSync('./private.key', 'utf8');
 const publicKey = fs.readFileSync('./public.key', 'utf8');
@@ -43,103 +35,246 @@ MJbUgqwYRpsRKhkEaq/5PCQUekpOP/QxyQbLhg63eyaMC0FGiYq36FkpQTGh41hR
 DsdwnhBovGLYR8B5LN5GtPF8bwERZhqWqYjD92sZb0Frihf6IkqZO5grgFUIJ8GE
 Imd5Dp3hkUvG2gstKjWLrw==
 `;
+const dbURL = 'http://localhost:8082';
 
 const fiveMins = 5 * 60 * 1000;
 const oneWeek = 7 * 24 * 3600 * 1000;
 
-app.use(express.static('html'));
-
 app.get('/auth/refresh', authenticateRefreshToken, (req, res) => {
     const refreshToken = req.cookies.refreshcookie;
-    if (refreshTokens.includes(refreshToken)) {
-        const decodedToken = jwt.decode(refreshToken);
-        const accessToken = generateAccessToken({ username: decodedToken.username });
-        const reRefreshToken = generateRefreshToken({ username: decodedToken.username });
-        res.cookie('authcookie', accessToken, {
-            maxAge: fiveMins,
-            httpOnly: false,
-            secure: false, // Must be true when HTTPS is enabled (will only be sent over HTTPS if true)
-            sameSite: 'lax',
-            domain: 'http://localhost:8080'
-        });
-        res.cookie('refreshcookie', reRefreshToken, {
-            maxAge: oneWeek,
-            httpOnly: true,
-            secure: false, // Must be true when HTTPS is enabled (will only be sent over HTTPS if true)
-            sameSite: 'lax',
-            domain: 'http://localhost:8080'
-        });
-        res.send();
-    }
+    const payload = jwt.decode(refreshToken);
+    //check for refresh id in DB
+    verifyRefreshId(payload.refreshId).then((bool) => {
+        if (bool) {
+            const decodedRefreshToken = jwt.decode(refreshToken);
+            const accessToken = generateAccessToken({ username: decodedRefreshToken.username });
+            const newRefreshToken = generateRefreshToken({
+                username: decodedRefreshToken.username,
+                refreshId: decodedRefreshToken.refreshId
+            });
+            res.cookie('authcookie', accessToken, {
+                maxAge: fiveMins,
+                httpOnly: false,
+                secure: true,
+                sameSite: 'lax',
+                domain: 'http://localhost:8080'
+            });
+            res.cookie('refreshcookie', newRefreshToken, {
+                maxAge: oneWeek,
+                httpOnly: true,
+                secure: true,
+                sameSite: 'lax',
+                domain: 'http://localhost:8080'
+            });
+            res.send();
+        } else {
+            //redirect to login page. "user need to login to get new access + refresh token"
+        }
+    });
+
+            
 });
 
 app.post('/auth/login', (req, res) => {
-    let username = req.body.username;
-    const user = users.find((user) => user.username === req.body.username);
+    const username = req.body.username;
+    const password = req.body.password;
+    login(username, password).then((bool1) => {
+        if (bool1) {
+            const refreshId = uuidv4();
+            getUserPayload(username).then((userPayload) => {
+                storeRefreshId(username, refreshId).then((bool) => {
+                    if (bool) {
+                        const accesstoken = generateAccessToken(userPayload);
+                        const refreshToken = generateRefreshToken({
+                            username: user.username,
+                            refreshId: refreshId
+                        });
 
-    if (user == null) {
-        return res.status(400).send(`Cannot find user with username: ${username}`);
-    }
-
-    if (user.password == req.body.password) {
-        const accesstoken = generateAccessToken({ username: user.username });
-        const refreshToken = generateRefreshToken({ username: user.username });
-        refreshTokens.push(refreshToken);
-
-        res.cookie('authcookie', accesstoken, {
-            maxAge: fiveMins,
-            httpOnly: false,
-            secure: false, // Must be true when HTTPS is enabled (will only be sent over HTTPS if true)
-            sameSite: 'lax'
-        });
-        res.cookie('refreshcookie', refreshToken, {
-            maxAge: oneWeek,
-            httpOnly: true,
-            secure: false, // Must be true when HTTPS is enabled (will only be sent over HTTPS if true)
-            sameSite: 'lax'
-        });
-        res.send();
-    } else {
-        console.log('Invalid password');
-    }
+                        res.cookie('authcookie', accesstoken, {
+                            maxAge: fiveMins,
+                            httpOnly: false,
+                            secure: true, //kun midlertidig
+                            sameSite: 'lax'
+                        });
+                        res.cookie('refreshcookie', refreshToken, {
+                            maxAge: oneWeek,
+                            httpOnly: true,
+                            secure: true, //kun midlertidig
+                            sameSite: 'lax'
+                        });
+                        res.send();
+                    } else {
+                        //could not store refresh id. Something went wrong
+                    }
+                });
+            });
+        } else {
+            //provided username + password did not match any users in DB
+            return res.status(400).send(`Cannot find user with username: ${username}`);
+        }
+    });
 });
 
-function authenticateToken(req, res, next) {
-    const authcookie = req.cookies.authcookie;
-    jwt.verify(authcookie, publicKey, (err, data) => {
+app.post('/auth/logout', authenticateRefreshToken, (req, res) => {
+    removeRefreshId(req.user.refreshId).then((bool) => {
+        if (bool) {
+            //succesfully logged out - should redirect user
+            res.sendStatus(200);
+        }
+    });
+});
+
+app.post('/auth/getUserAgents', authenticateRefreshToken, (req, res) => {
+    getUserAgentsAndRefreshId(req.user.username).then((agentList) => {
+        res.status(200).json(agentList);
+    });
+});
+
+function authenticateRefreshToken(req, res, next) {
+    const refreshCookie = req.cookies.refreshcookie;
+    jwt.verify(refreshCookie, refreshSecret, (err, data) => {
         if (err) {
             res.sendStatus(403);
         } else if (data.user) {
             req.user = data.user;
+            console.log('Refresh cookie verified');
         }
         next();
     });
 }
 
-function authenticateRefreshToken(req, res, next) {
-    const refreshCookie = req.cookies.refreshcookie;
-    if (refreshTokens.includes(refreshCookie)) {
-        jwt.verify(refreshCookie, refreshSecret, (err, data) => {
-            if (err) {
-                res.sendStatus(403);
-            } else if (data.user) {
-                req.user = data.user;
-                console.log('Refresh cookie verified');
-            }
-            next();
-        });
-    }
+function generateAccessToken(userdata) {
+    return jwt.sign(userdata, privateKey, { expiresIn: '5m', algorithm: 'RS256' });
 }
 
-function generateAccessToken(user) {
-    return jwt.sign(user, privateKey, { expiresIn: '5m', algorithm: 'RS256' });
-}
-
-function generateRefreshToken(user) {
-    return jwt.sign(user, refreshSecret, { expiresIn: '7d' });
+function generateRefreshToken(userdata) {
+    return jwt.sign(userdata, refreshSecret, { expiresIn: '7d' });
 }
 
 //Listen
 app.listen(3300, () => {
     console.log('Connected');
 });
+
+//functions for querying database
+
+function getUserPayload(username) {
+    return fetch('/getUserPayload', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Accept: 'text/plain'
+        },
+        body: JSON.stringify({ username })
+    })
+        .then((res) => {
+            return res.body.data;
+        })
+        .then((data) => {
+            return JSON.parse(data);
+        })
+        .catch((error) => {
+            console.error('error: ', error);
+        });
+}
+
+function login(username, password) {
+    return fetch(dbURL + '/checkCredentials', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Accept: 'text/plain'
+        },
+        body: JSON.stringify({ username, password })
+    })
+        .then((res) => {
+            return res.json();
+        })
+        .then((data) => {
+            return JSON.parse(data).someAttributeResolvingToTrueOrFalse;
+        })
+        .catch((error) => {
+            console.error('error: ', error);
+        });
+}
+
+function storeRefreshId(username, refreshId, userAgent) {
+    return fetch(dbURL + '/storeRefreshId', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Accept: 'text/plain'
+        },
+        body: JSON.stringify({ username, refreshId, userAgent })
+    })
+        .then((res) => {
+            return res.json();
+        })
+        .then((data) => {
+            return JSON.parse(data).someAttributeResolvingToTrueOrFalse;
+        })
+        .catch((error) => {
+            console.error('error: ', error);
+        });
+    return bool;
+}
+
+function verifyRefreshId(refreshId) {
+    return fetch(dbURL + '/checkRefreshId', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Accept: 'text/plain'
+        },
+        body: JSON.stringify({ username, refreshId, userAgent })
+    })
+        .then((res) => {
+            return res.json();
+        })
+        .then((data) => {
+            return JSON.parse(data).someAttributeResolvingToTrueOrFalse;
+        })
+        .catch((error) => {
+            console.error('error: ', error);
+        });
+}
+
+function removeRefreshId(refreshId) {
+    return fetch(dbURL + '/removeRefreshId', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Accept: 'text/plain'
+        },
+        body: JSON.stringify({ username, refreshId, userAgent })
+    })
+        .then((res) => {
+            return res.body;
+        })
+        .then((data) => {
+            return JSON.parse(data).someAttributeResolvingToTrueOrFalse;
+        })
+        .catch((error) => {
+            console.error('error: ', error);
+        });
+}
+
+function getUserAgentsAndRefreshId(username) {
+    return fetch('/getUserAgents', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Accept: 'text/plain'
+        },
+        body: JSON.stringify({ username, refreshId, userAgent })
+    })
+        .then((res) => {
+            return res.json();
+        })
+        .then((data) => {
+            return JSON.parse(data).someAttributeContiangLIST; //list<{refreshId, userAgent}>
+        })
+        .catch((error) => {
+            return console.error('error: ', error);
+        });
+}
