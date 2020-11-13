@@ -6,14 +6,15 @@ var mailTransporter;
 var mailDetails;
 var endEmail;
 var emailUrl;
-var mailTitle = 'Test mail';
+var mailTitle = 'Reset your password';
 var mailHtml = `<p><b>Hello</b></p>
         <p>Here's a link, where you can reset your password: `;
 
 var hyperlinkInEmail = 'https://localhost/gmail/reset';
 
-var mailTitleNoti;
-
+var mailTitleNoti = 'Your password has been changed';
+var mailHtmlNoti = `<p><b>Hello</b></p>
+        <p>Your email has been changed. If you did not now about this change we strongly advise you to change your password immediately!</p>`;
 const nodemailer = require('nodemailer');
 const cookieparser = require('cookie-parser');
 const fetch = require('node-fetch');
@@ -238,6 +239,7 @@ server.post('/resetPassword_form', urlencodedParser, function (req, res) {
     // sammenligning skal gøres på frontend og ikke her.
     let sucess = postNewPassword(decodedMail, password);
     if (succes) {
+        sendNotifificationMail(decodedMail);
         res.send(JSON.stringify({ msg: 'the users password has been reset', success: true }));
     } else {
         res.send(JSON.stringify({ msg: 'an user has ocured', success: false }));
@@ -309,13 +311,14 @@ function postNewPassword(email, password) {
 }
 
 function sendNotifificationMail(endmail) {
+    let mailTransporter = createMailTransporter(mailService, serverEmail, serverEmailPass);
     let details = {};
-
-    return (details = {
+    details = {
         from: serverEmail,
         to: endEmail,
         subject: mailTitleNoti,
         // HTML body
         html: mailHtmlNoti
-    });
+    };
+    sendMail(mailTransporter, mailDetails);
 }
