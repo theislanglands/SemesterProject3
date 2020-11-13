@@ -27,20 +27,27 @@ const algorithm = 'aes-128-cbc';
 
 function encrypt(text) {
     //Undersg iv, fordi denne funtion er outdated
-    var cipher = crypto.createCipher(algorithm, key);
-    var encrypted = cipher.update(text, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-    //console.log(typeof encrypted);
-    return encrypted;
+    if (typeof text == 'string') {
+        var cipher = crypto.createCipher(algorithm, key);
+        var encrypted = cipher.update(text, 'utf8', 'hex');
+        encrypted += cipher.final('hex');
+        //console.log(typeof encrypted);
+        return encrypted;
+    } else {
+        console.log("The parameter wasn't a string, try agian");
+    }
 }
 function decrypt(text) {
     //Undersg iv, fordi denne funtion er outdated
-    console.log(typeof text);
-    var decipher = crypto.createDecipher(algorithm, key);
-    var decrypted = decipher.update(text, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
-    //console.log(typeof decrypted);
-    return decrypted;
+    if (typeof text == 'string') {
+        var decipher = crypto.createDecipher(algorithm, key);
+        var decrypted = decipher.update(text, 'hex', 'utf8');
+        decrypted += decipher.final('utf8');
+        //console.log(typeof decrypted);
+        return decrypted;
+    } else {
+        console.log("The parameter wasn't a string, try agian");
+    }
 }
 
 // Expectations
@@ -88,6 +95,7 @@ const express = require('express');
 const server = express();
 const bodyparser = require('body-parser');
 const https = require('https');
+const { stringify } = require('querystring');
 
 // Create application/x-www-form-urlencoded parser
 //LÆS OP PÅ DETTE
@@ -99,14 +107,22 @@ server.use(express.static('html'));
 server.use(cookieparser());
 
 function encode(text) {
-    let bufferObj = Buffer.from(text, 'utf8');
-    let encodedString = bufferObj.toString('base64');
-    return encodedString;
+    if (typeof text == 'string') {
+        let bufferObj = Buffer.from(text, 'utf8');
+        let encodedString = bufferObj.toString('base64');
+        return encodedString;
+    } else {
+        console.log("The parameter wasn't a string, try agian");
+    }
 }
 function decode(text) {
-    let bufferObj = Buffer.from(text, 'base64');
-    let decodedString = bufferObj.toString('utf8');
-    return decodedString;
+    if (typeof text == 'string') {
+        let bufferObj = Buffer.from(text, 'base64');
+        let decodedString = bufferObj.toString('utf8');
+        return decodedString;
+    } else {
+        console.log("The parameter wasn't a string, try agian");
+    }
 }
 
 server.post('/forgotPass', urlencodedParser, function (req, res) {
@@ -117,13 +133,28 @@ server.post('/forgotPass', urlencodedParser, function (req, res) {
         let dateString = date.getTime().toString();
         console.log('DateString: ' + dateString);
         let urlParams = encode(endEmail + '?' + dateString);
+        if (urlParams == undefined) {
+            console.log('Encoding failiure');
+            res.sendStatus(500);
+            return;
+        }
         var encrypted = encrypt(urlParams);
+        if (encrypted == undefined) {
+            console.log('Encrypting failiure');
+            res.sendStatus(500);
+            return;
+        }
         mailDetails = createMailDetails(serverEmail, endEmail, hyperlinkInEmail + '?' + encrypted);
         let bool = sendMail(mailTransporter, mailDetails);
         if (bool) {
             res.send(JSON.stringify({ msg: 'An email has been sent to you', isSent: true }));
         } else {
-            //res.sendStatus(406);
+            res.send(
+                JSON.stringify({
+                    msg: 'An error ocuured in the server, the email wasnt able to be sent',
+                    isSent: false
+                })
+            );
         }
     } else {
         res.send(JSON.stringify({ msg: 'not a real Email', isSent: false }));
@@ -133,32 +164,63 @@ server.post('/forgotPass', urlencodedParser, function (req, res) {
 server.get('/reset', urlencodedParser, function (req, res) {
     let url = req.url;
     let encryptedString = url.split('?')[1];
-    let clear = decode(decrypt(encryptedString));
-
-    let splitedClear = clear.split('?');
-    console.log(splitedClear);
-    let email = splitedClear[0];
-    //kald database om email eksisterer
-
-    encryptedEmail = encrypt(encode(email));
-    if (isExpired(splitedClear, 1, 1)) {
-        res.cookie('mailtoken', encryptedEmail, {
-            maxAge: 900000
-        });
-        res.sendFile(__dirname + '/html/resetPassword.html');
+    if (encryptedString != undefined) {
+        let clear = decode(decrypt(encryptedString));
+        let email;
+        let splitedClear;
+        if (clear != undefined) {
+            splitedClear = clear.split('?');
+            email = splitedClear[0];
+        } else {
+            res.sendStatus(406);
+            return;
+        }
+        //kald database om email eksisterer
+        encryptedEmail = encrypt(encode(email));
+        if (encryptedEmail != undefined) {
+            if (isExpired(splitedClear, 1, 1)) {
+                res.cookie('mailtoken', encryptedEmail, {
+                    maxAge: 900000
+                });
+                res.sendFile(__dirname + '/html/resetPassword.html');
+                console.log('A user has used the link, sent in the email');
+            } else {
+                console.log('The link was expired');
+                res.sendStatus(404);
+                return;
+            }
+        } else {
+            console.log('An encryption error occured');
+            res.sendStatus(404);
+            return;
+        }
     } else {
-        console.log('false');
+        console.log('there was no parameters in the get request to /reset');
         res.sendStatus(404);
+        return;
     }
 });
 server.post('/resetPassword_form', urlencodedParser, function (req, res) {
     const encryptedMail = req.cookies.mailtoken;
+    if (encryptedMail === undefined) {
+        res.sendStatus(406);
+        return;
+    }
     console.log('Encrypted mailToken: ' + encryptedMail);
     let decryptedMail = decrypt(encryptedMail);
+    if (encryptedMail === undefined) {
+        console.log('an error ocurred on decryption');
+        res.sendStatus(500);
+        return;
+    }
     //mailen er stadig encoded
     //se om mail eksisterer i database.
     let password = req.body.password;
-    console.log('testPass: ' + req.body.password);
+    if (password === undefined) {
+        console.log('server didnt receive the password');
+        res.sendStatus(406);
+        return;
+    }
 
     // sammenligning skal gøres på frontend og ikke her.
 
