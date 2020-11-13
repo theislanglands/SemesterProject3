@@ -28,6 +28,8 @@ DsdwnhBovGLYR8B5LN5GtPF8bwERZhqWqYjD92sZb0Frihf6IkqZO5grgFUIJ8GE
 Imd5Dp3hkUvG2gstKjWLrw==
 `;
 
+const dbURL = 'http://localhost:8082';
+
 const fiveMins = 5 * 60 * 1000;
 const oneWeek = 7 * 24 * 3600 * 1000;
 
@@ -65,30 +67,36 @@ app.get('/auth/refresh', authenticateRefreshToken, (req, res) => {
 app.post('/auth/login', (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
-    login(username, password).then((res) => {
-        if (res) {
-            refreshId = uuidv4();
+    login(username, password).then((bool1) => {
+        if (bool1) {
+            const refreshId = uuidv4();
+            getUserPayload(username).then((userPayload) => {
+                storeRefreshId(username, refreshId).then((bool) => {
+                    if (bool) {
+                        const accesstoken = generateAccessToken(userPayload);
+                        const refreshToken = generateRefreshToken({
+                            username: user.username,
+                            refreshId: refreshId
+                        });
 
-            const accesstoken = generateAccessToken({ username: user.username });
-            const refreshToken = generateRefreshToken({
-                username: user.username,
-                refreshId: refreshId
+                        res.cookie('authcookie', accesstoken, {
+                            maxAge: fiveMins,
+                            httpOnly: false,
+                            secure: true, //kun midlertidig
+                            sameSite: 'lax'
+                        });
+                        res.cookie('refreshcookie', refreshToken, {
+                            maxAge: oneWeek,
+                            httpOnly: true,
+                            secure: true, //kun midlertidig
+                            sameSite: 'lax'
+                        });
+                        res.send();
+                    } else {
+                        //could not store refresh id. Something went wrong
+                    }
+                });
             });
-            console.log(refreshToken);
-
-            res.cookie('authcookie', accesstoken, {
-                maxAge: fiveMins,
-                httpOnly: false,
-                secure: true, //kun midlertidig
-                sameSite: 'lax'
-            });
-            res.cookie('refreshcookie', refreshToken, {
-                maxAge: oneWeek,
-                httpOnly: true,
-                secure: true, //kun midlertidig
-                sameSite: 'lax'
-            });
-            res.send();
         } else {
             //provided username + password did not match any users in DB
             return res.status(400).send(`Cannot find user with username: ${username}`);
@@ -96,31 +104,32 @@ app.post('/auth/login', (req, res) => {
     });
 });
 
-function authenticateToken(req, res, next) {
-    const authcookie = req.cookies.authcookie;
-    jwt.verify(authcookie, publicKey, (err, data) => {
+app.post('/auth/logout', authenticateRefreshToken, (req, res) => {
+    removeRefreshId(req.user.refreshId).then((bool) => {
+        if (bool) {
+            //succesfully logged out - should redirect user
+            res.sendStatus(200);
+        }
+    });
+});
+
+app.post('/auth/getUserAgents', authenticateRefreshToken, (req, res) => {
+    getUserAgentsAndRefreshId(req.user.username).then((agentList) => {
+        res.status(200).json(agentList);
+    });
+});
+
+function authenticateRefreshToken(req, res, next) {
+    const refreshCookie = req.cookies.refreshcookie;
+    jwt.verify(refreshCookie, refreshSecret, (err, data) => {
         if (err) {
             res.sendStatus(403);
         } else if (data.user) {
             req.user = data.user;
+            console.log('Refresh cookie verified');
         }
         next();
     });
-}
-
-function authenticateRefreshToken(req, res, next) {
-    const refreshCookie = req.cookies.refreshcookie;
-    if (refreshTokens.includes(refreshCookie)) {
-        jwt.verify(refreshCookie, refreshSecret, (err, data) => {
-            if (err) {
-                res.sendStatus(403);
-            } else if (data.user) {
-                req.user = data.user;
-                console.log('Refresh cookie verified');
-            }
-            next();
-        });
-    }
 }
 
 function generateAccessToken(userdata) {
@@ -139,16 +148,16 @@ app.listen(3300, () => {
 //functions for querying database
 
 function getUserPayload(username) {
-    return fetch('ednPointForGettingUserPayload', {
+    return fetch('/getUserPayload', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            Accept: 'application/json'
+            Accept: 'text/plain'
         },
         body: JSON.stringify({ username })
     })
         .then((res) => {
-            return res.json();
+            return res.body.data;
         })
         .then((data) => {
             return JSON.parse(data);
@@ -159,11 +168,11 @@ function getUserPayload(username) {
 }
 
 function login(username, password) {
-    return fetch('login end point', {
+    return fetch(dbURL + '/checkCredentials', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            Accept: 'application/json'
+            Accept: 'text/plain'
         },
         body: JSON.stringify({ username, password })
     })
@@ -178,16 +187,12 @@ function login(username, password) {
         });
 }
 
-function createUUID() {
-    //some logic for creating UUID, for the refresh ID
-}
-
 function storeRefreshId(username, refreshId, userAgent) {
-    return fetch('putRefreshId-endpoint', {
+    return fetch(dbURL + '/storeRefreshId', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            Accept: 'application/json'
+            Accept: 'text/plain'
         },
         body: JSON.stringify({ username, refreshId, userAgent })
     })
@@ -200,14 +205,15 @@ function storeRefreshId(username, refreshId, userAgent) {
         .catch((error) => {
             console.error('error: ', error);
         });
+    return bool;
 }
 
 function verifyRefreshId(refreshId) {
-    return fetch('verifryRefreshId-endpoint', {
+    return fetch(dbURL + '/checkRefreshId', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            Accept: 'application/json'
+            Accept: 'text/plain'
         },
         body: JSON.stringify({ username, refreshId, userAgent })
     })
@@ -223,16 +229,16 @@ function verifyRefreshId(refreshId) {
 }
 
 function removeRefreshId(refreshId) {
-    return fetch('removeREFResh ID-endpoint', {
+    return fetch(dbURL + '/removeRefreshId', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            Accept: 'application/json'
+            Accept: 'text/plain'
         },
         body: JSON.stringify({ username, refreshId, userAgent })
     })
         .then((res) => {
-            return res.json();
+            return res.body;
         })
         .then((data) => {
             return JSON.parse(data).someAttributeResolvingToTrueOrFalse;
@@ -243,16 +249,16 @@ function removeRefreshId(refreshId) {
 }
 
 function getUserAgentsAndRefreshId(username) {
-    return fetch('userAgentList -endpoint', {
+    return fetch('/getUserAgents', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            Accept: 'application/json'
+            Accept: 'text/plain'
         },
         body: JSON.stringify({ username, refreshId, userAgent })
     })
         .then((res) => {
-            return nres.json();
+            return res.json();
         })
         .then((data) => {
             return JSON.parse(data).someAttributeContiangLIST; //list<{refreshId, userAgent}>
