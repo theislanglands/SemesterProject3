@@ -20,15 +20,18 @@ const validator = require('validator');
 require('dotenv').config({ path: '.env' });
 
 const crypto = require('crypto');
+const secret = 'hey';
 
-const key = '123456789123456789123456789';
+const key = crypto.createHash('sha256').update(String(secret)).digest('base64').substr(0, 32);
+console.log('key: ' + key);
 
 const algorithm = 'aes-128-cbc';
+const iv = crypto.randomBytes(16);
 
 function encrypt(text) {
     //Undersg iv, fordi denne funtion er outdated
     if (typeof text == 'string') {
-        var cipher = crypto.createCipher(algorithm, key);
+        var cipher = crypto.createCipheriv(algorithm, key, iv);
         var encrypted = cipher.update(text, 'utf8', 'hex');
         encrypted += cipher.final('hex');
         //console.log(typeof encrypted);
@@ -40,7 +43,7 @@ function encrypt(text) {
 function decrypt(text) {
     //Undersg iv, fordi denne funtion er outdated
     if (typeof text == 'string') {
-        var decipher = crypto.createDecipher(algorithm, key);
+        var decipher = crypto.createDecipheriv(algorithm, key, iv);
         var decrypted = decipher.update(text, 'hex', 'utf8');
         decrypted += decipher.final('utf8');
         //console.log(typeof decrypted);
