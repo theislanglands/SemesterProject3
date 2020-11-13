@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const fs = require('fs');
+const { v4: uuidv4 } = require('uuid');
 
 const path = require('path');
 
@@ -27,6 +28,7 @@ const oneWeek = 7 * 24 * 3600 * 1000;
 app.get('/auth/refresh', authenticateRefreshToken, (req, res) => {
     const refreshToken = req.cookies.refreshcookie;
     const payload = jwt.decode(refreshToken);
+    //check for refresh id in DB
     verifyRefreshId(payload.refreshId).then(bool=> {
         if (bool) {
             const decodedRefreshToken = jwt.decode(refreshToken);
@@ -52,12 +54,11 @@ app.get('/auth/refresh', authenticateRefreshToken, (req, res) => {
 });
 
 app.post('/auth/login', (req, res) => {
-    let username = req.body.username;
-    login(username).then(res=> {
+    const username = req.body.username;
+    const password = req.body.password;
+    login(username, password).then(res => {
         if(res){
-            console.log(user);
-
-            refreshId = createUUID();
+            refreshId = uuidv4();
 
             const accesstoken = generateAccessToken({ username: user.username });
             const refreshToken = generateRefreshToken({ username: user.username, refreshId: refreshId});
@@ -123,6 +124,9 @@ function generateRefreshToken(userdata) {
 app.listen(3300, () => {
     console.log("Connected");
 });
+
+
+
 
 //functions for querying database
 

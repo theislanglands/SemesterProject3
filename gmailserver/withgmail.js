@@ -132,6 +132,7 @@ server.get('/reset', urlencodedParser, function (req, res) {
     let email = splitedDecrypted[0];
     encryptedEmail = encrypt(email);
 
+    //the third parameter of isExpired tells the time in min. before the URL expires
     if (isExpired(splitedDecrypted, 1, 1)) {
         res.cookie('mailtoken', encryptedEmail);
         res.sendFile(__dirname + '/html/resetPassword.html');
@@ -142,7 +143,7 @@ server.get('/reset', urlencodedParser, function (req, res) {
 });
 server.post('/resetPassword_form', urlencodedParser, function (req, res) {
     const mail = req.cookies.mailtoken;
-    let password = req.body.password;
+    let password = req.body.password;//prown to script injection. (tror jeg)
     let confirmpassword = req.body.confirmPassword;
     if (password === confirmpassword) {
         console.log('Password: ' + password + ' Email: ' + mail);
