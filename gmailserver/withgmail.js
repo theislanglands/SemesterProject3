@@ -12,6 +12,8 @@ var mailHtml = `<p><b>Hello</b></p>
 
 var hyperlinkInEmail = 'https://localhost/gmail/reset';
 
+var mailTitleNoti;
+
 const nodemailer = require('nodemailer');
 const cookieparser = require('cookie-parser');
 const fetch = require('node-fetch');
@@ -304,4 +306,16 @@ function postNewPassword(email, password) {
             console.log('some error happened');
             return false;
         });
+}
+
+function sendNotifificationMail(endmail) {
+    let details = {};
+
+    return (details = {
+        from: serverEmail,
+        to: endEmail,
+        subject: mailTitleNoti,
+        // HTML body
+        html: mailHtmlNoti
+    });
 }
