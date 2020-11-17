@@ -102,6 +102,7 @@ const server = express();
 const bodyparser = require('body-parser');
 const https = require('https');
 const { stringify } = require('querystring');
+const { resolve } = require('path');
 
 // Create application/x-www-form-urlencoded parser
 //LÆS OP PÅ DETTE
@@ -131,10 +132,12 @@ function decode(text) {
     }
 }
 
-server.post('/forgotPass', urlencodedParser, function (req, res) {
+server.post('/forgotPass', urlencodedParser, async function (req, res) {
     let endEmail = validator.escape(req.body.email);
     if (validator.isEmail(endEmail)) {
-        if (isValidUser(endEmail)) {
+        var bool = await isValidUser(endEmail);
+        console.log(bool);
+        if (bool === 'true') {
             mailTransporter = createMailTransporter(mailService, serverEmail, serverEmailPass);
             let date = new Date();
             let dateString = date.getTime().toString();
@@ -214,7 +217,7 @@ server.get('/reset', urlencodedParser, function (req, res) {
         return;
     }
 });
-server.post('/resetPassword_form', urlencodedParser, function (req, res) {
+server.post('/resetPassword_form', urlencodedParser, async function (req, res) {
     const encryptedMail = req.cookies.mailtoken;
     if (encryptedMail === undefined) {
         res.sendStatus(406);
@@ -222,6 +225,7 @@ server.post('/resetPassword_form', urlencodedParser, function (req, res) {
     }
 
     let decodedMail = decode(decrypt(encryptedMail));
+    decodedMail = validator.escape(decodedMail);
     if (decodedMail === undefined) {
         console.log('an error ocurred on decryption');
         res.sendStatus(500);
@@ -237,8 +241,9 @@ server.post('/resetPassword_form', urlencodedParser, function (req, res) {
     }
 
     // sammenligning skal gøres på frontend og ikke her.
-    let sucess = postNewPassword(decodedMail, password);
-    if (succes) {
+
+    var sucess = await postNewPassword(decodedMail, password);
+    if (sucess) {
         sendNotifificationMail(decodedMail);
         res.send(JSON.stringify({ msg: 'the users password has been reset', success: true }));
     } else {
@@ -265,32 +270,21 @@ function isExpired(splitedDecryptedArr, indexOfTime, valideInMinutes) {
         return false;
     }
 }
-
 function isValidUser(email) {
-    fetch('http://localhost/users/isEmail', {
+    return fetch('http://usersservice:9090/isEmail', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            Accept: 'text/plain'
+            'Content-Type': 'application/x-www-form-urlencoded' //,
+            //Accept: 'text/plain'
         },
         body: 'email=' + encodeURIComponent(email)
-    })
-        .then(function (res) {
-            res.text();
-        })
-        .then((data) => {
-            return data;
-        })
-        .catch((error) => {
-            console.log('some error happened');
-            return false;
-        });
+    }).then((res) => res.text());
 }
 
 function postNewPassword(email, password) {
     // the password and the mail will be passed with fetch to the database API
 
-    fetch('http://localhost/users/changePassword', {
+    return fetch('http://usersservice:9090/changePassword', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -298,19 +292,11 @@ function postNewPassword(email, password) {
         },
         body: 'email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password)
     })
-        .then(function (res) {
-            res.text();
-        })
-        .then((data) => {
-            return data;
-        })
-        .catch((error) => {
-            console.log('some error happened');
-            return false;
-        });
+        .then((res) => res.text())
+        .catch((err) => console.log(err));
 }
 
-function sendNotifificationMail(endmail) {
+function sendNotifificationMail(endEmail) {
     let mailTransporter = createMailTransporter(mailService, serverEmail, serverEmailPass);
     let details = {};
     details = {
@@ -320,5 +306,16 @@ function sendNotifificationMail(endmail) {
         // HTML body
         html: mailHtmlNoti
     };
-    sendMail(mailTransporter, mailDetails);
+    sendMail(mailTransporter, details);
+    /*
+    mailTransporter.sendMail(details, function (err, data) {
+        if (err) {
+            console.log('Error Occurs');
+        } else {
+            console.log('Email sent successfully');
+        }
+        if (data.messageTime != 0) {
+        }
+    });
+    */
 }

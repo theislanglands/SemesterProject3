@@ -26,3 +26,13 @@ services:
             context: ./gmailserver/
         expose:
             - '8081'
+
+    usersservice:
+        build:
+            context: ./UsersAPI/
+        expose:
+            - '9090'
+
+networks:
+    backend:
+        driver: bridge
