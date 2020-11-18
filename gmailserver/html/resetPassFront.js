@@ -2,12 +2,10 @@ window.onload = () => {
     var btn = document.getElementById('send');
     var pass = document.getElementById('password');
     var confPass = document.getElementById('confirmPassword');
+    var div = document.getElementById('response');
+    var msg = '';
     btn.addEventListener('click', function () {
         const sendUrl = 'https://localhost/gmail/resetPassword_form?';
-        const data = {
-            password: pass.value,
-            confirmPassword: confPass.value
-        };
         const specs = {
             method: 'POST',
             headers: {
@@ -16,13 +14,18 @@ window.onload = () => {
             },
             body: 'password=' + encodeURIComponent(pass.value)
         };
-        fetch(sendUrl, specs)
-            .then((data) => {
-                return data.json();
-            })
-            .then((res) => {
-                console.log(res);
-            })
-            .catch((error) => console.log(error));
+        if (pass.value === confPass.value) {
+            fetch(sendUrl, specs)
+                .then((res) => {
+                    return res.json();
+                })
+                .then((data) => {
+                    div.innerText = data.msg;
+                    btn.disabled = data.success;
+                })
+                .catch((error) => console.log(error));
+        } else {
+            div.innerText = "The two password aren't identical, try again";
+        }
     });
 };
