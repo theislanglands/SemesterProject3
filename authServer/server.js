@@ -18,6 +18,8 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 const privateKey = fs.readFileSync('./private.key', 'utf8');
+
+//should be distributed to all services needing to verify the signature of the access token
 const publicKey = fs.readFileSync('./public.key', 'utf8');
 
 // Access-Control-Allow-Headers... which ones? Accept removed
@@ -28,6 +30,8 @@ app.use(function (req, res, next) {
     next();
 });
 
+//secret for signing refresh tokens
+//should be in a secret file and
 let refreshSecret = `
 4cq9joRISzk2CFdmaAsCyf227T34ywSMvqlnaU5js53HevyYe5jjzVGdojcxtR/0
 Cl8PH1vFUdcVlLR+fBZDCDgRqY6lY4RdRx+tHDc87cwpFXBEQ5Gx1YOhCG4QNDJ5
@@ -37,82 +41,82 @@ DsdwnhBovGLYR8B5LN5GtPF8bwERZhqWqYjD92sZb0Frihf6IkqZO5grgFUIJ8GE
 Imd5Dp3hkUvG2gstKjWLrw==
 `;
 const dbURL = 'http://localhost:8082';
-
+const serviceUrl = 'http://localhost:8080';
+//age of access token
 const fiveMins = 5 * 60 * 1000;
+
+//age of refresh token
 const oneWeek = 7 * 24 * 3600 * 1000;
 
+//options for the access token cookie
+const authCookieOptions = {
+    maxAge: fiveMins,
+    httpOnly: false,
+    secure: true,
+    sameSite: 'lax',
+    domain: serviceUrl
+};
+
+//options for refresh token cookie
+const refreshCookieOptions = {
+    maxAge: oneWeek,
+    httpOnly: true,
+    secure: true, //kun midlertidig
+    sameSite: 'lax',
+    domain: serviceUrl
+};
+
+//receives access- and refresh token, and return a new valid access token
 app.post('/auth/refresh', authenticateRefreshToken, (req, res) => {
-    const refreshToken = req.cookies.refreshcookie;
-    const payload = jwt.decode(refreshToken);
-    //check for refresh id in DB
-    verifyRefreshId(payload.refreshId).then((bool) => {
-        if (bool) {
-            const decodedRefreshToken = jwt.decode(refreshToken);
-            const accessToken = generateAccessToken({ username: decodedRefreshToken.username });
-            const newRefreshToken = generateRefreshToken({
-                username: decodedRefreshToken.username,
-                refreshId: decodedRefreshToken.refreshId
-            });
-            res.cookie('authcookie', accessToken, {
-                maxAge: fiveMins,
-                httpOnly: false,
-                secure: true,
-                sameSite: 'lax',
-                domain: 'http://localhost:8080'
-            });
-            res.cookie('refreshcookie', newRefreshToken, {
-                maxAge: oneWeek,
-                httpOnly: true,
-                secure: true,
-                sameSite: 'lax',
-                domain: 'http://localhost:8080'
-            });
-            res.send();
-        } else {
-            console.log('buh');
-            //redirect to login page. "user need to login to get new access + refresh token"
-        }
-    });
+    //gets the userdata in the old access token and tranfers it to a new accesstoken
+    const userPayload = jwt.decode(req.cookies.authcookie);
+    const newAccessToken = generateAccessToken(userPayload);
+
+    //bør vi invalidere refresh token, når access token refreshes?
+
+    //adds the access and refresh and token as cookies to the response
+    res.cookie('authcookie', newAccessToken, authCookieOptions);
+    res.cookie('refreshcookie', req.cookies.refreshcookie, refreshCookieOptions);
+
+    console.log('successfully issued new access token: ' + newAccessToken);
+    res.send();
 });
 
+//logs in the user with username and password. return a new access- and refresh token
 app.post('/auth/login', (req, res) => {
+    //gets username, password and the requests origin device
     const username = req.body.username;
-    const userAgent = req.headers.userAgent;
-    console.log(username);
+    const userAgent = req.get('user-agent');
     const password = req.body.password;
+
+    //checks the existence of the credentials in the db
     login(username, password).then((bool1) => {
         if (bool1) {
-            const refreshId = uuidv4();
-            getUserPayload(username).then((userPayload) => {
-                playLoad = {
-                    userId: userPayload[0],
-                    username: userPayload[1],
-                    subType: userPayload[2],
-                    admin: userPayload[3]
-                };
+            console.log('logged in as: ' + username + ' from device: ' + userAgent);
+
+            //get userId, username, subscription mode(int), admin (bool)
+            getUserPayload(username).then((payload) => {
+                //genereates new refresh id
+                const refreshId = uuidv4();
+
+                //stores the refreesh id persistent in DB
                 storeRefreshId(username, refreshId, userAgent).then((bool) => {
+                    //should always be true
                     if (bool) {
-                        const accesstoken = generateAccessToken(playLoad);
+                        //issue access token with payload
+                        const accesstoken = generateAccessToken(payload);
                         const refreshToken = generateRefreshToken({
-                            username: playLoad.username,
+                            username: payload.username,
                             refreshId: refreshId
                         });
 
-                        res.cookie('authcookie', accesstoken, {
-                            maxAge: fiveMins,
-                            httpOnly: false,
-                            secure: true, //kun midlertidig
-                            sameSite: 'lax'
-                        });
-                        res.cookie('refreshcookie', refreshToken, {
-                            maxAge: oneWeek,
-                            httpOnly: true,
-                            secure: true, //kun midlertidig
-                            sameSite: 'lax'
-                        });
+                        //add the tokens as cookie in the response
+                        res.cookie('authcookie', accesstoken, authCookieOptions);
+                        res.cookie('refreshcookie', refreshToken, refreshCookieOptions);
                         res.send();
                     } else {
-                        //could not store refresh id. Something went wrong
+                        //somewting went wrong in the db, and the refresh id could not be stored
+                        console.log('could not store refresh id');
                     }
                 });
             });
@@ -123,36 +127,69 @@ app.post('/auth/login', (req, res) => {
     });
 });
 
+//logs out user device.
 app.post('/auth/logout', authenticateRefreshToken, (req, res) => {
-    removeRefreshId(req.user.refreshId).then((bool) => {
+    //if body contains a refresh id, the user want to logout another device (invalidate a refresh id assoicated with another device)
+    //might not be completely secure
+    //should maybe use the access token instead
+    let refreshId = req.decodedRefreshToken.refreshId;
+    if (req.body.refreshId) {
+        refreshId = req.body.refreshId;
+        console.log('logging out a device refresh id: ' + refreshId);
+    }
+
+    //removes row associated with refresh id to invalidate refreshToken
+    removeRefreshId(refreshId).then((bool) => {
         if (bool) {
-            //succesfully logged out - should redirect user
+            console.log('succesfully removed refresh id' + refreshId);
             res.sendStatus(200);
+        } else {
+            console.log('could not log out - something went wrong.');
+            res.sendStatus(405);
         }
     });
 });
 
 app.post('/auth/getUserAgents', authenticateRefreshToken, (req, res) => {
-    getUserAgentsAndRefreshId(req.user.username).then((agentList) => {
+    getUserAgentsAndRefreshId(req.decodedRefreshToken.username).then((agentList) => {
         res.status(200).json(agentList);
     });
 });
 
+//middleware for verifying and checking the existance of access token in db
 function authenticateRefreshToken(req, res, next) {
-    const refreshCookie = req.cookies.refreshcookie;
-    jwt.verify(refreshCookie, refreshSecret, (err, data) => {
+    const refreshToken = req.cookies.refreshcookie;
+    console.log('authenticating refreshtoken: ' + refreshToken);
+    //verifies signature of refresh token and returns the payload (refresh id and username)
+    jwt.verify(refreshToken, refreshSecret, (err, data) => {
         if (err) {
             res.sendStatus(403);
-        } else if (data.user) {
-            req.user = data.user;
-            console.log('Refresh cookie verified');
+        } else {
+            verifyRefreshId(data.refreshId).then((bool) => {
+                console.log(bool);
+                if (bool) {
+                    req.decodedRefreshToken = data;
+                    console.log('Refresh cookie verified');
+                    next();
+                } else {
+                    res.sendStatus(403);
+                }
+            });
         }
-        next();
     });
 }
 
+//return a new signed access token
 function generateAccessToken(userdata) {
-    return jwt.sign(userdata, privateKey, { expiresIn: '5m', algorithm: 'RS256' });
+    //relevant data for access token
+    const data = {
+        userId: userdata.userId,
+        username: userdata.username,
+        subType: userdata.subType,
+        admin: userdata.admin
+    };
+    console.log('payload for access token: ' + data);
+    return jwt.sign(data, privateKey, { expiresIn: '5m', algorithm: 'RS256' });
 }
 
 function generateRefreshToken(userdata) {
@@ -179,7 +216,14 @@ function getUserPayload(username) {
             return res.text();
         })
         .then((data) => {
-            return data;
+            data = JSON.parse(data);
+            const payload = {
+                userId: data[0],
+                username: data[1],
+                subType: data[2],
+                admin: data[3]
+            };
+            return payload;
         })
         .catch((error) => {
             console.error('error: ', error);
@@ -205,7 +249,7 @@ function login(username, password) {
         })
         .then((data) => {
             console.log(data);
-            return data;
+            return data === 'true';
         })
         .catch((error) => {
             console.error('error: ', error);
@@ -231,7 +275,7 @@ function storeRefreshId(username, refreshId, userAgent) {
             return res.text();
         })
         .then((data) => {
-            return data;
+            return data === 'true';
         })
         .catch((error) => {
             console.error('error: ', error);
@@ -246,13 +290,14 @@ function verifyRefreshId(refreshId) {
             'Content-Type': 'application/x-www-form-urlencoded',
             Accept: 'text/plain'
         },
-        body: JSON.stringify({ username, refreshId, userAgent })
+        body: 'refreshId=' + encodeURIComponent(refreshId)
     })
         .then((res) => {
-            return res.json();
+            return res.text();
         })
         .then((data) => {
-            return JSON.parse(data).someAttributeResolvingToTrueOrFalse;
+            console.log(data);
+            return data === 'true';
         })
         .catch((error) => {
             console.error('error: ', error);
@@ -266,33 +311,35 @@ function removeRefreshId(refreshId) {
             'Content-Type': 'application/x-www-form-urlencoded',
             Accept: 'text/plain'
         },
-        body: JSON.stringify({ username, refreshId, userAgent })
+        body: 'refreshId=' + encodeURIComponent(refreshId)
     })
         .then((res) => {
-            return res.body;
+            return res.text();
         })
         .then((data) => {
-            return JSON.parse(data).someAttributeResolvingToTrueOrFalse;
+            return data === 'true';
         })
         .catch((error) => {
             console.error('error: ', error);
         });
 }
 
+//gives a username and recieves all user-agents + refreshId, så that a user could log out other divivs currently logged in
 function getUserAgentsAndRefreshId(username) {
-    return fetch('/getUserAgents', {
+    return fetch(dbURL + '/getUserAgents', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             Accept: 'text/plain'
         },
-        body: JSON.stringify({ username, refreshId, userAgent })
+        body: 'username=' + encodeURIComponent(username)
     })
         .then((res) => {
-            return res.json();
+            return res.text();
         })
         .then((data) => {
-            return JSON.parse(data).someAttributeContiangLIST; //list<{refreshId, userAgent}>
+            console.log(data);
+            return JSON.parse(data);
         })
         .catch((error) => {
             return console.error('error: ', error);

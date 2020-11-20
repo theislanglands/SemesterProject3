@@ -16,12 +16,8 @@ class User {
         this.password = newPassword;
     }
 }
-<<<<<<< HEAD:UsersAPI/UserAPI.js
-users.push(new User(1, 'markusmunks@gmail.com', 'markus123', '123', 'markus', 'munk', 1, true));
-=======
 users.push(new User(1, 'markus@giganten.dk', 'markus123', '123', 'markus', 'munk', 1, true));
 
->>>>>>> completedAuth:UserAPI/UserAPI.js
 class ConSec {
     constructor(userId, refreshID, userAgent) {
         this.userId = userId;
@@ -170,13 +166,11 @@ server.post('/getUserPayload', function (req, res) {
 });
 server.post('/isEmail', function (req, res) {
     let email = req.body.email;
-    console.log('hello');
     let user = getUserFromEmail(email);
     if (user instanceof User) {
-        console.log('true');
-        res.send(true);
+        res.send('true');
     } else {
-        res.send(false);
+        res.send('false');
     }
 });
 
@@ -191,7 +185,7 @@ server.post('/changePassword', function (req, res) {
     }
 });
 
-var server1 = server.listen(9090, function () {
+var server1 = server.listen(8082, function () {
     var host = server1.address().address;
     var port = server1.address().port;
 
