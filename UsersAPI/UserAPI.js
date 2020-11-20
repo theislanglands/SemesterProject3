@@ -17,6 +17,7 @@ class User {
     }
 }
 users.push(new User(1, 'markusmunks@gmail.com', 'markus123', '123', 'markus', 'munk', 1, true));
+users.push(new User(1, 'kontakt@ardit.dk', 'markus123', '123', 'markus', 'munk', 1, true));
 class ConSec {
     constructor(userId, refreshID, userAgent) {
         this.userId = userId;
