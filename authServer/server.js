@@ -205,6 +205,7 @@ app.listen(3300, () => {
 
 function getUserPayload(username) {
     return fetch(dbURL + '/getUserPayload', {
+        // SHOULD POST TO SUBSCRIPTION TEAM DATABASE INSTEAD
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -232,7 +233,7 @@ function getUserPayload(username) {
 
 function login(username, password) {
     return fetch(dbURL + '/checkCredentials', {
-        method: 'POST',
+        method: 'GET',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             Accept: 'text/plain'
@@ -258,7 +259,7 @@ function login(username, password) {
 
 function storeRefreshId(username, refreshId, userAgent) {
     return fetch(dbURL + '/storeRefreshId', {
-        method: 'POST',
+        method: 'GET',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             Accept: 'text/plain'
@@ -285,7 +286,7 @@ function storeRefreshId(username, refreshId, userAgent) {
 
 function verifyRefreshId(refreshId) {
     return fetch(dbURL + '/checkRefreshId', {
-        method: 'POST',
+        method: 'GET',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             Accept: 'text/plain'
@@ -306,7 +307,7 @@ function verifyRefreshId(refreshId) {
 
 function removeRefreshId(refreshId) {
     return fetch(dbURL + '/removeRefreshId', {
-        method: 'POST',
+        method: 'GET',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             Accept: 'text/plain'
@@ -327,7 +328,7 @@ function removeRefreshId(refreshId) {
 //gives a username and recieves all user-agents + refreshId, så that a user could log out other divivs currently logged in
 function getUserAgentsAndRefreshId(username) {
     return fetch(dbURL + '/getUserAgents', {
-        method: 'POST',
+        method: 'GET',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             Accept: 'text/plain'

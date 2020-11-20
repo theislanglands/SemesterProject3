@@ -112,7 +112,8 @@ server.use(bodyParser.urlencoded({ extended: true }));
 
 server.use(express.static('html'));
 
-server.post('/checkCredentials', function (req, res) {
+server.get('/checkCredentials', function (req, res) {
+    // GET to Data Security DB
     let username = req.body.username;
     let password = req.body.password;
     let answer = isCredentialsValid(username, password);
@@ -121,7 +122,8 @@ server.post('/checkCredentials', function (req, res) {
 });
 
 // /users/storeRefreshId
-server.post('/storeRefreshId', function (req, res) {
+server.get('/storeRefreshId', function (req, res) {
+    // GET to Data Security DB
     let username = req.body.username;
     let refreshId = req.body.refreshId;
     let userAgent = req.body.userAgent;
@@ -133,13 +135,15 @@ server.post('/storeRefreshId', function (req, res) {
 
     res.send('true');
 });
-server.post('/checkRefreshId', function (req, res) {
+server.get('/checkRefreshId', function (req, res) {
+    // GET to DATA SECURITY DB
     let refreshId = req.body.refreshId;
     let bool = isRefreshId(refreshId);
     res.send(bool.toString());
 });
 
-server.post('/removeRefreshId', function (req, res) {
+server.get('/removeRefreshId', function (req, res) {
+    // GET to DATA SECURITY DB
     let refreshId = req.body.refreshId;
     let bool = removeRefreshId(refreshId);
     res.send(bool.toString());
@@ -155,6 +159,7 @@ server.post('/getUserAgents', function (req, res) {
     res.send(userAgents);
 });
 server.post('/getUserPayload', function (req, res) {
+    // SUBSCRIPTION DB
     let username = req.body.username;
     let user = getUserByUsername(username);
     let arr = [];
