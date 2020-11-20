@@ -1,0 +1,223 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: reverse-proxy
+spec:
+    selector:
+        # This app must match the label of the pods.
+        app: reverse-proxy
+    ports:
+        - protocol: TCP
+          port: 443
+          targetPort: 443
+          name: auth-server
+        - protocol: TCP
+          port: 443
+          targetPort: 443
+          name: gmail-server
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: reverse-proxy
+spec:
+    selector:
+        matchLabels:
+            # This is the label the app selector has to match.
+            app: reverse-proxy
+    replicas: 1
+    template:
+        metadata:
+            labels:
+                app: reverse-proxy
+            annotations:
+                sidecar.istio.io/inject: 'false'
+        spec:
+            containers:
+                - name: nginx
+                  image: nginx:1.19-alpine
+                  ports:
+                      - containerPort: 443
+                  volumeMounts:
+                      - name: nginx-confs
+                        mountPath: /etc/nginx
+            volumes:
+                - name: nginx-confs
+                  configMap:
+                      name: nginx-confs
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: nginx-confs
+data:
+    nginx.conf: |
+        events { }
+
+        http{
+            upstream dynamic { server 127.0.0.1; 
+            }
+            server {
+                listen 80 default_server;
+                server_name _;
+                return 301 https://$host$request_uri;
+            }
+
+        server {
+            listen 443 ssl;
+            server_name _;
+            ssl_certificate certs/nginx-selfsigned.crt;
+            ssl_certificate_key certs/nginx-selfsigned.key;
+            ssl_protocols TLSv1.2 TLSv1.3;
+            ssl_prefer_server_ciphers on;
+            ssl_ciphers ECDH+AESGCM:ECDH+AES256:ECDH+AES128:DHE+AES128:!ADH:!AECDH:!MD5;
+
+            location / {
+            proxy_pass http://authservice:3300/;
+            proxy_http_version 1.1;
+            proxy_cache_bypass $http_upgrade;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_pass_header Server;
+            }
+            location /gmail {
+            proxy_pass http://gmailservice:8081/;
+            proxy_http_version 1.1;
+            proxy_cache_bypass $http_upgrade;
+            proxy_pass_header Server;
+            }
+            
+            }
+        }
+    private.key: |
+        -----BEGIN PRIVATE KEY-----
+        MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCgyFEHDjMQEGOA
+        SL1DoCp15tLTFjU4VxcvcymCDFNre08SYAZJvqIhvDAHWe/MZaUSbsA95Ns5/zx0
+        vixB75An3MqzdHIxrsE1TRa0KzeX4YSSyDUjIMScgO3LBADFnmBOjcQjJFVNswAh
+        jSzm9TVL0mYRp0Bm6jkieXYSjK3aFD/npDgRCBcUar39KslVh7G3wR24Dr8cRXRY
+        jYb1ZkwVztTLMHcAnSuyhRpZEjGaUc+mKWH8MayRG6d4S4jhbOoq16OAe766v1SR
+        9gx/pH8S+WBseHEa8Ao3dFu0gM8CuT1UXCD2sw8dMYI0SctPgjCtsdRdq9furmne
+        A8oxSxDbAgMBAAECggEAa+L+vAVDLlxQ6BvnJCGtXD/u58XXIF8QJ77W83Th5RVx
+        EZttnL5WfNySPdyTlEwAYEYAqYePs3MZVhzmBbiCurzlJ1XT6pKhAusfePYm77tc
+        AkJlpZSvWXUKG1gsTG7hoNRv8ETJGMIsLFdW8gNIKACejOn1xRkWDZQDLp9HaTVs
+        ooo9g1lGcIb+HRiO37yEhwBllEgXOKAvph/CIay4AIoqH2GDXOJ4z5m5RykjFlzL
+        rsk28nJrY4W/vgRk7IfiDNPEY9ssAEIMlGdWjFcWoFRdRkfUAVmssH3CkJ2HTVYM
+        MHCUWvkVWTLT/epc63evUJiMbBsJWdfhncpswIYtgQKBgQDWBqspNs3iBklWFp8V
+        uSZGdy5gBIWtODZsXAzdMi+hHrSNEPijgtcIWKPQjtP6PBT/dwQera6HQv/h1Ezc
+        axjM53GLwzudJha+yxcbyCni3Pz4FnckHKnu9T50lBtkiUbNN/q1RqQvrqLxjU7w
+        V/iLKYcf41HrbVe9Ai+hcNRP2QKBgQDAUIRCDEBkCOIH5Oxn+mMp8H0+xLvPzXmt
+        RrGDtLCseLJdd43TmAGHg1A3BE2GZtqVWCVeh4HOydczYt1bv+HuStzjTXumSaTs
+        o/drXOmSP4P9QRCn5Iie/rcSlixd+gtqEMGzhp/8Vs4CywkK/n8a92JICKzJyBKR
+        iQCSru+p0wKBgQDURo7y9LllCYkpSoyEtjuhPkoPz8xqDsvj07Sqm0EkU9kN5RxG
+        yNnQHGJ104OpuHe3HWtHpknpPGmgqbmGEO7rJE65KW1yIzoCCFqmInRw33BD+7w1
+        Y/yj1jgY1mEI6SMBHhmaPDNSW6qfW+FEfmw0Un8EAKnakHuqKoXlYIwjmQKBgDPo
+        R5pwJh0aDLAmyOxTt9pFD/kWLr8q7bGoSBeNeLZEqZfywfQfriH+fnMrFSW2sz7m
+        GMgH+TBwaEZ1Y9v00a14xWAQtNQwQnSg2RJAdMbFoAGGQ1GdrIaFp7I7mGQRLm2F
+        clLbfmkkoNw+IwW1pWcI6J0awlCAUQq5GM9+qi+DAoGAZKoiWPhqdg4OuUmiXZdi
+        y4QSS4KioZ5yuWbn+GqByTJ2swYzeSrQHY4ta1AnDoixGx+CTgcraky8AZnyMzcD
+        6u7iIuHc6EP6HNG5vM/m4UcYe1G4JIOnOuW5QMW0LvP5kI/B95JicGvbiGRYuopb
+        n9h/pGN78IgHUcxzT+A6T+g=
+        -----END PRIVATE KEY-----
+    certificate.crt: |
+        -----BEGIN CERTIFICATE-----
+        MIIEKTCCAxGgAwIBAgIUUlqF3HL9yz3p7IEARs5tM/ZoUZkwDQYJKoZIhvcNAQEL
+        BQAwgaMxCzAJBgNVBAYTAkRLMQwwCgYDVQQIDANGeW4xETAPBgNVBAcMCE9kZW5z
+        ZSBDMRAwDgYDVQQKDAdURUstU0RVMSQwIgYDVQQLDBtzb2Z0d2FyZSBlbmdpbmVl
+        cmluZyAzLiBzZW0xFDASBgNVBAMMC01hcmt1cyBNdW5rMSUwIwYJKoZIhvcNAQkB
+        FhZtbXVuazE5QHN0dWRlbnQuc2R1LmRrMB4XDTIwMTAyMDE1NDgxN1oXDTIxMTAy
+        MDE1NDgxN1owgaMxCzAJBgNVBAYTAkRLMQwwCgYDVQQIDANGeW4xETAPBgNVBAcM
+        CE9kZW5zZSBDMRAwDgYDVQQKDAdURUstU0RVMSQwIgYDVQQLDBtzb2Z0d2FyZSBl
+        bmdpbmVlcmluZyAzLiBzZW0xFDASBgNVBAMMC01hcmt1cyBNdW5rMSUwIwYJKoZI
+        hvcNAQkBFhZtbXVuazE5QHN0dWRlbnQuc2R1LmRrMIIBIjANBgkqhkiG9w0BAQEF
+        AAOCAQ8AMIIBCgKCAQEAoMhRBw4zEBBjgEi9Q6AqdebS0xY1OFcXL3MpggxTa3tP
+        EmAGSb6iIbwwB1nvzGWlEm7APeTbOf88dL4sQe+QJ9zKs3RyMa7BNU0WtCs3l+GE
+        ksg1IyDEnIDtywQAxZ5gTo3EIyRVTbMAIY0s5vU1S9JmEadAZuo5Inl2Eoyt2hQ/
+        56Q4EQgXFGq9/SrJVYext8EduA6/HEV0WI2G9WZMFc7UyzB3AJ0rsoUaWRIxmlHP
+        pilh/DGskRuneEuI4WzqKtejgHu+ur9UkfYMf6R/EvlgbHhxGvAKN3RbtIDPArk9
+        VFwg9rMPHTGCNEnLT4IwrbHUXavX7q5p3gPKMUsQ2wIDAQABo1MwUTAdBgNVHQ4E
+        FgQUMLzzkRBSr1VtCDOEKv1I1E603jUwHwYDVR0jBBgwFoAUMLzzkRBSr1VtCDOE
+        Kv1I1E603jUwDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAff0/
+        wGghRox5qdYCuPT0NW5DUsUxshjsN4pLs78WzloQs3S7sy0GPCVMIZsLKEoQ2v4G
+        L1PNpuTLihCHGF0zz+DUQCYMd6n8M8gO3SitDg4vfht7oVd4dxFluDNTFwB8WbT+
+        jSG6FzqG8eJCBnXsvZ6E1+9c0HriTVK1oBqaQbVbtLSaXTSnQRfRlAzdCFGElGgo
+        eg7ANzRNBGR+GA0xYIOLSLEcEo7XOlOzmZOIcNHxugF+B9aZcXiTIUCmd2KFwzCu
+        HIGFE4J4toey6rqqf7x8uqZCXdZb7ibtjnfCk8wF1pQy7IVBSuLRXOZIo4r/w05q
+        goixXHF81Mx/NZmAoQ==
+        -----END CERTIFICATE-----
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: auth-server
+spec:
+    selector:
+        # This app must match the label of the pods.
+        app: auth-server
+    ports:
+        - protocol: TCP
+          port: 3300
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: auth-server
+spec:
+    selector:
+        matchLabels:
+            # This is the label the app selector has to match.
+            app: auth-server
+    replicas: 1
+    template:
+        metadata:
+            annotations:
+                sidecar.istio.io/inject: 'false'
+            labels:
+                app: auth-server
+        spec:
+            containers:
+                - name: auth-server
+                  image: IMAGE_IS_INSERTED_USING_GITLAB-auth-server
+                  imagePullPolicy: Always
+                  ports:
+                      - containerPort: 3300
+            imagePullSecrets:
+                - name: sdugitlab
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: gmail-server
+spec:
+    selector:
+        # This app must match the label of the pods.
+        app: gmail-server
+    ports:
+        - protocol: TCP
+          port: 8081
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: gmail-server
+spec:
+    selector:
+        matchLabels:
+            # This is the label the app selector has to match.
+            app: gmail-server
+    replicas: 1
+    template:
+        metadata:
+            annotations:
+                sidecar.istio.io/inject: 'false'
+            labels:
+                app: gmail-server
+        spec:
+            containers:
+                - name: gmail-server
+                  image: IMAGE_IS_INSERTED_USING_GITLAB-gmail-server
+                  imagePullPolicy: Always
+                  ports:
+                      - containerPort: 8081
+            imagePullSecrets:
+                - name: sdugitlab
