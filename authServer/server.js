@@ -40,7 +40,7 @@ MJbUgqwYRpsRKhkEaq/5PCQUekpOP/QxyQbLhg63eyaMC0FGiYq36FkpQTGh41hR
 DsdwnhBovGLYR8B5LN5GtPF8bwERZhqWqYjD92sZb0Frihf6IkqZO5grgFUIJ8GE
 Imd5Dp3hkUvG2gstKjWLrw==
 `;
-const dbURL = 'http://localhost:8082';
+const dbURL = 'http://usersservice:9090';
 const serviceUrl = 'http://localhost:8080';
 //age of access token
 const fiveMins = 5 * 60 * 1000;

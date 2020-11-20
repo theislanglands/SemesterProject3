@@ -307,15 +307,4 @@ function sendNotifificationMail(endEmail) {
         html: mailHtmlNoti
     };
     sendMail(mailTransporter, details);
-    /*
-    mailTransporter.sendMail(details, function (err, data) {
-        if (err) {
-            console.log('Error Occurs');
-        } else {
-            console.log('Email sent successfully');
-        }
-        if (data.messageTime != 0) {
-        }
-    });
-    */
 }

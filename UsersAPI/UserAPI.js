@@ -16,12 +16,7 @@ class User {
         this.password = newPassword;
     }
 }
-<<<<<<< HEAD:UsersAPI/UserAPI.js
 users.push(new User(1, 'markusmunks@gmail.com', 'markus123', '123', 'markus', 'munk', 1, true));
-=======
-users.push(new User(1, 'markus@giganten.dk', 'markus123', '123', 'markus', 'munk', 1, true));
-
->>>>>>> completedAuth:UserAPI/UserAPI.js
 class ConSec {
     constructor(userId, refreshID, userAgent) {
         this.userId = userId;
