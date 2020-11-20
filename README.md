@@ -1,4 +1,4 @@
-# Connection secruty 10
+# Connection security 10
 
 used to build and push image (gmail)
 
