@@ -17,15 +17,15 @@ class User {
     }
 }
 users.push(new User(1, 'markus@giganten.dk', 'markus123', '123', 'markus', 'munk', 1, true));
+
 class ConSec {
     constructor(userId, refreshID, userAgent) {
         this.userId = userId;
-        this.refreshID = refreshID;
+        this.refreshId = refreshID;
         this.userAgent = userAgent;
     }
 }
 
-function overwriteConSec() {}
 function isRefreshId(refreshId) {
     for (let i = 0; i < conSecs.length; i++) {
         if (conSecs[i].refreshId == refreshId) {
@@ -114,11 +114,9 @@ server.use(express.static('html'));
 
 server.post('/checkCredentials', function (req, res) {
     let username = req.body.username;
-    console.log(username);
     let password = req.body.password;
-    console.log(password);
     let answer = isCredentialsValid(username, password);
-    console.log(answer);
+    console.log(username + 'and' + password + ' is stored: ' + answer);
     res.send(answer);
 });
 
@@ -130,10 +128,13 @@ server.post('/storeRefreshId', function (req, res) {
 
     let userId = getUserByUsername(username).userId;
     conSecs.push(new ConSec(userId, refreshId, userAgent));
+
+    console.log('stored refresh id: ' + refreshId);
+
     res.send('true');
 });
 server.post('/checkRefreshId', function (req, res) {
-    let refreshid = req.body.refreshId;
+    let refreshId = req.body.refreshId;
     let bool = isRefreshId(refreshId);
     res.send(bool.toString());
 });
@@ -141,6 +142,7 @@ server.post('/checkRefreshId', function (req, res) {
 server.post('/removeRefreshId', function (req, res) {
     let refreshId = req.body.refreshId;
     let bool = removeRefreshId(refreshId);
+    res.send(bool.toString());
 });
 server.post('/getUserAgents', function (req, res) {
     let username = req.body.username;
@@ -148,9 +150,9 @@ server.post('/getUserAgents', function (req, res) {
     let arr = getConSecsByUserId(userId);
     let userAgents = [];
     for (let i = 0; i < arr.length; i++) {
-        userAgents.push(array[i].userAgent);
+        userAgents.push({ userAgent: arr[i].userAgent, refreshId: arr[i].refreshId });
     }
-    res.send(userAgents.toString());
+    res.send(userAgents);
 });
 server.post('/getUserPayload', function (req, res) {
     let username = req.body.username;
