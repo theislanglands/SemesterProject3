@@ -33,6 +33,21 @@ spec:
                   imagePullPolicy: Always
                   ports:
                       - containerPort: 3300
+                  resources:
+                      # Requests are used to define the amount of resources the container minimally needs.
+                      # It won’t run if it can not get those resources.
+                      requests:
+                          # 10m means 10 milli CPU and it is the same as 10/1000 of a CPU core or 1% of a CPU core
+                          cpu: '10m'
+                          # 16Mi means 16 mebibyte which corresponds to 16*1024² bytes.
+                          memory: '16Mi'
+                      # Limits are used to define the maximum of resources the container is allowed to use.
+                      limits:
+                          # This means that the container is maximum allowed to use 10% of a CPU core.
+                          cpu: '100m'
+                          # The same concepts as requests. This means the container is maximum allowed to use 128Mi memory.
+                          # If the container uses more than the limit, it will get removed.
+                          memory: '128Mi'
             imagePullSecrets:
                 - name: sdugitlab
 ---
@@ -71,5 +86,20 @@ spec:
                   imagePullPolicy: Always
                   ports:
                       - containerPort: 8081
+                  resources:
+                      # Requests are used to define the amount of resources the container minimally needs.
+                      # It won’t run if it can not get those resources.
+                      requests:
+                          # 10m means 10 milli CPU and it is the same as 10/1000 of a CPU core or 1% of a CPU core
+                          cpu: '10m'
+                          # 16Mi means 16 mebibyte which corresponds to 16*1024² bytes.
+                          memory: '16Mi'
+                      # Limits are used to define the maximum of resources the container is allowed to use.
+                      limits:
+                          # This means that the container is maximum allowed to use 10% of a CPU core.
+                          cpu: '100m'
+                          # The same concepts as requests. This means the container is maximum allowed to use 128Mi memory.
+                          # If the container uses more than the limit, it will get removed.
+                          memory: '128Mi'
             imagePullSecrets:
                 - name: sdugitlab
