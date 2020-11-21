@@ -48,6 +48,21 @@ const fiveMins = 5 * 60 * 1000;
 //age of refresh token
 const oneWeek = 7 * 24 * 3600 * 1000;
 
+//routes for html inserted for testing
+app.get('/', function (req, res) {
+    res.sendFile(path.join(__dirname + '/html/index.html'));
+});
+
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname + '/html/login-page.html'));
+});
+
+app.get('/music', authenticateToken, (req, res) => {
+    res.sendFile(path.join(__dirname + '/html/music.html'));
+});
+
+app.use(express.static('html'));
+
 //options for the access token cookie
 const authCookieOptions = {
     maxAge: fiveMins,
