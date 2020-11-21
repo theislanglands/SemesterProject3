@@ -57,7 +57,8 @@ app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname + '/html/login-page.html'));
 });
 
-app.get('/music', authenticateToken, (req, res) => {
+//atempt to fix authentication on /music by inserting authenticateRefreshToken
+app.get('/music', authenticateRefreshToken, (req, res) => {
     res.sendFile(path.join(__dirname + '/html/music.html'));
 });
 
