@@ -20,7 +20,7 @@ app.use(cookieParser());
 const privateKey = fs.readFileSync('./private.key', 'utf8');
 
 //should be distributed to all services needing to verify the signature of the access token
-const publicKey = fs.readFileSync('./public.key', 'utf8');
+//const publicKey = fs.readFileSync('./public.key', 'utf8');
 
 // Access-Control-Allow-Headers... which ones? Accept removed
 app.use(function (req, res, next) {
@@ -50,16 +50,19 @@ const oneWeek = 7 * 24 * 3600 * 1000;
 
 //routes for html inserted for testing
 app.get('/', function (req, res) {
+    // eslint-disable-next-line no-undef
     res.sendFile(path.join(__dirname + '/html/index.html'));
 });
 
 app.get('/login', (req, res) => {
+    // eslint-disable-next-line no-undef
     res.sendFile(path.join(__dirname + '/html/login-page.html'));
 });
 
 // test 2
 //atempt to fix authentication on /music by inserting authenticateRefreshToken
 app.get('/music', authenticateRefreshToken, (req, res) => {
+    // eslint-disable-next-line no-undef
     res.sendFile(path.join(__dirname + '/html/music.html'));
 });
 
@@ -173,7 +176,12 @@ app.post('/auth/getUserAgents', authenticateRefreshToken, (req, res) => {
     });
 });
 
-//middleware for verifying and checking the existance of access token in db
+/**
+ * middleware for verifying and checking the existance of access token in db
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
 function authenticateRefreshToken(req, res, next) {
     const refreshToken = req.cookies.refreshcookie;
     console.log('authenticating refreshtoken: ' + refreshToken);
@@ -196,7 +204,10 @@ function authenticateRefreshToken(req, res, next) {
     });
 }
 
-//return a new signed access token
+/**
+ * return a new signed access token
+ * @param {*} userdata
+ */
 function generateAccessToken(userdata) {
     //relevant data for access token
     const data = {
@@ -208,7 +219,10 @@ function generateAccessToken(userdata) {
     console.log('payload for access token: ' + data);
     return jwt.sign(data, privateKey, { expiresIn: '5m', algorithm: 'RS256' });
 }
-
+/**
+ *
+ * @param {*} userdata
+ */
 function generateRefreshToken(userdata) {
     return jwt.sign(userdata, refreshSecret, { expiresIn: '7d' });
 }
@@ -218,8 +232,10 @@ app.listen(3300, () => {
     console.log('Connected');
 });
 
-//functions for querying database
-
+/**
+ * functions for querying database
+ * @param {*} username
+ */
 function getUserPayload(username) {
     return fetch(dbURL + '/getUserPayload', {
         // SHOULD POST TO SUBSCRIPTION TEAM DATABASE INSTEAD
@@ -247,7 +263,11 @@ function getUserPayload(username) {
             console.error('error: ', error);
         });
 }
-
+/**
+ *
+ * @param {*} username
+ * @param {*} password
+ */
 function login(username, password) {
     return fetch(dbURL + '/checkCredentials', {
         method: 'GET',
@@ -273,7 +293,12 @@ function login(username, password) {
             console.error('error: ', error);
         });
 }
-
+/**
+ *
+ * @param {*} username
+ * @param {*} refreshId
+ * @param {*} userAgent
+ */
 function storeRefreshId(username, refreshId, userAgent) {
     return fetch(dbURL + '/storeRefreshId', {
         method: 'GET',
@@ -298,9 +323,11 @@ function storeRefreshId(username, refreshId, userAgent) {
         .catch((error) => {
             console.error('error: ', error);
         });
-    return bool;
 }
-
+/**
+ *
+ * @param {*} refreshId
+ */
 function verifyRefreshId(refreshId) {
     return fetch(dbURL + '/checkRefreshId', {
         method: 'GET',
@@ -321,7 +348,10 @@ function verifyRefreshId(refreshId) {
             console.error('error: ', error);
         });
 }
-
+/**
+ *
+ * @param {*} refreshId
+ */
 function removeRefreshId(refreshId) {
     return fetch(dbURL + '/removeRefreshId', {
         method: 'GET',
@@ -342,7 +372,10 @@ function removeRefreshId(refreshId) {
         });
 }
 
-//gives a username and recieves all user-agents + refreshId, så that a user could log out other divivs currently logged in
+/**
+ * gives a username and recieves all user-agents + refreshId, så that a user could log out other divivs currently logged in
+ * @param {*} username
+ */
 function getUserAgentsAndRefreshId(username) {
     return fetch(dbURL + '/getUserAgents', {
         method: 'GET',

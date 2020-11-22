@@ -6,7 +6,7 @@
     },
     "extends": [
         "eslint:recommended",
-        "plugin:prettier/recommended",
+        "prettier",
         "prettier/flowtype",
         "prettier/react",
         "prettier/standard"
@@ -15,7 +15,19 @@
         "ecmaVersion": 2020
     },
     "rules": {
-        "prettier/prettier": "error"
+        "prettier/prettier": "error",
+        "require-jsdoc": [
+            "error",
+            {
+                "require": {
+                    "FunctionDeclaration": true,
+                    "MethodDefinition": true,
+                    "ClassDeclaration": true,
+                    "ArrowFunctionExpression": false,
+                    "FunctionExpression": false
+                }
+            }
+        ]
     },
     "plugins": ["prettier"]
 }
