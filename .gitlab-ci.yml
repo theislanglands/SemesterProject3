@@ -12,7 +12,7 @@ include:
 
 compile:
     stage: build
-    image: docker:latest
+    image: gitlab.sdu.dk:5050/semester-project-e2020/team-12-continuous-integration/resources:docker
     services:
         - docker:dind
     before_script:
@@ -27,7 +27,7 @@ compile:
 
 compile-master:
     stage: build
-    image: docker:latest
+    image: gitlab.sdu.dk:5050/semester-project-e2020/team-12-continuous-integration/resources:docker
     services:
         - docker:dind
     before_script:
