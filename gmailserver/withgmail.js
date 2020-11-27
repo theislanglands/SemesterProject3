@@ -10,7 +10,7 @@ var mailTitle = 'Reset your password';
 /* var mailHtml = `<p><b>Hello</b></p>
         <p>Here's a link, where you can reset your password: `; */
 
-var hyperlinkInEmail = 'https://localhost/gmail/reset';
+var hyperlinkInEmail = 'http://stream.stud-srv.sdu.dk/reset';
 
 var mailTitleNoti = 'Your password has been changed';
 
@@ -198,17 +198,12 @@ server.post('/forgotPass', urlencodedParser, async function (req, res) {
             );
             let bool = sendMail(mailTransporter, mailDetails);
             if (bool) {
-                res.send(JSON.stringify({ msg: 'An email has been sent to you', isSent: true }));
+                res.sendStatus(200);
             } else {
-                res.send(
-                    JSON.stringify({
-                        msg: 'An error ocuured in the server, the email wasnt able to be sent',
-                        isSent: false
-                    })
-                );
+                res.sendStatus(500);
             }
         } else {
-            res.send(JSON.stringify({ msg: 'No users have this email', isSent: false }));
+            res.sendStatus(200);
             return;
         }
     } else {
@@ -319,7 +314,8 @@ function isExpired(splitedDecryptedArr, indexOfTime, valideInMinutes) {
  * @param {*} email
  */
 function isValidUser(email) {
-    return fetch('http://usersservice:9090/isEmail', {
+    // the following uri is not right, and needs to be a fetch to the backend which contains user info about email
+    return fetch('http://redhat.stream.stud-srv.sdu.dk/isUser', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded' //,
@@ -336,7 +332,7 @@ function isValidUser(email) {
 function postNewPassword(email, password) {
     // the password and the mail will be passed with fetch to the database API
 
-    return fetch('http://usersservice:9090/changePassword', {
+    return fetch('http://redhat.stream.stud-srv.sdu.dk/newPassword', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
