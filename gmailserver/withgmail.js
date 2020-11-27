@@ -198,17 +198,12 @@ server.post('/forgotPass', urlencodedParser, async function (req, res) {
             );
             let bool = sendMail(mailTransporter, mailDetails);
             if (bool) {
-                res.send(JSON.stringify({ msg: 'An email has been sent to you', isSent: true }));
+                res.sendStatus(200);
             } else {
-                res.send(
-                    JSON.stringify({
-                        msg: 'An error ocuured in the server, the email wasnt able to be sent',
-                        isSent: false
-                    })
-                );
+                res.sendStatus(500);
             }
         } else {
-            res.send(JSON.stringify({ msg: 'No users have this email', isSent: false }));
+            res.sendStatus(200);
             return;
         }
     } else {
