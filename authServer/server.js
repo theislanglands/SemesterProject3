@@ -40,7 +40,9 @@ MJbUgqwYRpsRKhkEaq/5PCQUekpOP/QxyQbLhg63eyaMC0FGiYq36FkpQTGh41hR
 DsdwnhBovGLYR8B5LN5GtPF8bwERZhqWqYjD92sZb0Frihf6IkqZO5grgFUIJ8GE
 Imd5Dp3hkUvG2gstKjWLrw==
 `;
+// Change to db interface
 const dbURL = 'http://usersservice:9090';
+// Change to our own service url
 const serviceUrl = 'http://localhost:8080';
 //age of access token
 const fiveMins = 5 * 60 * 1000;
@@ -103,7 +105,7 @@ app.post('/auth/refresh', authenticateRefreshToken, (req, res) => {
 });
 
 //logs in the user with username and password. return a new access- and refresh token
-app.post('/auth/login', (req, res) => {
+app.post('auth/login', (req, res) => {
     //gets username, password and the requests origin device
     const username = req.body.username;
     const userAgent = req.get('user-agent');
