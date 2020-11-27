@@ -20,30 +20,28 @@ app.use(cookieParser());
 const privateKey = fs.readFileSync('./private.key', 'utf8');
 
 //should be distributed to all services needing to verify the signature of the access token
-//const publicKey = fs.readFileSync('./public.key', 'utf8');
 
 // Access-Control-Allow-Headers... which ones? Accept removed
 app.use(function (req, res, next) {
-    res.header('Access-Control-Allow-Origin', '*');
+    //Client asks, wheter this service will accept their origin. WE ACCEPT ALL ORIGINS
+    res.header('Access-Control-Allow-Origin', '*'); //shoud only accept request from the sites root domain
+    //This service only accepts request with the following headers: Origin, X-req...
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type');
+    //may the credentials be exposed/saved by the front-end/browser. e.g. cookies (necessary to save cookies)
     res.header('Access-Control-Allow-Credentials', 'true');
     next();
 });
 
 //secret for signing refresh tokens
-//should be in a secret file and
-let refreshSecret = `
-4cq9joRISzk2CFdmaAsCyf227T34ywSMvqlnaU5js53HevyYe5jjzVGdojcxtR/0
-Cl8PH1vFUdcVlLR+fBZDCDgRqY6lY4RdRx+tHDc87cwpFXBEQ5Gx1YOhCG4QNDJ5
-a3udgHqL8KZCwytPG5fjGjmOoXcAvfaFzrsg29aJ30vpYzhSdaJZpJnAbzOIv4ET
-MJbUgqwYRpsRKhkEaq/5PCQUekpOP/QxyQbLhg63eyaMC0FGiYq36FkpQTGh41hR
-DsdwnhBovGLYR8B5LN5GtPF8bwERZhqWqYjD92sZb0Frihf6IkqZO5grgFUIJ8GE
-Imd5Dp3hkUvG2gstKjWLrw==
-`;
-// Change to db interface
-const dbURL = 'http://usersservice:9090';
-// Change to our own service url
-const serviceUrl = 'http://localhost:8080';
+//should be in a secret file
+let refreshSecret = fs.readFileSync('./refreshSecret.key', 'utf8');
+//subscription db URL
+const subscriptionURL = 'http://fedora.stream.stud-srv.sdu.dk';
+//connetionSecurity URL
+const dataSecurityURL = 'http://redhat.stream.stud-srv.sdu.dk';
+//own service URL
+const serviceUrl = 'http://kubuntu.stream.stud.-srv.sdu.dk';
+
 //age of access token
 const fiveMins = 5 * 60 * 1000;
 
@@ -89,23 +87,25 @@ const refreshCookieOptions = {
 };
 
 //receives access- and refresh token, and return a new valid access token
-app.post('/auth/refresh', authenticateRefreshToken, (req, res) => {
+app.post('/refresh', authenticateRefreshToken, (req, res) => {
     //gets the userdata in the old access token and tranfers it to a new accesstoken
     const userPayload = jwt.decode(req.cookies.authcookie);
     const newAccessToken = generateAccessToken(userPayload);
-
-    //bør vi invalidere refresh token, når access token refreshes?
+    const newRefreshToken = generateRefreshToken({
+        username: userPayload.username,
+        refreshId: req.cookies.refreshId
+    });
 
     //adds the access and refresh and token as cookies to the response
     res.cookie('authcookie', newAccessToken, authCookieOptions);
-    res.cookie('refreshcookie', req.cookies.refreshcookie, refreshCookieOptions);
+    res.cookie('refreshcookie', newRefreshToken, refreshCookieOptions);
 
     console.log('successfully issued new access token: ' + newAccessToken);
     res.send();
 });
 
 //logs in the user with username and password. return a new access- and refresh token
-app.post('auth/login', (req, res) => {
+app.post('/login', (req, res) => {
     //gets username, password and the requests origin device
     const username = req.body.username;
     const userAgent = req.get('user-agent');
@@ -150,7 +150,7 @@ app.post('auth/login', (req, res) => {
 });
 
 //logs out user device.
-app.post('/auth/logout', authenticateRefreshToken, (req, res) => {
+app.post('/logout', authenticateRefreshToken, (req, res) => {
     //if body contains a refresh id, the user want to logout another device (invalidate a refresh id assoicated with another device)
     //might not be completely secure
     //should maybe use the access token instead
@@ -172,7 +172,7 @@ app.post('/auth/logout', authenticateRefreshToken, (req, res) => {
     });
 });
 
-app.post('/auth/getUserAgents', authenticateRefreshToken, (req, res) => {
+app.post('/service01/getUserAgents', authenticateRefreshToken, (req, res) => {
     getUserAgentsAndRefreshId(req.decodedRefreshToken.username).then((agentList) => {
         res.status(200).json(agentList);
     });
@@ -215,8 +215,7 @@ function generateAccessToken(userdata) {
     const data = {
         userId: userdata.userId,
         username: userdata.username,
-        subType: userdata.subType,
-        admin: userdata.admin
+        subType: userdata.subType
     };
     console.log('payload for access token: ' + data);
     return jwt.sign(data, privateKey, { expiresIn: '5m', algorithm: 'RS256' });
@@ -239,7 +238,7 @@ app.listen(3300, () => {
  * @param {*} username
  */
 function getUserPayload(username) {
-    return fetch(dbURL + '/getUserPayload', {
+    return fetch(subscriptionURL + '/getUserPayload', {
         // SHOULD POST TO SUBSCRIPTION TEAM DATABASE INSTEAD
         method: 'POST',
         headers: {
@@ -256,8 +255,7 @@ function getUserPayload(username) {
             const payload = {
                 userId: data[0],
                 username: data[1],
-                subType: data[2],
-                admin: data[3]
+                subType: data[2]
             };
             return payload;
         })
@@ -271,7 +269,7 @@ function getUserPayload(username) {
  * @param {*} password
  */
 function login(username, password) {
-    return fetch(dbURL + '/checkCredentials', {
+    return fetch(dataSecurityURL + '/login', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -302,7 +300,7 @@ function login(username, password) {
  * @param {*} userAgent
  */
 function storeRefreshId(username, refreshId, userAgent) {
-    return fetch(dbURL + '/storeRefreshId', {
+    return fetch(dataSecurityURL + '/refresh', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -331,7 +329,7 @@ function storeRefreshId(username, refreshId, userAgent) {
  * @param {*} refreshId
  */
 function verifyRefreshId(refreshId) {
-    return fetch(dbURL + '/checkRefreshId', {
+    return fetch(dataSecurityURL + '/checkrefresh', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -355,7 +353,7 @@ function verifyRefreshId(refreshId) {
  * @param {*} refreshId
  */
 function removeRefreshId(refreshId) {
-    return fetch(dbURL + '/removeRefreshId', {
+    return fetch(dataSecurityURL + '/logout', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -379,7 +377,7 @@ function removeRefreshId(refreshId) {
  * @param {*} username
  */
 function getUserAgentsAndRefreshId(username) {
-    return fetch(dbURL + '/getUserAgents', {
+    return fetch(dataSecurityURL + '/getUserAgents', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
