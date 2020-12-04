@@ -245,7 +245,7 @@ app.listen(3300, () => {
  * @param {*} username
  */
 function getUserPayload(userId) {
-    return fetch(subscriptionURL + '/getUserPayload', {
+    return fetch(subscriptionURL + '/customer/' + userId + '/get_subscription_type', {
         // SHOULD POST TO SUBSCRIPTION TEAM DATABASE INSTEAD
         method: 'POST',
         headers: {
