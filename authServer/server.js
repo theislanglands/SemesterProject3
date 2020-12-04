@@ -3,7 +3,7 @@ const app = express();
 const fetch = require('node-fetch');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
-
+require('dotenv').config({ path: '.env' });
 const path = require('path');
 
 const bodyParser = require('body-parser');
@@ -36,11 +36,11 @@ app.use(function (req, res, next) {
 //should be in a secret file
 let refreshSecret = fs.readFileSync('./refreshSecret.key', 'utf8');
 //subscription db URL
-const subscriptionURL = 'http://fedora.stream.stud-srv.sdu.dk';
+const subscriptionURL = proces.env.SUBSCRIPTION_URL;
 //connetionSecurity URL
-const dataSecurityURL = 'http://redhat.stream.stud-srv.sdu.dk';
+const dataSecurityURL = process.env.DATASECURITY_URL;
 //own service URL
-const serviceUrl = 'http://kubuntu.stream.stud.-srv.sdu.dk';
+const serviceUrl = proces.env.SERVICE_URL;
 
 //age of access token
 const fiveMins = 5 * 60 * 1000;

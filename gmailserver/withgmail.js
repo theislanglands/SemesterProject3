@@ -1,6 +1,12 @@
+require('dotenv').config({ path: '.env' });
+const nodemailer = require('nodemailer');
+const cookieparser = require('cookie-parser');
+const fetch = require('node-fetch');
+const validator = require('validator');
+const crypto = require('crypto');
 //Mail variables
-const serverEmail = 'cstgruppe10@gmail.com';
-const serverEmailPass = 'P3J2z3YLwDHe';
+const serverEmail = process.env.SERVER_EMAIL;
+const serverEmailPass = process.env.SERVER_EMAIL_PASSWORD;
 const mailService = 'gmail';
 var mailTransporter;
 var mailDetails;
@@ -8,23 +14,14 @@ var mailDetails;
 //var emailUrl;
 var mailTitle = 'Reset your password';
 
-var hyperlinkInEmail = 'http://stream.stud-srv.sdu.dk/reset';
+var hyperlinkInEmail = process.env.HYPERLINK_IN_EMAIL;
 
 var mailTitleNoti = 'Your password has been changed';
-
-const nodemailer = require('nodemailer');
-const cookieparser = require('cookie-parser');
-const fetch = require('node-fetch');
-const validator = require('validator');
-
-require('dotenv').config({ path: '.env' });
-
-const crypto = require('crypto');
 
 const algorithm = 'aes-128-gcm';
 
 const iv = crypto.randomBytes(16);
-const salt = 'foobar';
+const salt = process.env.SALT;
 const hash = crypto.createHash('sha256');
 
 hash.update(salt);
@@ -312,7 +309,7 @@ function isExpired(splitedDecryptedArr, indexOfTime, valideInMinutes) {
  */
 function isValidUser(email) {
     // the following uri is not right, and needs to be a fetch to the backend which contains user info about email
-    return fetch('http://redhat.stream.stud-srv.sdu.dk/isUser', {
+    return fetch(process.env.IS_USER, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -327,7 +324,7 @@ function isValidUser(email) {
  */
 function postNewPassword(email, password) {
     // the password and the mail will be passed with fetch to the database API
-    return fetch('http://redhat.stream.stud-srv.sdu.dk/newPassword', {
+    return fetch(process.env.POST_NEW_PASSWORD, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
