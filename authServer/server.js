@@ -250,8 +250,7 @@ function getUserPayload(userId) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
-        },
-        body: { userId: userId }
+        }
     })
         .then((res) => {
             return res.text();
