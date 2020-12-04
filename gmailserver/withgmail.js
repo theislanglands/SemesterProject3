@@ -129,9 +129,7 @@ function sendMail(mailTransporter, mailDetails) {
 const express = require('express');
 const server = express();
 const bodyparser = require('body-parser');
-//const https = require('https');
-//const stringify = require('querystring');
-//const resolve = require('path');
+
 
 // Create application/x-www-form-urlencoded parser
 //LÆS OP PÅ DETTE
@@ -141,6 +139,7 @@ var urlencodedParser = bodyparser.urlencoded({
 
 server.use(express.static('html'));
 server.use(cookieparser());
+server.use(bodyparser.json());
 /**
  *
  * @param {*} text
@@ -207,7 +206,7 @@ server.post('/forgotPass', urlencodedParser, async function (req, res) {
             return;
         }
     } else {
-        res.send(JSON.stringify({ msg: 'not a real Email', isSent: false }));
+        res.send({ msg: 'not a real Email', isSent: false });
     }
 });
 
@@ -318,10 +317,9 @@ function isValidUser(email) {
     return fetch('http://redhat.stream.stud-srv.sdu.dk/isUser', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded' //,
-            //Accept: 'text/plain'
+            'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: 'email=' + encodeURIComponent(email)
+        body: {email: email}
     }).then((res) => res.text());
 }
 /**
@@ -331,14 +329,12 @@ function isValidUser(email) {
  */
 function postNewPassword(email, password) {
     // the password and the mail will be passed with fetch to the database API
-
     return fetch('http://redhat.stream.stud-srv.sdu.dk/newPassword', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            Accept: 'text/plain'
+            'Content-Type': 'application/json',
         },
-        body: 'email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password)
+        body: {email: email, password: password}
     })
         .then((res) => res.text())
         .catch((err) => console.log(err));
