@@ -51,10 +51,14 @@ function encrypt(text) {
  */
 function decrypt(text) {
     if (typeof text == 'string') {
-        var decipher = crypto.createDecipheriv(algorithm, key, iv);
-        var decrypted = decipher.update(text, 'hex', 'utf8');
-        decrypted += decipher.final('utf8');
-        return decrypted;
+        try {
+            var decipher = crypto.createDecipheriv(algorithm, key, iv);
+            var decrypted = decipher.update(text, 'hex', 'utf8');
+            decrypted += decipher.final('utf8');
+            return decrypted;
+        } catch (error) {
+            console.log('something went wrong');
+        }
     } else {
         console.log("The parameter wasn't a string, try agian");
     }
@@ -124,7 +128,6 @@ function sendMail(mailTransporter, mailDetails) {
 const express = require('express');
 const server = express();
 const bodyparser = require('body-parser');
-
 
 // Create application/x-www-form-urlencoded parser
 //LÆS OP PÅ DETTE
@@ -314,7 +317,7 @@ function isValidUser(email) {
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: {email: email}
+        body: { email: email }
     }).then((res) => res.text());
 }
 /**
@@ -327,9 +330,9 @@ function postNewPassword(email, password) {
     return fetch('http://redhat.stream.stud-srv.sdu.dk/newPassword', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
         },
-        body: {email: email, password: password}
+        body: { email: email, password: password }
     })
         .then((res) => res.text())
         .catch((err) => console.log(err));
