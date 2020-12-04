@@ -36,11 +36,11 @@ app.use(function (req, res, next) {
 //should be in a secret file
 let refreshSecret = fs.readFileSync('./refreshSecret.key', 'utf8');
 //subscription db URL
-const subscriptionURL = proces.env.SUBSCRIPTION_URL;
+const subscriptionURL = process.env.SUBSCRIPTION_URL;
 //connetionSecurity URL
 const dataSecurityURL = process.env.DATASECURITY_URL;
 //own service URL
-const serviceUrl = proces.env.SERVICE_URL;
+const serviceUrl = process.env.SERVICE_URL;
 
 //age of access token
 const fiveMins = 5 * 60 * 1000;
