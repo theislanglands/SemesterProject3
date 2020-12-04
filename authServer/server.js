@@ -270,17 +270,12 @@ function getUserPayload(username) {
  */
 function login(username, password) {
     return fetch(dataSecurityURL + '/login', {
-        method: 'GET',
+        method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/json',
             Accept: 'text/plain'
         },
-        body:
-            'username=' +
-            encodeURIComponent(username) +
-            '&' +
-            'password=' +
-            encodeURIComponent(password)
+        body: { username: username, password: password }
     })
         .then((res) => {
             return res.text();
@@ -301,18 +296,12 @@ function login(username, password) {
  */
 function storeRefreshId(username, refreshId, userAgent) {
     return fetch(dataSecurityURL + '/refresh', {
-        method: 'GET',
+        method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/json',
             Accept: 'text/plain'
         },
-        body:
-            'username=' +
-            encodeURIComponent(username) +
-            '&refreshId=' +
-            encodeURIComponent(refreshId) +
-            '&userAgent=' +
-            encodeURIComponent(userAgent)
+        body: { username: username, refreshId: refreshId, userAgent: userAgent }
     })
         .then((res) => {
             return res.text();
@@ -330,12 +319,12 @@ function storeRefreshId(username, refreshId, userAgent) {
  */
 function verifyRefreshId(refreshId) {
     return fetch(dataSecurityURL + '/checkrefresh', {
-        method: 'GET',
+        method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/json',
             Accept: 'text/plain'
         },
-        body: 'refreshId=' + encodeURIComponent(refreshId)
+        body: { refreshId: refreshId }
     })
         .then((res) => {
             return res.text();
@@ -354,12 +343,12 @@ function verifyRefreshId(refreshId) {
  */
 function removeRefreshId(refreshId) {
     return fetch(dataSecurityURL + '/logout', {
-        method: 'GET',
+        method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/json',
             Accept: 'text/plain'
         },
-        body: 'refreshId=' + encodeURIComponent(refreshId)
+        body: { refreshId: refreshId }
     })
         .then((res) => {
             return res.text();
@@ -378,12 +367,12 @@ function removeRefreshId(refreshId) {
  */
 function getUserAgentsAndRefreshId(username) {
     return fetch(dataSecurityURL + '/getUserAgents', {
-        method: 'GET',
+        method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/json',
             Accept: 'text/plain'
         },
-        body: 'username=' + encodeURIComponent(username)
+        body: { username: username }
     })
         .then((res) => {
             return res.text();
