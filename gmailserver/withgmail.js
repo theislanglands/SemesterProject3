@@ -7,15 +7,11 @@ var mailDetails;
 //var endEmail;
 //var emailUrl;
 var mailTitle = 'Reset your password';
-/* var mailHtml = `<p><b>Hello</b></p>
-        <p>Here's a link, where you can reset your password: `; */
 
 var hyperlinkInEmail = 'http://stream.stud-srv.sdu.dk/reset';
 
 var mailTitleNoti = 'Your password has been changed';
 
-//var mailHtmlNoti = `<p><b>Hello</b></p>
-//  <p>Your email has been changed. If you did not now about this change we strongly advise you to change your password immediately!</p>`;
 const nodemailer = require('nodemailer');
 const cookieparser = require('cookie-parser');
 const fetch = require('node-fetch');
@@ -24,7 +20,6 @@ const validator = require('validator');
 require('dotenv').config({ path: '.env' });
 
 const crypto = require('crypto');
-//const secret = 'ælaksndfkajsndflkabsdflhb';
 
 const algorithm = 'aes-128-cbc';
 
