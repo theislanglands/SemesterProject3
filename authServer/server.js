@@ -114,32 +114,39 @@ app.post('/login', (req, res) => {
     //checks the existence of the credentials in the db
     login(username, password).then((bool1) => {
         if (bool1) {
-            console.log('logged in as: ' + username + ' from device: ' + userAgent);
+            getUserId(username).then((userId) => {
+                console.log('logged in as: ' + username + ' from device: ' + userAgent);
 
-            //get userId, username, subscription mode(int), admin (bool)
-            getUserPayload(username).then((payload) => {
-                //genereates new refresh id
-                const refreshId = uuidv4();
+                //get userId, username, subscription mode(int), admin (bool)
+                getUserPayload(userId).then((subType) => {
+                    //genereates new refresh id
+                    const refreshId = uuidv4();
 
-                //stores the refreesh id persistent in DB
-                storeRefreshId(username, refreshId, userAgent).then((bool) => {
-                    //should always be true
-                    if (bool) {
-                        //issue access token with payload
-                        const accesstoken = generateAccessToken(payload);
-                        const refreshToken = generateRefreshToken({
-                            username: payload.username,
-                            refreshId: refreshId
-                        });
+                    //stores the refreesh id persistent in DB
+                    storeRefreshId(username, refreshId, userAgent).then((bool) => {
+                        //should always be true
+                        if (bool) {
+                            //issue access token with payload
+                            const payload = {
+                                subType: subType,
+                                username: username,
+                                userId: userId
+                            };
+                            const accesstoken = generateAccessToken(payload);
+                            const refreshToken = generateRefreshToken({
+                                username: username,
+                                refreshId: refreshId
+                            });
 
-                        //add the tokens as cookie in the response
-                        res.cookie('authcookie', accesstoken, authCookieOptions);
-                        res.cookie('refreshcookie', refreshToken, refreshCookieOptions);
-                        res.send();
-                    } else {
-                        //somewting went wrong in the db, and the refresh id could not be stored
-                        console.log('could not store refresh id');
-                    }
+                            //add the tokens as cookie in the response
+                            res.cookie('authcookie', accesstoken, authCookieOptions);
+                            res.cookie('refreshcookie', refreshToken, refreshCookieOptions);
+                            res.send();
+                        } else {
+                            //somewting went wrong in the db, and the refresh id could not be stored
+                            console.log('could not store refresh id');
+                        }
+                    });
                 });
             });
         } else {
@@ -237,27 +244,45 @@ app.listen(3300, () => {
  * functions for querying database
  * @param {*} username
  */
-function getUserPayload(username) {
+function getUserPayload(userId) {
     return fetch(subscriptionURL + '/getUserPayload', {
         // SHOULD POST TO SUBSCRIPTION TEAM DATABASE INSTEAD
         method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            Accept: 'text/plain'
+            'Content-Type': 'application/json'
         },
-        body: 'username=' + encodeURIComponent(username)
+        body: { userId: userId }
     })
         .then((res) => {
             return res.text();
         })
         .then((data) => {
             data = JSON.parse(data);
-            const payload = {
-                userId: data[0],
-                username: data[1],
-                subType: data[2]
-            };
-            return payload;
+            return data.body.subType;
+        })
+        .catch((error) => {
+            console.error('error: ', error);
+        });
+}
+/**
+ *
+ * @param {*} username
+ */
+function getUserId(username) {
+    return fetch(dataSecurityURL + '/getUserId', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'text/plain'
+        },
+        body: { username: username }
+    })
+        .then((res) => {
+            return res.text();
+        })
+        .then((data) => {
+            console.log(data);
+            return data;
         })
         .catch((error) => {
             console.error('error: ', error);
