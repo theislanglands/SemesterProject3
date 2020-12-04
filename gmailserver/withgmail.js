@@ -21,15 +21,15 @@ require('dotenv').config({ path: '.env' });
 
 const crypto = require('crypto');
 
-const algorithm = 'aes-128-cbc';
+const algorithm = 'aes-128-gcm';
 
 const iv = crypto.randomBytes(16);
 const salt = 'foobar';
-const hash = crypto.createHash('sha1');
+const hash = crypto.createHash('sha256');
 
 hash.update(salt);
 
-let key = hash.digest().slice(0, 16);
+const key = hash.digest().slice(0, 16);
 
 /**
  *
