@@ -200,6 +200,7 @@ server.post('/forgotPass', urlencodedParser, async function (req, res) {
                 res.sendStatus(500);
             }
         } else {
+            res.send('Failed to send email');
             res.sendStatus(200);
             return;
         }
@@ -259,7 +260,7 @@ server.post('/resetPassword_form', urlencodedParser, async function (req, res) {
     decodedMail = validator.escape(decodedMail);
     if (decodedMail === undefined) {
         console.log('an error ocurred on decryption');
-        res.sendStatus(500);
+        res.sendStatus(404);
         return;
     }
     //mailen er stadig encoded
@@ -267,7 +268,7 @@ server.post('/resetPassword_form', urlencodedParser, async function (req, res) {
     let password = req.body.password;
     if (password === undefined) {
         console.log('server didnt receive the password');
-        res.sendStatus(406);
+        res.sendStatus(404);
         return;
     }
 
