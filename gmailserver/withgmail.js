@@ -195,12 +195,13 @@ server.post('/forgotPass', urlencodedParser, async function (req, res) {
             );
             let bool = sendMail(mailTransporter, mailDetails);
             if (bool) {
-                res.sendStatus(200);
+                res.send({ msg: 'Email is send', isSent: true });
+                res.statusCode(200);
             } else {
                 res.sendStatus(500);
             }
         } else {
-            res.send('Failed to send email');
+            res.send({ msg: 'Failed to send email', isSent: false });
             res.statusCode(200);
             return;
         }
