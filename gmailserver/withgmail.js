@@ -200,8 +200,8 @@ server.post('/forgotPass', urlencodedParser, async function (req, res) {
                 res.sendStatus(500);
             }
         } else {
+            res.statusCode(200);
             res.send('Failed to send email');
-            res.sendStatus(200);
             return;
         }
     } else {
