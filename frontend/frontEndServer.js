@@ -14,7 +14,6 @@ server.get('/forgotPass', (req, res) => {
 server.get('/forgotPass.js', (req, res) => {
     res.sendFile(__dirname + '/html/forgot/forgotPass.js');
 });
-
 server.get('/reset', (req, res) => {
     res.sendFile(__dirname + '/html/forgot/resetPassword.html');
 });
