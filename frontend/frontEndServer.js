@@ -20,4 +20,6 @@ server.get('/reset', (req, res) => {
 server.get('/resetPassFront.js', (req, res) => {
     res.sendFile(__dirname + 'html/forgot/resetPassFront.js');
 });
-server.listen(8090);
+server.listen(8090, () => {
+    console.log('frontend listening on 8090');
+});

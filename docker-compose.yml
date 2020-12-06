@@ -32,3 +32,9 @@ services:
             context: ./UsersAPI/
         expose:
             - '9090'
+
+    frontend:
+        build:
+            context: ./frontend/
+        expose:
+            - '8090'
