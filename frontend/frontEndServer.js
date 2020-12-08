@@ -21,9 +21,12 @@ server.get('/reset', async (req, res) => {
     let params = url.split('?')[1];
     console.log(params);
     if (params != undefined) {
-        let bool = await isValidURL(params);
-        if (bool) {
-            //res.sendFile(__dirname + '/html/forgot/resetPassword.html');
+        let response = await isValidURL(params);
+        if (response.valid) {
+            res.cookie(response.cookie.name, response.cookie.value, {
+                maxAge: response.cookie.maxAge
+            });
+            res.sendFile(__dirname + '/html/forgot/resetPassword.html');
         } else {
             res.send('not authorized');
         }
@@ -43,5 +46,5 @@ async function isValidURL(params) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ params: params })
-    }).then((res) => res.text());
+    }).then((res) => res.json());
 }

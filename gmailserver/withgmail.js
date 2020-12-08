@@ -18,12 +18,13 @@ var hyperlinkInEmail = process.env.HYPERLINK_IN_EMAIL_MOCKUP;
 
 var mailTitleNoti = 'Your password has been changed';
 
-const algorithm = 'aes-128-gcm';
+const algorithm = 'aes-128-cbc';
 
 const salt = process.env.SALT;
 const hash = crypto.createHash('sha256');
 
 hash.update(salt);
+const iv = crypto.randomBytes(16);
 
 const key = hash.digest().slice(0, 16);
 
@@ -33,13 +34,10 @@ const key = hash.digest().slice(0, 16);
  */
 function encrypt(text) {
     if (typeof text == 'string') {
-        const iv = crypto.randomBytes(16);
         var cipher = crypto.createCipheriv(algorithm, key, iv);
         var encrypted = cipher.update(text, 'utf8', 'hex');
         encrypted += cipher.final('hex');
-        console.log('authtag: ' + typeof cipher.getAuthTag());
-        console.log('iv: ' + typeof iv);
-        return [encrypted, iv, cipher.getAuthTag()];
+        return encrypted;
     } else {
         console.log("The parameter wasn't a string, try agian");
     }
@@ -192,7 +190,7 @@ server.post('/forgotPass', urlencodedParser, async function (req, res) {
             mailDetails = createMailDetails(
                 serverEmail,
                 endEmail,
-                hyperlinkInEmail + '?' + encrypted[0] + '?' + encrypted[1] + '?' + encrypted[2]
+                hyperlinkInEmail + '?' + encrypted
             );
             let bool = sendMail(mailTransporter, mailDetails);
             if (bool) {
@@ -211,42 +209,39 @@ server.post('/forgotPass', urlencodedParser, async function (req, res) {
 
 server.post('/reset', urlencodedParser, function (req, res) {
     let params = req.body.params;
-    console.log(typeof params);
-    console.log(params);
     if (params !== undefined) {
         let clear = decode(decrypt(params));
-        console.log(clear);
         let email;
         let splitedClear;
         if (clear !== undefined) {
             splitedClear = clear.split('?');
             email = validator.escape(splitedClear[0]);
         } else {
-            res.send(false);
+            res.json({ valid: false });
             return;
         }
         //kald database om email eksisterer
         let encryptedEmail = encrypt(encode(email));
         if (encryptedEmail !== undefined) {
             if (isExpired(splitedClear, 1, 1)) {
-                res.cookie('mailtoken', encryptedEmail, {
-                    maxAge: 900000
+                res.json({
+                    valid: true,
+                    cookie: { name: 'mailtoken', value: encryptedEmail, maxAge: 900000 }
                 });
-                res.send(true);
                 console.log('A user has used the link, sent in the email');
             } else {
                 console.log('The link was expired');
-                res.send(false);
+                res.json({ valid: false });
                 return;
             }
         } else {
             console.log('An encryption error occured');
-            res.send(false);
+            res.json({ valid: false });
             return;
         }
     } else {
         console.log('there was no parameters in the get request to /reset');
-        res.send(false);
+        res.json({ valid: false });
         return;
     }
 });

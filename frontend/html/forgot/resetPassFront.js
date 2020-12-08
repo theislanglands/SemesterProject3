@@ -5,7 +5,7 @@ window.onload = () => {
     var div = document.getElementById('response');
     var msg = '';
     btn.addEventListener('click', function () {
-        const sendUrl = 'https://localhost/gmail/resetPassword_form?';
+        const sendUrl = 'https://localhost/gmail/resetPassword_form';
         const specs = {
             method: 'POST',
             headers: {
