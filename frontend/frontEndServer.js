@@ -15,7 +15,7 @@ server.get('/reset', async (req, res) => {
                 maxAge: response.cookie.maxAge
             });
             // eslint-disable-next-line no-undef
-            res.redirect(301, 'https://localhost/html/forgot/resetPassword.html');
+            res.redirect(301, 'https://localhost/forgot/resetPassword.html');
         } else {
             res.send('not authorized');
         }
