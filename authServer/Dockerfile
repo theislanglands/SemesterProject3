@@ -1,8 +1,8 @@
-FROM node:12-alpine
+FROM node:latest
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm install -y
 
 # Bundles app source
 COPY . .

@@ -5,7 +5,9 @@ const fetch = require('node-fetch');
 const validator = require('validator');
 const crypto = require('crypto');
 //Mail variables
+// eslint-disable-next-line no-undef
 const serverEmail = process.env.SERVER_EMAIL;
+// eslint-disable-next-line no-undef
 const serverEmailPass = process.env.SERVER_EMAIL_PASSWORD;
 const mailService = 'gmail';
 var mailTransporter;
@@ -14,17 +16,19 @@ var mailDetails;
 //var emailUrl;
 var mailTitle = 'Reset your password';
 
-var hyperlinkInEmail = process.env.HYPERLINK_IN_EMAIL;
+// eslint-disable-next-line no-undef
+var hyperlinkInEmail = process.env.HYPERLINK_IN_EMAIL_MOCKUP;
 
 var mailTitleNoti = 'Your password has been changed';
 
-const algorithm = 'aes-128-gcm';
+const algorithm = 'aes-128-cbc';
 
-const iv = crypto.randomBytes(16);
+// eslint-disable-next-line no-undef
 const salt = process.env.SALT;
 const hash = crypto.createHash('sha256');
 
 hash.update(salt);
+const iv = crypto.randomBytes(16);
 
 const key = hash.digest().slice(0, 16);
 
@@ -47,6 +51,7 @@ function encrypt(text) {
  * @param {*} text
  */
 function decrypt(text) {
+    console.log(typeof text);
     if (typeof text == 'string') {
         try {
             var decipher = crypto.createDecipheriv(algorithm, key, iv);
@@ -54,7 +59,7 @@ function decrypt(text) {
             decrypted += decipher.final('utf8');
             return decrypted;
         } catch (error) {
-            console.log('something went wrong');
+            console.log(error);
         }
     } else {
         console.log("The parameter wasn't a string, try agian");
@@ -129,7 +134,7 @@ const bodyparser = require('body-parser');
 // Create application/x-www-form-urlencoded parser
 //LÆS OP PÅ DETTE
 var urlencodedParser = bodyparser.urlencoded({
-    extended: false
+    extended: true
 });
 
 server.use(express.static('html'));
@@ -166,6 +171,7 @@ function decode(text) {
 
 server.post('/forgotPass', urlencodedParser, async function (req, res) {
     let endEmail = validator.escape(req.body.email);
+    console.log(endEmail);
     if (validator.isEmail(endEmail)) {
         var bool = await isValidUser(endEmail);
         console.log(bool);
@@ -205,43 +211,41 @@ server.post('/forgotPass', urlencodedParser, async function (req, res) {
     }
 });
 
-server.get('/reset', urlencodedParser, function (req, res) {
-    let url = req.url;
-    let encryptedString = url.split('?')[1];
-    if (encryptedString !== undefined) {
-        let clear = decode(decrypt(encryptedString));
+server.post('/reset', urlencodedParser, function (req, res) {
+    let params = req.body.params;
+    if (params !== undefined) {
+        let clear = decode(decrypt(params));
         let email;
         let splitedClear;
         if (clear !== undefined) {
             splitedClear = clear.split('?');
             email = validator.escape(splitedClear[0]);
         } else {
-            res.sendStatus(406);
+            res.json({ valid: false });
             return;
         }
         //kald database om email eksisterer
         let encryptedEmail = encrypt(encode(email));
         if (encryptedEmail !== undefined) {
             if (isExpired(splitedClear, 1, 1)) {
-                res.cookie('mailtoken', encryptedEmail, {
-                    maxAge: 900000
+                res.json({
+                    valid: true,
+                    cookie: { name: 'mailtoken', value: encryptedEmail, maxAge: 900000 }
                 });
-                // eslint-disable-next-line no-undef
-                res.sendFile(__dirname + '/html/resetPassword.html');
                 console.log('A user has used the link, sent in the email');
             } else {
                 console.log('The link was expired');
-                res.sendStatus(404);
+                res.json({ valid: false });
                 return;
             }
         } else {
             console.log('An encryption error occured');
-            res.sendStatus(404);
+            res.json({ valid: false });
             return;
         }
     } else {
         console.log('there was no parameters in the get request to /reset');
-        res.sendStatus(404);
+        res.json({ valid: false });
         return;
     }
 });
@@ -309,12 +313,13 @@ function isExpired(splitedDecryptedArr, indexOfTime, valideInMinutes) {
  */
 function isValidUser(email) {
     // the following uri is not right, and needs to be a fetch to the backend which contains user info about email
-    return fetch(process.env.IS_USER, {
+    // eslint-disable-next-line no-undef
+    return fetch(process.env.IS_USER_MOCKUP, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
+            'Content-Type': 'application/json'
         },
-        body: { email: email }
+        body: JSON.stringify({ email: email })
     }).then((res) => res.text());
 }
 /**
@@ -324,7 +329,8 @@ function isValidUser(email) {
  */
 function postNewPassword(email, password) {
     // the password and the mail will be passed with fetch to the database API
-    return fetch(process.env.POST_NEW_PASSWORD, {
+    // eslint-disable-next-line no-undef
+    return fetch(process.env.POST_NEW_PASSWORD_MOCKUP, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
