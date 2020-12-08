@@ -1,9 +1,11 @@
+// eslint-disable-next-line no-unused-vars
 window.addEventListener('load', (event) => {
     var button = document.getElementById('submit');
     var div = document.getElementById('response');
     var msg = '';
     button.addEventListener('click', function () {
         var input = document.getElementById('email');
+        // eslint-disable-next-line no-unused-vars
         let response = fetch('https://localhost/gmail/forgotPass', {
             method: 'POST',
             headers: {
@@ -21,6 +23,7 @@ window.addEventListener('load', (event) => {
                 input.value = '';
                 input.disabled = data.isSent;
             })
+            // eslint-disable-next-line no-unused-vars
             .catch((error) => {
                 console.log('some error happened');
             });

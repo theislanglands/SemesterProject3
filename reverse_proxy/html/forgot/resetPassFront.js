@@ -3,6 +3,7 @@ window.onload = () => {
     var pass = document.getElementById('password');
     var confPass = document.getElementById('confirmPassword');
     var div = document.getElementById('response');
+    // eslint-disable-next-line no-unused-vars
     var msg = '';
     btn.addEventListener('click', function () {
         const sendUrl = 'https://localhost/gmail/resetPassword_form';
