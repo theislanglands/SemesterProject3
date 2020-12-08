@@ -3,18 +3,6 @@ const server = express();
 const validator = require('validator');
 const fetch = require('node-fetch');
 
-server.get('/', (req, res) => {
-    res.sendFile(__dirname + '/html/index.html');
-});
-server.get('/login', (req, res) => {
-    res.sendFile(__dirname + '/html/login/login-page.html');
-});
-server.get('/forgotPass', (req, res) => {
-    res.sendFile(__dirname + '/html/forgot/forgotPasword-page.html');
-});
-server.get('/forgotPass.js', (req, res) => {
-    res.sendFile(__dirname + '/html/forgot/forgotPass.js');
-});
 server.get('/reset', async (req, res) => {
     let url = req.url;
     url = validator.escape(url);
@@ -31,9 +19,6 @@ server.get('/reset', async (req, res) => {
             res.send('not authorized');
         }
     }
-});
-server.get('/resetPassFront.js', (req, res) => {
-    res.sendFile(__dirname + '/html/forgot/resetPassFront.js');
 });
 server.listen(8090, () => {
     console.log('frontend listening on 8090');
