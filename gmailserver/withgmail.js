@@ -5,7 +5,9 @@ const fetch = require('node-fetch');
 const validator = require('validator');
 const crypto = require('crypto');
 //Mail variables
+// eslint-disable-next-line no-undef
 const serverEmail = process.env.SERVER_EMAIL;
+// eslint-disable-next-line no-undef
 const serverEmailPass = process.env.SERVER_EMAIL_PASSWORD;
 const mailService = 'gmail';
 var mailTransporter;
@@ -14,12 +16,14 @@ var mailDetails;
 //var emailUrl;
 var mailTitle = 'Reset your password';
 
+// eslint-disable-next-line no-undef
 var hyperlinkInEmail = process.env.HYPERLINK_IN_EMAIL_MOCKUP;
 
 var mailTitleNoti = 'Your password has been changed';
 
 const algorithm = 'aes-128-cbc';
 
+// eslint-disable-next-line no-undef
 const salt = process.env.SALT;
 const hash = crypto.createHash('sha256');
 
@@ -309,6 +313,7 @@ function isExpired(splitedDecryptedArr, indexOfTime, valideInMinutes) {
  */
 function isValidUser(email) {
     // the following uri is not right, and needs to be a fetch to the backend which contains user info about email
+    // eslint-disable-next-line no-undef
     return fetch(process.env.IS_USER_MOCKUP, {
         method: 'POST',
         headers: {
@@ -324,6 +329,7 @@ function isValidUser(email) {
  */
 function postNewPassword(email, password) {
     // the password and the mail will be passed with fetch to the database API
+    // eslint-disable-next-line no-undef
     return fetch(process.env.POST_NEW_PASSWORD_MOCKUP, {
         method: 'POST',
         headers: {

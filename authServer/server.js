@@ -36,10 +36,13 @@ app.use(function (req, res, next) {
 //should be in a secret file
 let refreshSecret = fs.readFileSync('./refreshSecret.key', 'utf8');
 //subscription db URL
+// eslint-disable-next-line no-undef
 const subscriptionURL = process.env.SUBSCRIPTION_URL;
 //connetionSecurity URL
+// eslint-disable-next-line no-undef
 const dataSecurityURL = process.env.DATASECURITY_URL;
 //own service URL
+// eslint-disable-next-line no-undef
 const serviceUrl = process.env.SERVICE_URL;
 
 //age of access token

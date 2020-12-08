@@ -14,6 +14,7 @@ server.get('/reset', async (req, res) => {
             res.cookie(response.cookie.name, response.cookie.value, {
                 maxAge: response.cookie.maxAge
             });
+            // eslint-disable-next-line no-undef
             res.sendFile(__dirname + '/html/forgot/resetPassword.html');
         } else {
             res.send('not authorized');
@@ -24,6 +25,10 @@ server.listen(8090, () => {
     console.log('frontend listening on 8090');
 });
 
+/**
+ *
+ * @param {*} params
+ */
 async function isValidURL(params) {
     return fetch('http://gmailservice:8081/reset', {
         method: 'POST',

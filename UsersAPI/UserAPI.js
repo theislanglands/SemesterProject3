@@ -1,7 +1,10 @@
 var users = [];
 
 var conSecs = [];
+
+// eslint-disable-next-line require-jsdoc
 class User {
+    // eslint-disable-next-line require-jsdoc
     constructor(userId, email, username, password, fName, lName, subType, admin) {
         this.userId = userId;
         this.email = email;
@@ -12,13 +15,16 @@ class User {
         this.subType = subType;
         this.admin = admin;
     }
+    // eslint-disable-next-line require-jsdoc
     changePassword(newPassword) {
         this.password = newPassword;
     }
 }
 users.push(new User(1, 'markusmunks@gmail.com', 'markus123', '123', 'markus', 'munk', 1, true));
 users.push(new User(1, 'kontakt@ardit.dk', 'markus123', '123', 'markus', 'munk', 1, true));
+// eslint-disable-next-line require-jsdoc
 class ConSec {
+    // eslint-disable-next-line require-jsdoc
     constructor(userId, refreshID, userAgent) {
         this.userId = userId;
         this.refreshId = refreshID;
@@ -26,6 +32,10 @@ class ConSec {
     }
 }
 
+/**
+ *
+ * @param {*} refreshId
+ */
 function isRefreshId(refreshId) {
     for (let i = 0; i < conSecs.length; i++) {
         if (conSecs[i].refreshId == refreshId) {
@@ -34,6 +44,11 @@ function isRefreshId(refreshId) {
     }
     return false;
 }
+/**
+ *
+ * @param {*} arr
+ * @param {*} value
+ */
 function removeItem(arr, value) {
     var index = arr.indexOf(value);
     if (index > -1) {
@@ -41,19 +56,34 @@ function removeItem(arr, value) {
     }
     return arr;
 }
+/**
+ *
+ * @param {*} refreshId
+ */
 function removeRefreshId(refreshId) {
     conSecs = removeItem(conSecs, getConSecByRefreshId(refreshId));
     return true;
 }
+/**
+ *
+ * @param {*} userId
+ */
 function getConSecsByUserId(userId) {
+    // eslint-disable-next-line no-undef
     arr = [];
     for (let i = 0; i < conSecs.length; i++) {
         if (conSecs[i].userId == userId) {
+            // eslint-disable-next-line no-undef
             arr.push(conSecs[i]);
         }
     }
+    // eslint-disable-next-line no-undef
     return arr;
 }
+/**
+ *
+ * @param {*} refreshId
+ */
 function getConSecByRefreshId(refreshId) {
     for (let i = 0; i < conSecs.length; i++) {
         if ((conSecs[i].refreshID = refreshId)) {
@@ -61,6 +91,10 @@ function getConSecByRefreshId(refreshId) {
         }
     }
 }
+/**
+ *
+ * @param {*} email
+ */
 function getUserFromEmail(email) {
     for (let i = 0; i < users.length; i++) {
         if (users[i].email == email) {
@@ -68,13 +102,21 @@ function getUserFromEmail(email) {
         }
     }
 }
-function getUserByUserId(userId) {
+/**
+ *
+ * @param {*} userId
+ */
+/* function getUserByUserId(userId) {
     for (let i = 0; i < users.length; i++) {
         if (users[i].userId == userId) {
             return users[i];
         }
     }
-}
+} */
+/**
+ *
+ * @param {*} username
+ */
 function getUserByUsername(username) {
     for (let i = 0; i < users.length; i++) {
         if (users[i].username == username) {
@@ -82,6 +124,11 @@ function getUserByUsername(username) {
         }
     }
 }
+/**
+ *
+ * @param {*} email
+ * @param {*} password
+ */
 function changePassword(email, password) {
     for (let i = 0; i < users.length; i++) {
         if (users[i].email == email) {
@@ -91,8 +138,17 @@ function changePassword(email, password) {
     }
     return false;
 }
-function deleteUser(user) {}
+/**
+ *
+ * @param {*} user
+ */
+/* function deleteUser(user) {} */
 
+/**
+ *
+ * @param {*} username
+ * @param {*} password
+ */
 function isCredentialsValid(username, password) {
     let user = getUserByUsername(username);
     if (user === undefined) {
@@ -105,7 +161,6 @@ function isCredentialsValid(username, password) {
     }
 }
 const express = require('express');
-const { pathToFileURL } = require('url');
 const server = express();
 const bodyParser = require('body-parser');
 server.use(bodyParser.json());
