@@ -51,7 +51,6 @@ function encrypt(text) {
  * @param {*} text
  */
 function decrypt(text) {
-    console.log(typeof text);
     if (typeof text == 'string') {
         try {
             var decipher = crypto.createDecipheriv(algorithm, key, iv);
@@ -119,9 +118,6 @@ function sendMail(mailTransporter, mailDetails) {
         } else {
             console.log('Email sent successfully');
         }
-        if (data.messageTime != 0) {
-            console.log('it worked');
-        }
     });
     return true;
 }
@@ -171,10 +167,8 @@ function decode(text) {
 
 server.post('/forgotPass', urlencodedParser, async function (req, res) {
     let endEmail = validator.escape(req.body.email);
-    console.log(endEmail);
     if (validator.isEmail(endEmail)) {
         var bool = await isValidUser(endEmail);
-        console.log(bool);
         if (bool === 'true') {
             mailTransporter = createMailTransporter(mailService, serverEmail, serverEmailPass);
             let date = new Date();
@@ -335,7 +329,7 @@ function postNewPassword(email, password) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: { email: email, password: password }
+        body: JSON.stringify({ email: email, password: password })
     })
         .then((res) => res.text())
         .catch((err) => console.log(err));

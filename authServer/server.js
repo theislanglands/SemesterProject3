@@ -76,7 +76,7 @@ const authCookieOptions = {
     maxAge: fiveMins,
     httpOnly: false,
     secure: true,
-    sameSite: 'lax',
+    sameSite: 'lax'
     //domain: serviceUrl
 };
 
@@ -85,7 +85,7 @@ const refreshCookieOptions = {
     maxAge: oneWeek,
     httpOnly: true,
     secure: true, //kun midlertidig
-    sameSite: 'lax',
+    sameSite: 'lax'
     //domain: serviceUrl
 };
 
@@ -94,40 +94,37 @@ app.post('/refresh', authenticateRefreshToken, (req, res) => {
     //gets the userdata in the old access token and tranfers it to a new accesstoken
     const userPayload = jwt.decode(req.cookies.authcookie);
 
-     //used to store new refresh id in data security db, so than whenever the refresh id is verified in db, we store a new one and deletes the old refresh id
-     const email = userPayload.email;
-     const userAgent = req.get('user-agent');
-     const newRefreshId = uuidv4();
+    //used to store new refresh id in data security db, so than whenever the refresh id is verified in db, we store a new one and deletes the old refresh id
+    const email = userPayload.email;
+    const userAgent = req.get('user-agent');
+    const newRefreshId = uuidv4();
 
     const newAccessToken = generateAccessToken(userPayload);
     const newRefreshToken = generateRefreshToken({
         username: userPayload.username,
         refreshId: newRefreshId
     });
-    removeRefreshId(req.decodedRefreshToken.refreshId).then(bool=> {
-        if(bool){
-            storeRefreshId(email,newRefreshId, userAgent).then(bool => {
-                if(bool){
-                //adds the access and refresh and token as cookies to the response
-                res.cookie('authcookie', newAccessToken, authCookieOptions);
-                res.cookie('refreshcookie', newRefreshToken, refreshCookieOptions);
-                console.log('successfully issued new access token: ' + newAccessToken);
-                res.send();
+    removeRefreshId(req.decodedRefreshToken.refreshId).then((bool) => {
+        if (bool) {
+            storeRefreshId(email, newRefreshId, userAgent).then((bool) => {
+                if (bool) {
+                    //adds the access and refresh and token as cookies to the response
+                    res.cookie('authcookie', newAccessToken, authCookieOptions);
+                    res.cookie('refreshcookie', newRefreshToken, refreshCookieOptions);
+                    console.log('successfully issued new access token: ' + newAccessToken);
+                    res.send();
                 } else {
                     res.status(403).send('refresh id could not be stored succesfully');
                 }
             });
         } else {
-            res.status(403).send('old refesh id, could not be removed from db succesfully. ')
+            res.status(403).send('old refesh id, could not be removed from db succesfully. ');
         }
     });
-   
-    
 });
 
 //logs in the user with username and password. return a new access- and refresh token
 app.post('/login', (req, res) => {
-    console.log('reached login endpoint')
     //gets email, password and the requests origin device
     const email = req.body.email;
     const userAgent = req.get('user-agent');
@@ -163,7 +160,9 @@ app.post('/login', (req, res) => {
                             //add the tokens as cookie in the response
                             res.cookie('authcookie', accesstoken, authCookieOptions);
                             res.cookie('refreshcookie', refreshToken, refreshCookieOptions);
-                            res.send('succesfully logged in, and recieved auth + refresh token as cookies');
+                            res.send(
+                                'succesfully logged in, and recieved auth + refresh token as cookies'
+                            );
                         } else {
                             //somewting went wrong in the db, and the refresh id could not be stored
                             console.log('could not store refresh id');
@@ -321,7 +320,7 @@ function login(email, password) {
             'Content-Type': 'application/json',
             Accept: 'text/plain'
         },
-        body: JSON.stringify({email: email, password: password})
+        body: JSON.stringify({ email: email, password: password })
     })
         .then((res) => {
             return res.text();
@@ -340,7 +339,7 @@ function login(email, password) {
  * @param {*} refreshId
  * @param {*} userAgent
  */
-function storeRefreshId(email, refreshId, userAgent){
+function storeRefreshId(email, refreshId, userAgent) {
     return fetch(dataSecurityURL + '/refresh', {
         method: 'POST',
         headers: {
