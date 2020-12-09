@@ -37,13 +37,13 @@ app.use(function (req, res, next) {
 let refreshSecret = fs.readFileSync('./refreshSecret.key', 'utf8');
 //subscription db URL
 // eslint-disable-next-line no-undef
-const subscriptionURL = process.env.SUBSCRIPTION_URL;
+const subscriptionURL = process.env.SUBSCRIPTION_URL_MOCK;
 //connetionSecurity URL
 // eslint-disable-next-line no-undef
-const dataSecurityURL = process.env.DATASECURITY_URL;
+const dataSecurityURL = process.env.DATASECURITY_URL_MOCK;
 //own service URL
 // eslint-disable-next-line no-undef
-const serviceUrl = process.env.SERVICE_URL;
+const serviceUrl = process.env.SERVICE_URL_MOCK;
 
 //age of access token
 const fiveMins = 5 * 60 * 1000;
@@ -77,7 +77,7 @@ const authCookieOptions = {
     httpOnly: false,
     secure: true,
     sameSite: 'lax',
-    domain: serviceUrl
+    //domain: serviceUrl
 };
 
 //options for refresh token cookie
@@ -86,65 +86,84 @@ const refreshCookieOptions = {
     httpOnly: true,
     secure: true, //kun midlertidig
     sameSite: 'lax',
-    domain: serviceUrl
+    //domain: serviceUrl
 };
 
 //receives access- and refresh token, and return a new valid access token
 app.post('/refresh', authenticateRefreshToken, (req, res) => {
     //gets the userdata in the old access token and tranfers it to a new accesstoken
     const userPayload = jwt.decode(req.cookies.authcookie);
+
+     //used to store new refresh id in data security db, so than whenever the refresh id is verified in db, we store a new one and deletes the old refresh id
+     const email = userPayload.email;
+     const userAgent = req.get('user-agent');
+     const newRefreshId = uuidv4();
+
     const newAccessToken = generateAccessToken(userPayload);
     const newRefreshToken = generateRefreshToken({
         username: userPayload.username,
-        refreshId: req.cookies.refreshId
+        refreshId: newRefreshId
     });
-
-    //adds the access and refresh and token as cookies to the response
-    res.cookie('authcookie', newAccessToken, authCookieOptions);
-    res.cookie('refreshcookie', newRefreshToken, refreshCookieOptions);
-
-    console.log('successfully issued new access token: ' + newAccessToken);
-    res.send();
+    removeRefreshId(req.decodedRefreshToken.refreshId).then(bool=> {
+        if(bool){
+            storeRefreshId(email,newRefreshId, userAgent).then(bool => {
+                if(bool){
+                //adds the access and refresh and token as cookies to the response
+                res.cookie('authcookie', newAccessToken, authCookieOptions);
+                res.cookie('refreshcookie', newRefreshToken, refreshCookieOptions);
+                console.log('successfully issued new access token: ' + newAccessToken);
+                res.send();
+                } else {
+                    res.status(403).send('refresh id could not be stored succesfully');
+                }
+            });
+        } else {
+            res.status(403).send('old refesh id, could not be removed from db succesfully. ')
+        }
+    });
+   
+    
 });
 
 //logs in the user with username and password. return a new access- and refresh token
 app.post('/login', (req, res) => {
-    //gets username, password and the requests origin device
-    const username = req.body.username;
+    console.log('reached login endpoint')
+    //gets email, password and the requests origin device
+    const email = req.body.email;
     const userAgent = req.get('user-agent');
     const password = req.body.password;
 
     //checks the existence of the credentials in the db
-    login(username, password).then((bool1) => {
+    login(email, password).then((bool1) => {
         if (bool1) {
-            getUserId(username).then((userId) => {
-                console.log('logged in as: ' + username + ' from device: ' + userAgent);
+            getUserId(email).then((userId) => {
+                console.log('logged in as: ' + email + ' from device: ' + userAgent);
 
                 //get userId, username, subscription mode(int), admin (bool)
-                getUserPayload(userId).then((subType) => {
+                getSubscriptionType(userId).then((subType) => {
                     //genereates new refresh id
                     const refreshId = uuidv4();
 
                     //stores the refreesh id persistent in DB
-                    storeRefreshId(username, refreshId, userAgent).then((bool) => {
+                    storeRefreshId(email, refreshId, userAgent).then((bool) => {
                         //should always be true
                         if (bool) {
                             //issue access token with payload
                             const payload = {
                                 subType: subType,
-                                username: username,
+                                email: email,
                                 userId: userId
                             };
                             const accesstoken = generateAccessToken(payload);
                             const refreshToken = generateRefreshToken({
-                                username: username,
+                                email: email,
                                 refreshId: refreshId
                             });
 
                             //add the tokens as cookie in the response
                             res.cookie('authcookie', accesstoken, authCookieOptions);
                             res.cookie('refreshcookie', refreshToken, refreshCookieOptions);
-                            res.send();
+                            res.send('succesfully logged in, and recieved auth + refresh token as cookies');
                         } else {
                             //somewting went wrong in the db, and the refresh id could not be stored
                             console.log('could not store refresh id');
@@ -154,7 +173,7 @@ app.post('/login', (req, res) => {
             });
         } else {
             //provided username + password did not match any users in DB
-            return res.status(400).send(`Cannot find user with username: ${username}`);
+            return res.status(400).send(`Cannot find user with username: ${email}`);
         }
     });
 });
@@ -177,12 +196,12 @@ app.post('/logout', authenticateRefreshToken, (req, res) => {
             res.sendStatus(200);
         } else {
             console.log('could not log out - something went wrong.');
-            res.sendStatus(405);
+            res.status(403).send('you are already logged out');
         }
     });
 });
 
-app.post('/service01/getUserAgents', authenticateRefreshToken, (req, res) => {
+app.post('/getUserAgents', authenticateRefreshToken, (req, res) => {
     getUserAgentsAndRefreshId(req.decodedRefreshToken.username).then((agentList) => {
         res.status(200).json(agentList);
     });
@@ -209,7 +228,7 @@ function authenticateRefreshToken(req, res, next) {
                     console.log('Refresh cookie verified');
                     next();
                 } else {
-                    res.sendStatus(403);
+                    res.status(403).send('could not verify refresh id');
                 }
             });
         }
@@ -247,7 +266,7 @@ app.listen(3300, () => {
  * functions for querying database
  * @param {*} username
  */
-function getUserPayload(userId) {
+function getSubscriptionType(userId) {
     return fetch(subscriptionURL + '/customer/' + userId + '/get_subscription_type', {
         // SHOULD POST TO SUBSCRIPTION TEAM DATABASE INSTEAD
         method: 'POST',
@@ -260,7 +279,7 @@ function getUserPayload(userId) {
         })
         .then((data) => {
             data = JSON.parse(data);
-            return data.body.subType;
+            return data;
         })
         .catch((error) => {
             console.error('error: ', error);
@@ -277,7 +296,7 @@ function getUserId(username) {
             'Content-Type': 'application/json',
             Accept: 'text/plain'
         },
-        body: { username: username }
+        body: JSON.stringify({ username: username })
     })
         .then((res) => {
             return res.text();
@@ -292,17 +311,17 @@ function getUserId(username) {
 }
 /**
  *
- * @param {*} username
+ * @param {*} email
  * @param {*} password
  */
-function login(username, password) {
+function login(email, password) {
     return fetch(dataSecurityURL + '/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             Accept: 'text/plain'
         },
-        body: { username: username, password: password }
+        body: JSON.stringify({email: email, password: password})
     })
         .then((res) => {
             return res.text();
@@ -317,18 +336,18 @@ function login(username, password) {
 }
 /**
  *
- * @param {*} username
+ * @param {*} email
  * @param {*} refreshId
  * @param {*} userAgent
  */
-function storeRefreshId(username, refreshId, userAgent) {
+function storeRefreshId(email, refreshId, userAgent){
     return fetch(dataSecurityURL + '/refresh', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             Accept: 'text/plain'
         },
-        body: { username: username, refreshId: refreshId, userAgent: userAgent }
+        body: JSON.stringify({ email: email, refreshId: refreshId, userAgent: userAgent })
     })
         .then((res) => {
             return res.text();
@@ -351,7 +370,7 @@ function verifyRefreshId(refreshId) {
             'Content-Type': 'application/json',
             Accept: 'text/plain'
         },
-        body: { refreshId: refreshId }
+        body: JSON.stringify({ refreshId: refreshId })
     })
         .then((res) => {
             return res.text();
@@ -375,7 +394,7 @@ function removeRefreshId(refreshId) {
             'Content-Type': 'application/json',
             Accept: 'text/plain'
         },
-        body: { refreshId: refreshId }
+        body: JSON.stringify({ refreshId: refreshId })
     })
         .then((res) => {
             return res.text();
@@ -390,7 +409,7 @@ function removeRefreshId(refreshId) {
 
 /**
  * gives a username and recieves all user-agents + refreshId, så that a user could log out other divivs currently logged in
- * @param {*} username
+ * @param {*} username //data security expect the body to contain a field with key "username", although in reality it is a email
  */
 function getUserAgentsAndRefreshId(username) {
     return fetch(dataSecurityURL + '/getUserAgents', {
@@ -399,7 +418,7 @@ function getUserAgentsAndRefreshId(username) {
             'Content-Type': 'application/json',
             Accept: 'text/plain'
         },
-        body: { username: username }
+        body: JSON.stringify({ username: username })
     })
         .then((res) => {
             return res.text();

@@ -27,9 +27,9 @@ services:
         expose:
             - '8081'
 
-    usersservice:
+    userservice:
         build:
-            context: ./UsersAPI/
+            context: ./userAPI/
         expose:
             - '9090'
 
