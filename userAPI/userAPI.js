@@ -1,3 +1,4 @@
+/* eslint-disable require-jsdoc */
 //user API contains mock endpoint for both subscription TEAM and DATASECURITY TEAMS.
 
 const express = require('express');
@@ -148,6 +149,7 @@ server.listen(port, () => {
 
 //non-persistent database for datasecurity team: initially no devices/users are logged in (i.e. no refresh id's are stored)
 const devices = [];
+
 class Device {
     constructor(email, userAgent, refreshId) {
         this.email = email;
