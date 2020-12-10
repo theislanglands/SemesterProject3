@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const express = require('express');
 const app = express();
 const fetch = require('node-fetch');
@@ -43,6 +44,7 @@ const subscriptionURL = process.env.SUBSCRIPTION_URL_MOCK;
 const dataSecurityURL = process.env.DATASECURITY_URL_MOCK;
 //own service URL
 // eslint-disable-next-line no-undef
+//eslint-disable-next-line no-unused-vars
 const serviceUrl = process.env.SERVICE_URL_MOCK;
 
 //age of access token
