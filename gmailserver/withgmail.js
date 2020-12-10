@@ -17,14 +17,14 @@ var mailDetails;
 var mailTitle = 'Reset your password';
 
 // eslint-disable-next-line no-undef
-var hyperlinkInEmail = process.env.HYPERLINK_IN_EMAIL_MOCKUP;
+var hyperlinkInEmail = 'http://stream.stud-srv.sdu.dk/reset';
 
 var mailTitleNoti = 'Your password has been changed';
 
 const algorithm = 'aes-128-cbc';
 
 // eslint-disable-next-line no-undef
-const salt = process.env.SALT;
+const salt = 'foobar';
 const hash = crypto.createHash('sha256');
 
 hash.update(salt);
@@ -168,8 +168,12 @@ function decode(text) {
 server.post('/forgotPass', urlencodedParser, async function (req, res) {
     let endEmail = validator.escape(req.body.email);
     if (validator.isEmail(endEmail)) {
-        var bool = await isValidUser(endEmail);
-        if (bool === 'true') {
+        let bool = await isValidUser(endEmail);
+        if (typeof bool != 'string') {
+            res.status(424).send('mail service, can not request data security service');
+            return;
+        }
+        if (bool) {
             mailTransporter = createMailTransporter(mailService, serverEmail, serverEmailPass);
             let date = new Date();
             let dateString = date.getTime().toString();
@@ -194,7 +198,7 @@ server.post('/forgotPass', urlencodedParser, async function (req, res) {
             if (bool) {
                 res.send({ msg: 'Email is send', isSent: true });
             } else {
-                res.sendStatus(500);
+                res.status(500).send("mail wasn't sent from mail service");
             }
         } else {
             res.send({ msg: 'Failed to send email', isSent: false });
@@ -267,8 +271,12 @@ server.post('/resetPassword_form', urlencodedParser, async function (req, res) {
     }
 
     // sammenligning skal gøres på frontend og ikke her.
+    let sucess = await postNewPassword(decodedMail, password);
+    if (typeof sucess != 'string') {
+        res.status(424).send('mail service, can not request data security service');
+        return;
+    }
 
-    var sucess = await postNewPassword(decodedMail, password);
     if (sucess) {
         sendNotifificationMail(decodedMail);
         res.send(JSON.stringify({ msg: 'the users password has been reset', success: true }));
@@ -308,13 +316,17 @@ function isExpired(splitedDecryptedArr, indexOfTime, valideInMinutes) {
 function isValidUser(email) {
     // the following uri is not right, and needs to be a fetch to the backend which contains user info about email
     // eslint-disable-next-line no-undef
-    return fetch(process.env.IS_USER_MOCKUP, {
+    return fetch('http://redhat.stream.stud-srv.sdu.dk/isUser', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ email: email })
-    }).then((res) => res.text());
+    })
+        .then((res) => res.text())
+        .catch((err) => {
+            return err;
+        });
 }
 /**
  *
@@ -324,7 +336,7 @@ function isValidUser(email) {
 function postNewPassword(email, password) {
     // the password and the mail will be passed with fetch to the database API
     // eslint-disable-next-line no-undef
-    return fetch(process.env.POST_NEW_PASSWORD_MOCKUP, {
+    return fetch('http://redhat.stream.stud-srv.sdu.dk/newPassword', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -332,7 +344,9 @@ function postNewPassword(email, password) {
         body: JSON.stringify({ email: email, password: password })
     })
         .then((res) => res.text())
-        .catch((err) => console.log(err));
+        .catch((err) => {
+            return err;
+        });
 }
 /**
  *
