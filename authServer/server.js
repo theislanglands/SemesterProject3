@@ -5,7 +5,6 @@ const fetch = require('node-fetch');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 require('dotenv').config({ path: '.env' });
-const path = require('path');
 
 const bodyParser = require('body-parser');
 
@@ -38,14 +37,14 @@ app.use(function (req, res, next) {
 let refreshSecret = fs.readFileSync('./refreshSecret.key', 'utf8');
 //subscription db URL
 // eslint-disable-next-line no-undef
-const subscriptionURL = process.env.SUBSCRIPTION_URL_MOCK;
+const subscriptionURL = 'http://fedora.stream.stud-srv.sdu.dk';
 //connetionSecurity URL
 // eslint-disable-next-line no-undef
-const dataSecurityURL = process.env.DATASECURITY_URL_MOCK;
+const dataSecurityURL = 'http://redhat.stream.stud-srv.sdu.dk';
 //own service URL
 // eslint-disable-next-line no-undef
 //eslint-disable-next-line no-unused-vars
-const serviceUrl = process.env.SERVICE_URL_MOCK;
+const serviceUrl = 'http://kubuntu.stream.stud.-srv.sdu.dk';
 
 //age of access token
 const fiveMins = 5 * 60 * 1000;
@@ -53,42 +52,22 @@ const fiveMins = 5 * 60 * 1000;
 //age of refresh token
 const oneWeek = 7 * 24 * 3600 * 1000;
 
-//routes for html inserted for testing
-app.get('/', function (req, res) {
-    // eslint-disable-next-line no-undef
-    res.sendFile(path.join(__dirname + '/html/index.html'));
-});
-
-app.get('/login', (req, res) => {
-    // eslint-disable-next-line no-undef
-    res.sendFile(path.join(__dirname + '/html/login-page.html'));
-});
-
-// test 2
-//atempt to fix authentication on /music by inserting authenticateRefreshToken
-app.get('/music', authenticateRefreshToken, (req, res) => {
-    // eslint-disable-next-line no-undef
-    res.sendFile(path.join(__dirname + '/html/music.html'));
-});
-
-app.use(express.static('html'));
-
 //options for the access token cookie
 const authCookieOptions = {
     maxAge: fiveMins,
     httpOnly: false,
     secure: true,
-    sameSite: 'lax'
-    //domain: serviceUrl
+    sameSite: 'lax',
+    domain: serviceUrl
 };
 
 //options for refresh token cookie
 const refreshCookieOptions = {
     maxAge: oneWeek,
     httpOnly: true,
-    secure: true, //kun midlertidig
-    sameSite: 'lax'
-    //domain: serviceUrl
+    secure: true,
+    sameSite: 'lax',
+    domain: serviceUrl
 };
 
 //receives access- and refresh token, and return a new valid access token
@@ -188,14 +167,6 @@ app.post('/login', (req, res) => {
 
 //logs out user device.
 app.post('/logout', authenticateRefreshToken, (req, res) => {
-    //if body contains a refresh id, the user wants to logout another device (invalidate a refresh id assoicated with another device)
-    //might not be completely secure
-    //should maybe use the access token instead
-    let refreshId = req.decodedRefreshToken.refreshId;
-    if (req.body.refreshId) {
-        refreshId = req.body.refreshId;
-        console.log('logging out a device refresh id: ' + refreshId);
-    }
     try {
         //removes row associated with refresh id to invalidate refreshToken
         removeRefreshId(refreshId).then((isRemoved) => {
@@ -208,12 +179,6 @@ app.post('/logout', authenticateRefreshToken, (req, res) => {
     } catch (e) {
         res.status(424).send(e);
     }
-});
-
-app.post('/getUserAgents', authenticateRefreshToken, (req, res) => {
-    getUserAgentsAndRefreshId(req.decodedRefreshToken.username).then((agentList) => {
-        res.status(200).json(agentList);
-    });
 });
 
 /**
@@ -399,27 +364,5 @@ function removeRefreshId(refreshId) {
         })
         .then((data) => {
             return data === 'true';
-        });
-}
-
-/**
- * gives a username and recieves all user-agents + refreshId, så that a user could log out other divivs currently logged in
- * @param {*} username //data security expect the body to contain a field with key "username", although in reality it is a email
- */
-function getUserAgentsAndRefreshId(username) {
-    return fetch(dataSecurityURL + '/getUserAgents', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Accept: 'text/plain'
-        },
-        body: JSON.stringify({ username: username })
-    })
-        .then((res) => {
-            return res.text();
-        })
-        .then((data) => {
-            console.log(data);
-            return JSON.parse(data);
         });
 }
