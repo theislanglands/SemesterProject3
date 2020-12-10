@@ -1,3 +1,4 @@
+/* eslint-disable require-jsdoc */
 //user API contains mock endpoint for both subscription TEAM and DATASECURITY TEAMS.
 
 const express = require('express');
@@ -12,6 +13,10 @@ server.post('/getUserId', (req, res) => {
     const userId = getUserIdByUsername(req.body.username);
     res.json(userId);
 });
+/**
+ *
+ * @param {*} username
+ */
 function getUserIdByUsername(username) {
     let userId = -1;
     users.forEach((user) => {
@@ -27,7 +32,10 @@ server.post('/customer/:userId/get_subscription_type', (req, res) => {
     const subType = getSubTypeByUserId(req.params.userId);
     res.json(subType);
 });
-
+/**
+ *
+ * @param {*} userId
+ */
 function getSubTypeByUserId(userId) {
     let subType = 1;
     userSubType.forEach((user) => {
@@ -44,7 +52,11 @@ server.post('/login', (req, res) => {
     const isRegistered = checkCredentials(req.body.email, req.body.password);
     res.send(isRegistered);
 });
-
+/**
+ *
+ * @param {*} email
+ * @param {*} password
+ */
 function checkCredentials(email, password) {
     let isRegistered = false;
     users.forEach((user) => {
@@ -66,7 +78,10 @@ server.post('/checkrefresh', (req, res) => {
     const hasRefreshId = refreshIdExists(req.body.refreshId);
     res.send(hasRefreshId);
 });
-
+/**
+ *
+ * @param {*} refreshId
+ */
 function refreshIdExists(refreshId) {
     let hasRefreshId = false;
     devices.forEach((device) => {
@@ -82,7 +97,10 @@ server.post('/logout', (req, res) => {
     logoutDevice(req.body.refreshId);
     res.send(true);
 });
-
+/**
+ *
+ * @param {*} refreshId
+ */
 function logoutDevice(refreshId) {
     for (let i = 0; i < devices.length; i++) {
         if (devices[i].refreshId == refreshId) {
@@ -100,7 +118,10 @@ server.post('/isUser', function (req, res) {
         res.send(false);
     }
 });
-
+/**
+ *
+ * @param {*} email
+ */
 function getUserByEmail(email) {
     let user = undefined;
     users.forEach((el) => {
@@ -128,6 +149,7 @@ server.listen(port, () => {
 
 //non-persistent database for datasecurity team: initially no devices/users are logged in (i.e. no refresh id's are stored)
 const devices = [];
+
 class Device {
     constructor(email, userAgent, refreshId) {
         this.email = email;
