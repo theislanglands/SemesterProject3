@@ -1,40 +1,36 @@
+require('dotenv').config({ path: '.env' });
+const nodemailer = require('nodemailer');
+const cookieparser = require('cookie-parser');
+const fetch = require('node-fetch');
+const validator = require('validator');
+const crypto = require('crypto');
 //Mail variables
-const serverEmail = 'cstgruppe10@gmail.com';
-const serverEmailPass = 'P3J2z3YLwDHe';
+// eslint-disable-next-line no-undef
+const serverEmail = process.env.SERVER_EMAIL;
+// eslint-disable-next-line no-undef
+const serverEmailPass = process.env.SERVER_EMAIL_PASSWORD;
 const mailService = 'gmail';
 var mailTransporter;
 var mailDetails;
 //var endEmail;
 //var emailUrl;
 var mailTitle = 'Reset your password';
-/* var mailHtml = `<p><b>Hello</b></p>
-        <p>Here's a link, where you can reset your password: `; */
 
-var hyperlinkInEmail = 'https://localhost/gmail/reset';
+// eslint-disable-next-line no-undef
+var hyperlinkInEmail = 'http://stream.stud-srv.sdu.dk/reset';
 
 var mailTitleNoti = 'Your password has been changed';
 
-//var mailHtmlNoti = `<p><b>Hello</b></p>
-//  <p>Your email has been changed. If you did not now about this change we strongly advise you to change your password immediately!</p>`;
-const nodemailer = require('nodemailer');
-const cookieparser = require('cookie-parser');
-const fetch = require('node-fetch');
-const validator = require('validator');
-
-require('dotenv').config({ path: '.env' });
-
-const crypto = require('crypto');
-//const secret = 'ælaksndfkajsndflkabsdflhb';
-
 const algorithm = 'aes-128-cbc';
 
-const iv = crypto.randomBytes(16);
+// eslint-disable-next-line no-undef
 const salt = 'foobar';
-const hash = crypto.createHash('sha1');
+const hash = crypto.createHash('sha256');
 
 hash.update(salt);
+const iv = crypto.randomBytes(16);
 
-let key = hash.digest().slice(0, 16);
+const key = hash.digest().slice(0, 16);
 
 /**
  *
@@ -56,10 +52,14 @@ function encrypt(text) {
  */
 function decrypt(text) {
     if (typeof text == 'string') {
-        var decipher = crypto.createDecipheriv(algorithm, key, iv);
-        var decrypted = decipher.update(text, 'hex', 'utf8');
-        decrypted += decipher.final('utf8');
-        return decrypted;
+        try {
+            var decipher = crypto.createDecipheriv(algorithm, key, iv);
+            var decrypted = decipher.update(text, 'hex', 'utf8');
+            decrypted += decipher.final('utf8');
+            return decrypted;
+        } catch (error) {
+            console.log(error);
+        }
     } else {
         console.log("The parameter wasn't a string, try agian");
     }
@@ -112,14 +112,12 @@ function createMailDetails(serverEmail, endEmail, link) {
  * @param {*} mailDetails
  */
 function sendMail(mailTransporter, mailDetails) {
+    // eslint-disable-next-line no-unused-vars
     mailTransporter.sendMail(mailDetails, function (err, data) {
         if (err) {
             console.log('Error Occurs');
         } else {
             console.log('Email sent successfully');
-        }
-        if (data.messageTime != 0) {
-            console.log('it worked');
         }
     });
     return true;
@@ -129,18 +127,16 @@ function sendMail(mailTransporter, mailDetails) {
 const express = require('express');
 const server = express();
 const bodyparser = require('body-parser');
-//const https = require('https');
-//const stringify = require('querystring');
-//const resolve = require('path');
 
 // Create application/x-www-form-urlencoded parser
 //LÆS OP PÅ DETTE
 var urlencodedParser = bodyparser.urlencoded({
-    extended: false
+    extended: true
 });
 
 server.use(express.static('html'));
 server.use(cookieparser());
+server.use(bodyparser.json());
 /**
  *
  * @param {*} text
@@ -173,9 +169,12 @@ function decode(text) {
 server.post('/forgotPass', urlencodedParser, async function (req, res) {
     let endEmail = validator.escape(req.body.email);
     if (validator.isEmail(endEmail)) {
-        var bool = await isValidUser(endEmail);
-        console.log(bool);
-        if (bool === 'true') {
+        let bool = await isValidUser(endEmail);
+        if (typeof bool != 'string') {
+            res.status(424).send('mail service, can not request data security service');
+            return;
+        }
+        if (bool) {
             mailTransporter = createMailTransporter(mailService, serverEmail, serverEmailPass);
             let date = new Date();
             let dateString = date.getTime().toString();
@@ -198,61 +197,54 @@ server.post('/forgotPass', urlencodedParser, async function (req, res) {
             );
             let bool = sendMail(mailTransporter, mailDetails);
             if (bool) {
-                res.send(JSON.stringify({ msg: 'An email has been sent to you', isSent: true }));
+                res.send({ msg: 'Email is send', isSent: true });
             } else {
-                res.send(
-                    JSON.stringify({
-                        msg: 'An error ocuured in the server, the email wasnt able to be sent',
-                        isSent: false
-                    })
-                );
+                res.status(500).send("mail wasn't sent from mail service");
             }
         } else {
-            res.send(JSON.stringify({ msg: 'No users have this email', isSent: false }));
+            res.send({ msg: 'Failed to send email', isSent: false });
             return;
         }
     } else {
-        res.send(JSON.stringify({ msg: 'not a real Email', isSent: false }));
+        res.send({ msg: 'not a real Email', isSent: false });
     }
 });
 
-server.get('/reset', urlencodedParser, function (req, res) {
-    let url = req.url;
-    let encryptedString = url.split('?')[1];
-    if (encryptedString !== undefined) {
-        let clear = decode(decrypt(encryptedString));
+server.post('/reset', urlencodedParser, function (req, res) {
+    let params = req.body.params;
+    if (params !== undefined) {
+        let clear = decode(decrypt(params));
         let email;
         let splitedClear;
         if (clear !== undefined) {
             splitedClear = clear.split('?');
             email = validator.escape(splitedClear[0]);
         } else {
-            res.sendStatus(406);
+            res.json({ valid: false });
             return;
         }
         //kald database om email eksisterer
         let encryptedEmail = encrypt(encode(email));
         if (encryptedEmail !== undefined) {
             if (isExpired(splitedClear, 1, 1)) {
-                res.cookie('mailtoken', encryptedEmail, {
-                    maxAge: 900000
+                res.json({
+                    valid: true,
+                    cookie: { name: 'mailtoken', value: encryptedEmail, maxAge: 900000 }
                 });
-                // eslint-disable-next-line no-undef
-                res.sendFile(__dirname + '/html/resetPassword.html');
                 console.log('A user has used the link, sent in the email');
             } else {
                 console.log('The link was expired');
-                res.sendStatus(404);
+                res.json({ valid: false });
                 return;
             }
         } else {
             console.log('An encryption error occured');
-            res.sendStatus(404);
+            res.json({ valid: false });
             return;
         }
     } else {
         console.log('there was no parameters in the get request to /reset');
-        res.sendStatus(404);
+        res.json({ valid: false });
         return;
     }
 });
@@ -267,7 +259,7 @@ server.post('/resetPassword_form', urlencodedParser, async function (req, res) {
     decodedMail = validator.escape(decodedMail);
     if (decodedMail === undefined) {
         console.log('an error ocurred on decryption');
-        res.sendStatus(500);
+        res.sendStatus(404);
         return;
     }
     //mailen er stadig encoded
@@ -275,13 +267,17 @@ server.post('/resetPassword_form', urlencodedParser, async function (req, res) {
     let password = req.body.password;
     if (password === undefined) {
         console.log('server didnt receive the password');
-        res.sendStatus(406);
+        res.sendStatus(404);
         return;
     }
 
     // sammenligning skal gøres på frontend og ikke her.
+    let sucess = await postNewPassword(decodedMail, password);
+    if (typeof sucess != 'string') {
+        res.status(424).send('mail service, can not request data security service');
+        return;
+    }
 
-    var sucess = await postNewPassword(decodedMail, password);
     if (sucess) {
         sendNotifificationMail(decodedMail);
         res.send(JSON.stringify({ msg: 'the users password has been reset', success: true }));
@@ -319,14 +315,19 @@ function isExpired(splitedDecryptedArr, indexOfTime, valideInMinutes) {
  * @param {*} email
  */
 function isValidUser(email) {
-    return fetch('http://usersservice:9090/isEmail', {
+    // the following uri is not right, and needs to be a fetch to the backend which contains user info about email
+    // eslint-disable-next-line no-undef
+    return fetch('http://redhat.stream.stud-srv.sdu.dk/isUser', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded' //,
-            //Accept: 'text/plain'
+            'Content-Type': 'application/json'
         },
-        body: 'email=' + encodeURIComponent(email)
-    }).then((res) => res.text());
+        body: JSON.stringify({ email: email })
+    })
+        .then((res) => res.text())
+        .catch((err) => {
+            return err;
+        });
 }
 /**
  *
@@ -335,17 +336,18 @@ function isValidUser(email) {
  */
 function postNewPassword(email, password) {
     // the password and the mail will be passed with fetch to the database API
-
-    return fetch('http://usersservice:9090/changePassword', {
+    // eslint-disable-next-line no-undef
+    return fetch('http://redhat.stream.stud-srv.sdu.dk/newPassword', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            Accept: 'text/plain'
+            'Content-Type': 'application/json'
         },
-        body: 'email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password)
+        body: JSON.stringify({ email: email, password: password })
     })
         .then((res) => res.text())
-        .catch((err) => console.log(err));
+        .catch((err) => {
+            return err;
+        });
 }
 /**
  *

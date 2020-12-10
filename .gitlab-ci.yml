@@ -1,5 +1,6 @@
 stages:
     - lint
+    - versioning
     - build
     - test
     - deploy
@@ -9,33 +10,3 @@ include:
       ref: master
       file: '10.yml'
 # Set [GROUPNUMBER] to you team number ex. '[GROUPNUMBER].yml' becomes '5.yml'
-
-compile:
-    stage: build
-    image: gitlab.sdu.dk:5050/semester-project-e2020/team-12-continuous-integration/resources:docker
-    services:
-        - docker:dind
-    before_script:
-        - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-    script:
-        - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-auth-server" ./authServer/
-        - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-auth-server"
-        - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-gmail-server" ./gmailserver/
-        - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-gmail-server"
-    except:
-        - master
-
-compile-master:
-    stage: build
-    image: gitlab.sdu.dk:5050/semester-project-e2020/team-12-continuous-integration/resources:docker
-    services:
-        - docker:dind
-    before_script:
-        - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-    script:
-        - docker build --pull -t "$CI_REGISTRY_IMAGE:auth-server" ./authServer/
-        - docker push "$CI_REGISTRY_IMAGE:auth-server"
-        - docker build --pull -t "$CI_REGISTRY_IMAGE:gmail-server" ./gmailserver/
-        - docker push "$CI_REGISTRY_IMAGE:gmail-server"
-    only:
-        - master
