@@ -268,8 +268,10 @@ server.post('/resetPassword_form', urlencodedParser, async function (req, res) {
     }
 
     // sammenligning skal gøres på frontend og ikke her.
-
-    var sucess = await postNewPassword(decodedMail, password);
+    let sucess;
+    if (validator.isEmail(decodedMail)) {
+        sucess = await postNewPassword(decodedMail, password);
+    }
     if (sucess) {
         sendNotifificationMail(decodedMail);
         res.send(JSON.stringify({ msg: 'the users password has been reset', success: true }));
