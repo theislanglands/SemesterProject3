@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const express = require('express');
 const app = express();
 const fetch = require('node-fetch');
@@ -43,6 +44,7 @@ const subscriptionURL = process.env.SUBSCRIPTION_URL_MOCK;
 const dataSecurityURL = process.env.DATASECURITY_URL_MOCK;
 //own service URL
 // eslint-disable-next-line no-undef
+//eslint-disable-next-line no-unused-vars
 const serviceUrl = process.env.SERVICE_URL_MOCK;
 
 //age of access token
@@ -104,23 +106,26 @@ app.post('/refresh', authenticateRefreshToken, (req, res) => {
         username: userPayload.username,
         refreshId: newRefreshId
     });
-    removeRefreshId(req.decodedRefreshToken.refreshId).then((bool) => {
-        if (bool) {
-            storeRefreshId(email, newRefreshId, userAgent).then((bool) => {
-                if (bool) {
-                    //adds the access and refresh and token as cookies to the response
-                    res.cookie('authcookie', newAccessToken, authCookieOptions);
-                    res.cookie('refreshcookie', newRefreshToken, refreshCookieOptions);
-                    console.log('successfully issued new access token: ' + newAccessToken);
-                    res.send();
-                } else {
-                    res.status(403).send('refresh id could not be stored succesfully');
-                }
-            });
-        } else {
-            res.status(403).send('old refesh id, could not be removed from db succesfully. ');
-        }
-    });
+    try {
+        removeRefreshId(req.decodedRefreshToken.refreshId).then((isRemoved) => {
+            if (isRemoved) {
+                storeRefreshId(email, newRefreshId, userAgent).then((isStored) => {
+                    if (isStored) {
+                        //adds the access and refresh and token as cookies to the response
+                        res.cookie('authcookie', newAccessToken, authCookieOptions);
+                        res.cookie('refreshcookie', newRefreshToken, refreshCookieOptions);
+                        res.send('succesfully refreshed tokens');
+                    } else {
+                        res.status(424).send('storing refresh id failed');
+                    }
+                });
+            } else {
+                res.status(403).send('could not invalidate refresh id');
+            }
+        });
+    } catch (e) {
+        res.status(424).send(e);
+    }
 });
 
 //logs in the user with username and password. return a new access- and refresh token
@@ -130,56 +135,60 @@ app.post('/login', (req, res) => {
     const userAgent = req.get('user-agent');
     const password = req.body.password;
 
-    //checks the existence of the credentials in the db
-    login(email, password).then((bool1) => {
-        if (bool1) {
-            getUserId(email).then((userId) => {
-                console.log('logged in as: ' + email + ' from device: ' + userAgent);
+    try {
+        //checks the existence of the credentials in the db
+        login(email, password).then((isAuth) => {
+            if (isAuth) {
+                getUserId(email).then((userId) => {
+                    console.log('logged in as: ' + email + ' from device: ' + userAgent);
 
-                //get userId, username, subscription mode(int), admin (bool)
-                getSubscriptionType(userId).then((subType) => {
-                    //genereates new refresh id
-                    const refreshId = uuidv4();
+                    //get userId, username, subscription mode(int), admin (bool)
+                    getSubscriptionType(userId).then((subType) => {
+                        //genereates new refresh id
+                        const refreshId = uuidv4();
 
-                    //stores the refreesh id persistent in DB
-                    storeRefreshId(email, refreshId, userAgent).then((bool) => {
-                        //should always be true
-                        if (bool) {
-                            //issue access token with payload
-                            const payload = {
-                                subType: subType,
-                                email: email,
-                                userId: userId
-                            };
-                            const accesstoken = generateAccessToken(payload);
-                            const refreshToken = generateRefreshToken({
-                                email: email,
-                                refreshId: refreshId
-                            });
+                        //stores the refreesh id persistent in DB
+                        storeRefreshId(email, refreshId, userAgent).then((bool) => {
+                            //should always be true
+                            if (bool) {
+                                //issue access token with payload
+                                const payload = {
+                                    subType: subType,
+                                    email: email,
+                                    userId: userId
+                                };
+                                const accesstoken = generateAccessToken(payload);
+                                const refreshToken = generateRefreshToken({
+                                    email: email,
+                                    refreshId: refreshId
+                                });
 
-                            //add the tokens as cookie in the response
-                            res.cookie('authcookie', accesstoken, authCookieOptions);
-                            res.cookie('refreshcookie', refreshToken, refreshCookieOptions);
-                            res.send(
-                                'succesfully logged in, and recieved auth + refresh token as cookies'
-                            );
-                        } else {
-                            //somewting went wrong in the db, and the refresh id could not be stored
-                            console.log('could not store refresh id');
-                        }
+                                //add the tokens as cookie in the response
+                                res.cookie('authcookie', accesstoken, authCookieOptions);
+                                res.cookie('refreshcookie', refreshToken, refreshCookieOptions);
+                                res.send(
+                                    'succesfully logged in, and recieved auth + refresh token as cookies'
+                                );
+                            } else {
+                                //somewting went wrong in the db, and the refresh id could not be stored
+                                console.log('could not store refresh id');
+                            }
+                        });
                     });
                 });
-            });
-        } else {
-            //provided username + password did not match any users in DB
-            return res.status(400).send(`Cannot find user with username: ${email}`);
-        }
-    });
+            } else {
+                //provided username + password did not match any users in DB
+                return res.status(401).send(`Cannot find account with mail: ${email}`);
+            }
+        });
+    } catch (e) {
+        res.status(424).send(e);
+    }
 });
 
 //logs out user device.
 app.post('/logout', authenticateRefreshToken, (req, res) => {
-    //if body contains a refresh id, the user want to logout another device (invalidate a refresh id assoicated with another device)
+    //if body contains a refresh id, the user wants to logout another device (invalidate a refresh id assoicated with another device)
     //might not be completely secure
     //should maybe use the access token instead
     let refreshId = req.decodedRefreshToken.refreshId;
@@ -187,17 +196,18 @@ app.post('/logout', authenticateRefreshToken, (req, res) => {
         refreshId = req.body.refreshId;
         console.log('logging out a device refresh id: ' + refreshId);
     }
-
-    //removes row associated with refresh id to invalidate refreshToken
-    removeRefreshId(refreshId).then((bool) => {
-        if (bool) {
-            console.log('succesfully removed refresh id' + refreshId);
-            res.sendStatus(200);
-        } else {
-            console.log('could not log out - something went wrong.');
-            res.status(403).send('you are already logged out');
-        }
-    });
+    try {
+        //removes row associated with refresh id to invalidate refreshToken
+        removeRefreshId(refreshId).then((isRemoved) => {
+            if (isRemoved) {
+                res.sendStatus(200);
+            } else {
+                res.status(403).send('you need to be signed in to log out');
+            }
+        });
+    } catch (e) {
+        res.status(424).send(e);
+    }
 });
 
 app.post('/getUserAgents', authenticateRefreshToken, (req, res) => {
@@ -220,16 +230,20 @@ function authenticateRefreshToken(req, res, next) {
         if (err) {
             res.sendStatus(403);
         } else {
-            verifyRefreshId(data.refreshId).then((bool) => {
-                console.log(bool);
-                if (bool) {
-                    req.decodedRefreshToken = data;
-                    console.log('Refresh cookie verified');
-                    next();
-                } else {
-                    res.status(403).send('could not verify refresh id');
-                }
-            });
+            try {
+                verifyRefreshId(data.refreshId).then((bool) => {
+                    console.log(bool);
+                    if (bool) {
+                        req.decodedRefreshToken = data;
+                        console.log('Refresh cookie verified');
+                        next();
+                    } else {
+                        res.status(403).send('could not verify refresh id');
+                    }
+                });
+            } catch (e) {
+                res.status(424).send(e);
+            }
         }
     });
 }
@@ -245,7 +259,6 @@ function generateAccessToken(userdata) {
         username: userdata.username,
         subType: userdata.subType
     };
-    console.log('payload for access token: ' + data);
     return jwt.sign(data, privateKey, { expiresIn: '5m', algorithm: 'RS256' });
 }
 /**
@@ -257,8 +270,9 @@ function generateRefreshToken(userdata) {
 }
 
 //Listen
-app.listen(3300, () => {
-    console.log('Connected');
+const port = 3300;
+app.listen(port, () => {
+    console.log('AuthService listening on port: ' + port);
 });
 
 /**
@@ -279,9 +293,6 @@ function getSubscriptionType(userId) {
         .then((data) => {
             data = JSON.parse(data);
             return data;
-        })
-        .catch((error) => {
-            console.error('error: ', error);
         });
 }
 /**
@@ -303,9 +314,6 @@ function getUserId(username) {
         .then((data) => {
             console.log(data);
             return data;
-        })
-        .catch((error) => {
-            console.error('error: ', error);
         });
 }
 /**
@@ -328,9 +336,6 @@ function login(email, password) {
         .then((data) => {
             console.log(data);
             return data === 'true';
-        })
-        .catch((error) => {
-            console.error('error: ', error);
         });
 }
 /**
@@ -353,9 +358,6 @@ function storeRefreshId(email, refreshId, userAgent) {
         })
         .then((data) => {
             return data === 'true';
-        })
-        .catch((error) => {
-            console.error('error: ', error);
         });
 }
 /**
@@ -377,9 +379,6 @@ function verifyRefreshId(refreshId) {
         .then((data) => {
             console.log(data);
             return data === 'true';
-        })
-        .catch((error) => {
-            console.error('error: ', error);
         });
 }
 /**
@@ -400,9 +399,6 @@ function removeRefreshId(refreshId) {
         })
         .then((data) => {
             return data === 'true';
-        })
-        .catch((error) => {
-            console.error('error: ', error);
         });
 }
 
@@ -425,8 +421,5 @@ function getUserAgentsAndRefreshId(username) {
         .then((data) => {
             console.log(data);
             return JSON.parse(data);
-        })
-        .catch((error) => {
-            return console.error('error: ', error);
         });
 }

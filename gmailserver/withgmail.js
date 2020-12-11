@@ -112,6 +112,7 @@ function createMailDetails(serverEmail, endEmail, link) {
  * @param {*} mailDetails
  */
 function sendMail(mailTransporter, mailDetails) {
+    // eslint-disable-next-line no-unused-vars
     mailTransporter.sendMail(mailDetails, function (err, data) {
         if (err) {
             console.log('Error Occurs');
