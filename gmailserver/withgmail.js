@@ -221,7 +221,7 @@ server.post('/reset', urlencodedParser, function (req, res) {
         //kald database om email eksisterer
         let encryptedEmail = encrypt(encode(email));
         if (encryptedEmail !== undefined) {
-            if (isExpired(splitedClear, 1, 1)) {
+            if (isExpired(splitedClear, 1, 15)) {
                 res.json({
                     valid: true,
                     cookie: { name: 'mailtoken', value: encryptedEmail, maxAge: 900000 }
@@ -289,10 +289,10 @@ var server1 = server.listen(8081, function () {
  * @param {*} indexOfTime
  * @param {*} valideInMinutes
  */
-function isExpired(splitedDecryptedArr, indexOfTime, valideInMinutes) {
+function isExpired(splitedDecryptedArr, indexOfTime, validInMinutes) {
     let decoded = splitedDecryptedArr;
     let timeCreated = parseInt(decoded[indexOfTime]);
-    var timeExpired = timeCreated + valideInMinutes * 60 * 1000;
+    var timeExpired = timeCreated + validInMinutes * 60 * 1000;
     let now = new Date();
     now = now.getTime();
     if (timeExpired > now) {
