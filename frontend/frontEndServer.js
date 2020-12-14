@@ -27,7 +27,7 @@ server.get('/music', (req, res) => {
     res.sendFile(__dirname + '/html/music.html');
 });
 // Access-Control-Allow-Headers... which ones? Accept removed
-app.use(function (req, res, next) {
+server.use(function (req, res, next) {
     //Client asks, wheter this service will accept their origin. WE ACCEPT ALL ORIGINS
     res.header('Access-Control-Allow-Origin', '*'); //shoud only accept request from the sites root domain
     //This service only accepts request with the following headers: Origin, X-req...
