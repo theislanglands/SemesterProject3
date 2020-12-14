@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <body>
-    <form action="/service01/login" method="POST">
+    <form>
         <div>
             <label for="email">Email</label>
             <input type="text" id="email" name="email" required />
@@ -32,6 +32,13 @@
             //MOCK_URL='https://localhost/auth/refresh'
             //KUBUNTU_URL="http://kubuntu-stream.stud-srv.sdu.dk/service01/refresh"
             fetch('http://kubuntu-stream.stud-srv.sdu.dk/service01/refresh', {
+                method: 'POST'
+            });
+        });
+
+        const loginBtn = document.getElementById('submit');
+        loginBtn.addEventListener('click', () => {
+            fetch('http://kubuntu-stream.stud-srv.sdu.dk/service01/login', {
                 method: 'POST'
             });
         });
