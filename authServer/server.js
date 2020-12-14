@@ -315,6 +315,9 @@ function login(email, password) {
         .then((data) => {
             console.log(data);
             return data === 'true';
+        })
+        .catch((error) => {
+            console.error('function login fail fetch', error);
         });
 }
 /**

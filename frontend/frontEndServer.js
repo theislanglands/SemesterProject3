@@ -26,6 +26,16 @@ server.get('/', (req, res) => {
 server.get('/music', (req, res) => {
     res.sendFile(__dirname + '/html/music.html');
 });
+// Access-Control-Allow-Headers... which ones? Accept removed
+app.use(function (req, res, next) {
+    //Client asks, wheter this service will accept their origin. WE ACCEPT ALL ORIGINS
+    res.header('Access-Control-Allow-Origin', '*'); //shoud only accept request from the sites root domain
+    //This service only accepts request with the following headers: Origin, X-req...
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type');
+    //may the credentials be exposed/saved by the front-end/browser. e.g. cookies (necessary to save cookies)
+    res.header('Access-Control-Allow-Credentials', 'true');
+    next();
+});
 server.get('/reset', async (req, res) => {
     let url = req.url;
     url = validator.escape(url);

@@ -13,7 +13,7 @@ window.addEventListener('load', (event) => {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 Accept: 'application/json'
             },
-            body: JSON.stringify({email: encodeURIComponent(input.value)})
+            body: JSON.stringify({ email: encodeURIComponent(input.value) })
         })
             .then((response) => {
                 return response.json();
@@ -28,7 +28,7 @@ window.addEventListener('load', (event) => {
             .catch((error) => {
                 console.log('some error happened');
             });
-        console.log(response + " IS connected")
+        console.log(response + ' IS connected');
         console.log(msg);
     });
 });
