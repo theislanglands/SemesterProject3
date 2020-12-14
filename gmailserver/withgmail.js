@@ -128,15 +128,16 @@ const express = require('express');
 const server = express();
 const bodyparser = require('body-parser');
 
-// Create application/x-www-form-urlencoded parser
-//LÆS OP PÅ DETTE
-var urlencodedParser = bodyparser.urlencoded({
-    extended: true
-});
+
 
 server.use(express.static('html'));
 server.use(cookieparser());
 server.use(bodyparser.json());
+// Create application/x-www-form-urlencoded parser
+//LÆS OP PÅ DETTE
+server.use(bodyparser.urlencoded({
+    extended: true
+}));
 /**
  *
  * @param {*} text
@@ -166,7 +167,7 @@ function decode(text) {
     }
 }
 
-server.post('/forgotPass', urlencodedParser, async function (req, res) {
+server.post('/forgotPass', async function (req, res) {
     let endEmail = validator.escape(req.body.email);
     if (validator.isEmail(endEmail)) {
         var bool = await isValidUser(endEmail);
@@ -206,7 +207,7 @@ server.post('/forgotPass', urlencodedParser, async function (req, res) {
     }
 });
 
-server.post('/reset', urlencodedParser, function (req, res) {
+server.post('/reset', function (req, res) {
     let params = req.body.params;
     if (params !== undefined) {
         let clear = decode(decrypt(params));
@@ -244,7 +245,7 @@ server.post('/reset', urlencodedParser, function (req, res) {
         return;
     }
 });
-server.post('/resetPassword_form', urlencodedParser, async function (req, res) {
+server.post('/resetPassword_form', async function (req, res) {
     const encryptedMail = req.cookies.mailtoken;
     if (encryptedMail === undefined) {
         res.sendStatus(406);
@@ -317,7 +318,7 @@ function isValidUser(email) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ email: email })
-    }).then((res) => res.text());
+    }).then((res) => {return res.text()});
 }
 /**
  *

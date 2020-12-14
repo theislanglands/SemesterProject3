@@ -8,18 +8,20 @@ window.addEventListener('load', (event) => {
         console.log(input.value);
         //Mock_URL='https://localhost/gmail/forgotPass'
         //KUBUNTU_URL='http://kubuntu.stream.stud-srv.sdu.dk/service02/forgotPass'
-        let response = fetch('http://kubuntu.stream.stud-srv.sdu.dk/service02/forgotPass', {
+        fetch('http://kubuntu.stream.stud-srv.sdu.dk/service02/forgotPass', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Type': 'application/json',
                 Accept: 'application/json'
             },
-            body: 'email=' + encodeURI(input.value)
+            body: JSON.stringify({email: input.value})
         })
             .then((response) => {
-                return JSON.stringify(response);
+                return response.text();
             })
             .then((data) => {
+                data = JSON.parse(data);
+                console.log(data.msg);
                 div.innerText = data.msg;
 
                 input.value = '';
@@ -29,7 +31,6 @@ window.addEventListener('load', (event) => {
             .catch((error) => {
                 console.log('some error happened');
             });
-        console.log(response + ' IS connected');
-        console.log(msg);
+        
     });
 });
