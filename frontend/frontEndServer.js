@@ -45,8 +45,8 @@ server.get('/reset', async (req, res) => {
     }
 });
 server.use(express.static('html'));
-server.listen(8090, () => {
-    console.log('frontend listening on 8090');
+server.listen(3031, () => {
+    console.log('frontend listening on 3031');
 });
 
 /**
