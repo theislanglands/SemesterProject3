@@ -5,6 +5,7 @@ window.addEventListener('load', (event) => {
     var msg = '';
     button.addEventListener('click', function () {
         var input = document.getElementById('email');
+        console.log(input.value);
         //Mock_URL='https://localhost/gmail/forgotPass'
         //KUBUNTU_URL='http://kubuntu.stream.stud-srv.sdu.dk/service02/forgotPass'
         let response = fetch('http://kubuntu.stream.stud-srv.sdu.dk/service02/forgotPass', {
@@ -16,7 +17,7 @@ window.addEventListener('load', (event) => {
             body: JSON.stringify({ email: encodeURIComponent(input.value) })
         })
             .then((response) => {
-                return response.json();
+                return JSON.stringify(response);
             })
             .then((data) => {
                 div.innerText = data.msg;
