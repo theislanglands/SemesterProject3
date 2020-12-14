@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <body>
-    <form action="/auth/login" method="POST">
+    <form action="/service01/login" method="POST">
         <div>
             <label for="email">Email</label>
             <input type="text" id="email" name="email" required />
@@ -31,7 +31,7 @@
         refreshBtn.addEventListener('click', () => {
             //MOCK_URL='https://localhost/auth/refresh'
             //KUBUNTU_URL="http://kubuntu-stream.stud-srv.sdu.dk/service01/refresh"
-            fetch('https://localhost/auth/refresh', {
+            fetch('http://kubuntu-stream.stud-srv.sdu.dk/service01/refresh', {
                 method: 'POST'
             });
         });

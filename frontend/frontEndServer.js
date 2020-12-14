@@ -17,14 +17,14 @@ server.get('/forgot/resetPassFront.js', (req, res) => {
 server.get('/forgot/resetPassword.html', (req, res) => {
     res.sendFile(__dirname + '/html/forgot/resetPassword.html');
 });
-server.get('/login/login-page.html', (req, res) => {
+server.get('/login', (req, res) => {
     res.sendFile(__dirname + '/html/login/login-page.html');
 });
 server.get('/', (req, res) => {
     res.sendFile(__dirname + '/html/index.html');
 });
 server.get('/music', (req, res) => {
-    res.sendFile(__dirname + '/html/musichtml');
+    res.sendFile(__dirname + '/html/music.html');
 });
 server.get('/reset', async (req, res) => {
     let url = req.url;
