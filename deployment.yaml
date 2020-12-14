@@ -166,7 +166,7 @@ spec:
         app: userapi
     ports:
         - protocol: TCP
-          port: 3031
+          port: 3032
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -189,7 +189,7 @@ spec:
                   image: gitlab.sdu.dk:5050/semester-project-e2020/team-10-connection-security/template:userapi
                   imagePullPolicy: Always
                   ports:
-                      - containerPort: 3301
+                      - containerPort: 3302
                   resources:
                       # Requests are used to define the amount of resources the container minimally needs.
                       # It won’t run if it can not get those resources.
