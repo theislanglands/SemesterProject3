@@ -1,5 +1,5 @@
 FROM node:latest
-EXPOSE 8090
+EXPOSE 3031
 WORKDIR /app
 COPY package.json /app
 RUN npm install -y
