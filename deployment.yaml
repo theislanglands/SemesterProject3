@@ -163,7 +163,7 @@ metadata:
 spec:
     selector:
         # This app must match the label of the pods.
-        app: userAPI
+        app: userapi
     ports:
         - protocol: TCP
           port: 3031
@@ -171,22 +171,22 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    name: userAPI
+    name: userapi
 spec:
     selector:
         matchLabels:
             # This is the label the app selector has to match.
-            app: userAPI
+            app: userapi
     replicas: 1
     template:
         metadata:
             annotations:
             labels:
-                app: userAPI
+                app: userapi
         spec:
             containers:
-                - name: userAPI
-                  image: gitlab.sdu.dk:5050/semester-project-e2020/team-10-connection-security/template:userAPI
+                - name: userapi
+                  image: gitlab.sdu.dk:5050/semester-project-e2020/team-10-connection-security/template:userapi
                   imagePullPolicy: Always
                   ports:
                       - containerPort: 3301
