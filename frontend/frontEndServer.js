@@ -22,6 +22,9 @@ server.get('/login/login-page.html', (req, res) => {
 server.get('/', (req, res) => {
     res.sendFile(__dirname + '/html/index.html');
 });
+server.get('/music', (req, res) => {
+    res.sendFile(__dirname + '/html/musichtml');
+});
 server.get('/reset', async (req, res) => {
     let url = req.url;
     url = validator.escape(url);
@@ -40,6 +43,7 @@ server.get('/reset', async (req, res) => {
         }
     }
 });
+server.use(express.static('html'));
 server.listen(8090, () => {
     console.log('frontend listening on 8090');
 });
