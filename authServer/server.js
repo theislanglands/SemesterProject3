@@ -272,6 +272,10 @@ function getSubscriptionType(userId) {
         .then((data) => {
             data = JSON.parse(data);
             return data;
+        })
+        .catch((error) => {
+            console.error('function getSubscriptionType fail fetch', error);
+            console.log("coudn't login");
         });
 }
 /**
@@ -293,6 +297,9 @@ function getUserId(username) {
         .then((data) => {
             console.log(data);
             return data;
+        })
+        .catch((error) => {
+            console.error('function getUserId fail fetch', error);
         });
 }
 /**
@@ -317,7 +324,7 @@ function login(email, password) {
             return data === 'true';
         })
         .catch((error) => {
-            console.error('function login fail fetch', error);
+            console.error('function Login() fail fetch', error);
         });
 }
 /**
@@ -340,6 +347,9 @@ function storeRefreshId(email, refreshId, userAgent) {
         })
         .then((data) => {
             return data === 'true';
+        })
+        .catch((error) => {
+            console.error('function storeRefreshId fail fetch', error);
         });
 }
 /**
@@ -361,6 +371,9 @@ function verifyRefreshId(refreshId) {
         .then((data) => {
             console.log(data);
             return data === 'true';
+        })
+        .catch((error) => {
+            console.error('function verifyRefreshId fail fetch', error);
         });
 }
 /**
@@ -381,6 +394,9 @@ function removeRefreshId(refreshId) {
         })
         .then((data) => {
             return data === 'true';
+        })
+        .catch((error) => {
+            console.error('function removeRefreshId fail fetch', error);
         });
 }
 
@@ -403,5 +419,8 @@ function getUserAgentsAndRefreshId(username) {
         .then((data) => {
             console.log(data);
             return JSON.parse(data);
+        })
+        .catch((error) => {
+            console.error('function getUserAgentsAndFreshId fail fetch', error);
         });
 }
