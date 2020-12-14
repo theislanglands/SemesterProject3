@@ -5,8 +5,10 @@ window.addEventListener('load', (event) => {
     var msg = '';
     button.addEventListener('click', function () {
         var input = document.getElementById('email');
+        //Mock_URL='https://localhost/gmail/forgotPass'
+        //KUBUNTU_URL='http://kubuntu.stream.stud-srv.sdu.dk/service02/forgotPass'
         // eslint-disable-next-line no-unused-vars
-        let response = fetch('https://localhost/gmail/forgotPass', {
+        let response = fetch('http://kubuntu.stream.stud-srv.sdu.dk/service02/forgotPass', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',

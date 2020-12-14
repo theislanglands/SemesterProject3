@@ -3,10 +3,12 @@ window.onload = () => {
     var pass = document.getElementById('password');
     var confPass = document.getElementById('confirmPassword');
     var div = document.getElementById('response');
+    //MOCK_URL='https://localhost/gmail/resetPassword_form'
+    //KUBUNTU_URL="http://kubuntu.stream.stud-srv.sdu.dk/service02/resetPassword_form"
     // eslint-disable-next-line no-unused-vars
     var msg = '';
     btn.addEventListener('click', function () {
-        const sendUrl = 'https://localhost/gmail/resetPassword_form';
+        const sendUrl = 'http://kubuntu.stream.stud-srv.sdu.dk/service02/resetPassword_form';
         const specs = {
             method: 'POST',
             headers: {
