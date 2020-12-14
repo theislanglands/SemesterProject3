@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const express = require('express');
 const server = express();
 const validator = require('validator');
@@ -27,6 +28,13 @@ server.get('', (req, res) => {
 server.get('', (req, res) => {
     res.sendFile(__dirname + '/html/forgot/forgotPassword-page.html');
 });
+
+app.get('/music', authenticateRefreshToken, (req, res) => {
+    // eslint-disable-next-line no-undef
+    res.sendFile(path.join(__dirname + '/html/music.html'));
+});
+
+app.use(express.static('html'));
 
 server.get('/reset', async (req, res) => {
     let url = req.url;
