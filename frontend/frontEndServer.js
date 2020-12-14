@@ -3,6 +3,31 @@ const server = express();
 const validator = require('validator');
 const fetch = require('node-fetch');
 
+server.get('/forgot/forgotPass.js', (req, res) => {
+    res.sendFile(__dirname + '/html/forgot/forgotPass.js');
+});
+server.get('/forgot/forgotPassword-page.html', (req, res) => {
+    res.sendFile(__dirname + '/html/forgot/forgotPassword-page.html');
+});
+server.get('/forgot/resetPassFront.js', (req, res) => {
+    res.sendFile(__dirname + '/html/forgot/resetPassFront.js');
+});
+server.get('/forgot/resetPassword.html', (req, res) => {
+    res.sendFile(__dirname + '/html/forgot/resetPassword.html');
+});
+server.get('/login/login-page.html', (req, res) => {
+    res.sendFile(__dirname + '/html/login/login-page.html');
+});
+server.get('/', (req, res) => {
+    res.sendFile(__dirname + '/html/index.html');
+});
+server.get('', (req, res) => {
+    res.sendFile(__dirname + '/html/forgot/forgotPassword-page.html');
+});
+server.get('', (req, res) => {
+    res.sendFile(__dirname + '/html/forgot/forgotPassword-page.html');
+});
+
 server.get('/reset', async (req, res) => {
     let url = req.url;
     url = validator.escape(url);
