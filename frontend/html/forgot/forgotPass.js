@@ -14,7 +14,7 @@ window.addEventListener('load', (event) => {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 Accept: 'application/json'
             },
-            body: JSON.stringify({ email: input.value })
+            body: 'email=' + encodeURI(input.value)
         })
             .then((response) => {
                 return JSON.stringify(response);
