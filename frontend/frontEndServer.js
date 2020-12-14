@@ -34,7 +34,7 @@ server.get('/music', authenticateRefreshToken, (req, res) => {
     res.sendFile(path.join(__dirname + '/html/music.html'));
 });
 
-//used for static mp3 files
+//used for static mp3 files.
 server.use(express.static('html'));
 
 server.get('/reset', async (req, res) => {
