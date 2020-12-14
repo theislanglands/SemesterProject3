@@ -55,6 +55,7 @@ server.get('/reset', async (req, res) => {
         }
     }
 });
+//server listen on 3031
 server.listen(3031, () => {
     console.log('frontend listening on 8090');
 });
