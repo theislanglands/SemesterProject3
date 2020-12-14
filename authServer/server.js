@@ -5,7 +5,6 @@ const fetch = require('node-fetch');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 require('dotenv').config({ path: '.env' });
-const path = require('path');
 
 const bodyParser = require('body-parser');
 

@@ -132,7 +132,61 @@ spec:
         spec:
             containers:
                 - name: frontend
-                  image: IMAGE_IS_INSERTED_USING_GITLAB-frontend
+                  image: gitlab.sdu.dk:5050/semester-project-e2020/team-10-connection-security/template:frontend
+                  imagePullPolicy: Always
+                  ports:
+                      - containerPort: 3301
+                  resources:
+                      # Requests are used to define the amount of resources the container minimally needs.
+                      # It won’t run if it can not get those resources.
+                      requests:
+                          # 10m means 10 milli CPU and it is the same as 10/1000 of a CPU core or 1% of a CPU core
+                          cpu: '10m'
+                          # 16Mi means 16 mebibyte which corresponds to 16*1024² bytes.
+                          memory: '16Mi'
+                      # Limits are used to define the maximum of resources the container is allowed to use.
+                      limits:
+                          # This means that the container is maximum allowed to use 10% of a CPU core.
+                          cpu: '100m'
+                          # The same concepts as requests. This means the container is maximum allowed to use 128Mi memory.
+                          # If the container uses more than the limit, it will get removed.
+                          memory: '128Mi'
+            imagePullSecrets:
+                - name: sdugitlab
+---
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: service04
+spec:
+    selector:
+        # This app must match the label of the pods.
+        app: userAPI
+    ports:
+        - protocol: TCP
+          port: 3031
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: userAPI
+spec:
+    selector:
+        matchLabels:
+            # This is the label the app selector has to match.
+            app: userAPI
+    replicas: 1
+    template:
+        metadata:
+            annotations:
+            labels:
+                app: userAPI
+        spec:
+            containers:
+                - name: userAPI
+                  image: gitlab.sdu.dk:5050/semester-project-e2020/team-10-connection-security/template:userAPI
                   imagePullPolicy: Always
                   ports:
                       - containerPort: 3301
