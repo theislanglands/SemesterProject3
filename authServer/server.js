@@ -115,6 +115,7 @@ app.post('/login', (req, res) => {
     const password = req.body.password;
 
     try {
+        console.log('når her til');
         //checks the existence of the credentials in the db
         login(email, password).then((isAuth) => {
             if (isAuth) {
