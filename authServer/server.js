@@ -307,8 +307,9 @@ function getUserId(username) {
  * @param {*} email
  * @param {*} password
  */
-function login(email, password) {
-    return fetch(dataSecurityURL + '/login', {
+async function login(email, password) {
+    addEventListener.defaultPrevented();
+    return await fetch(dataSecurityURL + '/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
