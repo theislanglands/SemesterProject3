@@ -29,7 +29,7 @@ server.get('', (req, res) => {
     res.sendFile(__dirname + '/html/forgot/forgotPassword-page.html');
 });
 
-server.get('/music', authenticateRefreshToken, (req, res) => {
+server.get('/music', (req, res) => {
     // eslint-disable-next-line no-undef
     res.sendFile(path.join(__dirname + '/html/music.html'));
 });
