@@ -38,8 +38,11 @@
 
         const loginBtn = document.getElementById('submit');
         loginBtn.addEventListener('click', () => {
+            console.log(document.getElementById('email').value);
+            console.log(document.getElementById('password').value);
             fetch('http://kubuntu.stream.stud-srv.sdu.dk/service01/login', {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: document.getElementById('email').value,
                     password: document.getElementById('password').value
