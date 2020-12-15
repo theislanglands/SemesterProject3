@@ -21,8 +21,8 @@
         const logoutBtn = document.getElementById('logoutBtn');
         logoutBtn.addEventListener('click', () => {
             //MOCK_URL='https://localhost/auth/logout'
-            //KUBUNTU_URL="http://kubuntu-stream.stud-srv.sdu.dk/service01/logout"
-            fetch('http://kubuntu-stream.stud-srv.sdu.dk/service01/logout', {
+            //KUBUNTU_URL="http://kubuntu.stream.stud-srv.sdu.dk/service01/logout"
+            fetch('http://kubuntu.stream.stud-srv.sdu.dk/service01/logout', {
                 method: 'POST'
             });
         });
@@ -30,15 +30,15 @@
         const refreshBtn = document.getElementById('refreshBtn');
         refreshBtn.addEventListener('click', () => {
             //MOCK_URL='https://localhost/auth/refresh'
-            //KUBUNTU_URL="http://kubuntu-stream.stud-srv.sdu.dk/service01/refresh"
-            fetch('http://kubuntu-stream.stud-srv.sdu.dk/service01/refresh', {
+            //KUBUNTU_URL="http://kubuntu.stream.stud-srv.sdu.dk/service01/refresh"
+            fetch('http://kubuntu.stream.stud-srv.sdu.dk/service01/refresh', {
                 method: 'POST'
             });
         });
 
         const loginBtn = document.getElementById('submit');
         loginBtn.addEventListener('click', () => {
-            fetch('http://kubuntu-stream.stud-srv.sdu.dk/service01/login', {
+            fetch('http://kubuntu.stream.stud-srv.sdu.dk/service01/login', {
                 method: 'POST'
             });
         });
