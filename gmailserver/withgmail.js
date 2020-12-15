@@ -17,7 +17,7 @@ var mailDetails;
 var mailTitle = 'Reset your password';
 
 // eslint-disable-next-line no-undef
-var hyperlinkInEmail = 'http://stream.stud-srv.sdu.dk/reset';
+var hyperlinkInEmail = process.env.HYPERLINK_IN_EMAIL_MOCK;
 
 var mailTitleNoti = 'Your password has been changed';
 
@@ -128,15 +128,16 @@ const express = require('express');
 const server = express();
 const bodyparser = require('body-parser');
 
-// Create application/x-www-form-urlencoded parser
-//LÆS OP PÅ DETTE
-var urlencodedParser = bodyparser.urlencoded({
-    extended: true
-});
-
 server.use(express.static('html'));
 server.use(cookieparser());
 server.use(bodyparser.json());
+// Create application/x-www-form-urlencoded parser
+//LÆS OP PÅ DETTE
+server.use(
+    bodyparser.urlencoded({
+        extended: true
+    })
+);
 /**
  *
  * @param {*} text
@@ -166,7 +167,7 @@ function decode(text) {
     }
 }
 
-server.post('/forgotPass', urlencodedParser, async function (req, res) {
+server.post('/forgotPass', async function (req, res) {
     let endEmail = validator.escape(req.body.email);
     if (validator.isEmail(endEmail)) {
         let bool = await isValidUser(endEmail);
@@ -210,7 +211,7 @@ server.post('/forgotPass', urlencodedParser, async function (req, res) {
     }
 });
 
-server.post('/reset', urlencodedParser, function (req, res) {
+server.post('/reset', function (req, res) {
     let params = req.body.params;
     if (params !== undefined) {
         let clear = decode(decrypt(params));
@@ -226,7 +227,7 @@ server.post('/reset', urlencodedParser, function (req, res) {
         //kald database om email eksisterer
         let encryptedEmail = encrypt(encode(email));
         if (encryptedEmail !== undefined) {
-            if (isExpired(splitedClear, 1, 1)) {
+            if (isExpired(splitedClear, 1, 15)) {
                 res.json({
                     valid: true,
                     cookie: { name: 'mailtoken', value: encryptedEmail, maxAge: 900000 }
@@ -248,7 +249,7 @@ server.post('/reset', urlencodedParser, function (req, res) {
         return;
     }
 });
-server.post('/resetPassword_form', urlencodedParser, async function (req, res) {
+server.post('/resetPassword_form', async function (req, res) {
     const encryptedMail = req.cookies.mailtoken;
     if (encryptedMail === undefined) {
         res.sendStatus(406);
@@ -272,12 +273,10 @@ server.post('/resetPassword_form', urlencodedParser, async function (req, res) {
     }
 
     // sammenligning skal gøres på frontend og ikke her.
-    let sucess = await postNewPassword(decodedMail, password);
-    if (typeof sucess != 'string') {
-        res.status(424).send('mail service, can not request data security service');
-        return;
+    let sucess;
+    if (validator.isEmail(decodedMail)) {
+        sucess = await postNewPassword(decodedMail, password);
     }
-
     if (sucess) {
         sendNotifificationMail(decodedMail);
         res.send(JSON.stringify({ msg: 'the users password has been reset', success: true }));
@@ -298,10 +297,10 @@ var server1 = server.listen(8081, function () {
  * @param {*} indexOfTime
  * @param {*} valideInMinutes
  */
-function isExpired(splitedDecryptedArr, indexOfTime, valideInMinutes) {
+function isExpired(splitedDecryptedArr, indexOfTime, validInMinutes) {
     let decoded = splitedDecryptedArr;
     let timeCreated = parseInt(decoded[indexOfTime]);
-    var timeExpired = timeCreated + valideInMinutes * 60 * 1000;
+    var timeExpired = timeCreated + validInMinutes * 60 * 1000;
     let now = new Date();
     now = now.getTime();
     if (timeExpired > now) {
@@ -317,17 +316,15 @@ function isExpired(splitedDecryptedArr, indexOfTime, valideInMinutes) {
 function isValidUser(email) {
     // the following uri is not right, and needs to be a fetch to the backend which contains user info about email
     // eslint-disable-next-line no-undef
-    return fetch('http://redhat.stream.stud-srv.sdu.dk/isUser', {
+    return fetch(process.env.IS_USER, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ email: email })
-    })
-        .then((res) => res.text())
-        .catch((err) => {
-            return err;
-        });
+    }).then((res) => {
+        return res.text();
+    });
 }
 /**
  *
@@ -337,7 +334,7 @@ function isValidUser(email) {
 function postNewPassword(email, password) {
     // the password and the mail will be passed with fetch to the database API
     // eslint-disable-next-line no-undef
-    return fetch('http://redhat.stream.stud-srv.sdu.dk/newPassword', {
+    return fetch(process.env.POST_NEW_PASSWORD, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

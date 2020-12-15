@@ -37,14 +37,14 @@ app.use(function (req, res, next) {
 let refreshSecret = fs.readFileSync('./refreshSecret.key', 'utf8');
 //subscription db URL
 // eslint-disable-next-line no-undef
-const subscriptionURL = 'http://fedora.stream.stud-srv.sdu.dk';
+const subscriptionURL = process.env.SUBSCRIPTION_URL;
 //connetionSecurity URL
 // eslint-disable-next-line no-undef
-const dataSecurityURL = 'http://redhat.stream.stud-srv.sdu.dk';
+const dataSecurityURL = process.env.DATASECURITY_URL;
 //own service URL
 // eslint-disable-next-line no-undef
 //eslint-disable-next-line no-unused-vars
-const serviceUrl = 'http://kubuntu.stream.stud.-srv.sdu.dk';
+const serviceUrl = process.env.SERVICE_URL;
 
 //age of access token
 const fiveMins = 5 * 60 * 1000;
@@ -258,6 +258,10 @@ function getSubscriptionType(userId) {
         .then((data) => {
             data = JSON.parse(data);
             return data;
+        })
+        .catch((error) => {
+            console.error('function getSubscriptionType fail fetch', error);
+            console.log("coudn't login");
         });
 }
 /**
@@ -279,6 +283,9 @@ function getUserId(username) {
         .then((data) => {
             console.log(data);
             return data;
+        })
+        .catch((error) => {
+            console.error('function getUserId fail fetch', error);
         });
 }
 /**
@@ -301,6 +308,9 @@ function login(email, password) {
         .then((data) => {
             console.log(data);
             return data === 'true';
+        })
+        .catch((error) => {
+            console.error('function Login() fail fetch', error);
         });
 }
 /**
@@ -323,6 +333,9 @@ function storeRefreshId(email, refreshId, userAgent) {
         })
         .then((data) => {
             return data === 'true';
+        })
+        .catch((error) => {
+            console.error('function storeRefreshId fail fetch', error);
         });
 }
 /**
@@ -344,6 +357,9 @@ function verifyRefreshId(refreshId) {
         .then((data) => {
             console.log(data);
             return data === 'true';
+        })
+        .catch((error) => {
+            console.error('function verifyRefreshId fail fetch', error);
         });
 }
 /**
@@ -364,5 +380,33 @@ function removeRefreshId(refreshId) {
         })
         .then((data) => {
             return data === 'true';
+        })
+        .catch((error) => {
+            console.error('function removeRefreshId fail fetch', error);
+        });
+}
+
+/**
+ * gives a username and recieves all user-agents + refreshId, så that a user could log out other divivs currently logged in
+ * @param {*} username //data security expect the body to contain a field with key "username", although in reality it is a email
+ */
+function getUserAgentsAndRefreshId(username) {
+    return fetch(dataSecurityURL + '/getUserAgents', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'text/plain'
+        },
+        body: JSON.stringify({ username: username })
+    })
+        .then((res) => {
+            return res.text();
+        })
+        .then((data) => {
+            console.log(data);
+            return JSON.parse(data);
+        })
+        .catch((error) => {
+            console.error('function getUserAgentsAndFreshId fail fetch', error);
         });
 }
