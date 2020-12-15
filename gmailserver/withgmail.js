@@ -312,7 +312,7 @@ function isExpired(splitedDecryptedArr, indexOfTime, validInMinutes) {
 function isValidUser(email) {
     // the following uri is not right, and needs to be a fetch to the backend which contains user info about email
     // eslint-disable-next-line no-undef
-    return fetch(process.env.IS_USER_MOCKUP, {
+    return fetch(process.env.IS_USER_MOCK, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
