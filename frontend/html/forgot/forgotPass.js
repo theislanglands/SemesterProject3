@@ -2,7 +2,6 @@
 window.addEventListener('load', (event) => {
     var button = document.getElementById('submit');
     var div = document.getElementById('response');
-    var msg = '';
     button.addEventListener('click', function () {
         var input = document.getElementById('email');
         console.log(input.value);
@@ -14,7 +13,7 @@ window.addEventListener('load', (event) => {
                 'Content-Type': 'application/json',
                 Accept: 'application/json'
             },
-            body: JSON.stringify({email: input.value})
+            body: JSON.stringify({ email: input.value })
         })
             .then((response) => {
                 return response.text();
@@ -31,6 +30,5 @@ window.addEventListener('load', (event) => {
             .catch((error) => {
                 console.log('some error happened');
             });
-        
     });
 });

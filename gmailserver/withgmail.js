@@ -128,16 +128,16 @@ const express = require('express');
 const server = express();
 const bodyparser = require('body-parser');
 
-
-
 server.use(express.static('html'));
 server.use(cookieparser());
 server.use(bodyparser.json());
 // Create application/x-www-form-urlencoded parser
 //LÆS OP PÅ DETTE
-server.use(bodyparser.urlencoded({
-    extended: true
-}));
+server.use(
+    bodyparser.urlencoded({
+        extended: true
+    })
+);
 /**
  *
  * @param {*} text
@@ -318,7 +318,9 @@ function isValidUser(email) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ email: email })
-    }).then((res) => {return res.text()});
+    }).then((res) => {
+        return res.text();
+    });
 }
 /**
  *
