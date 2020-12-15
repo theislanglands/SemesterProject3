@@ -115,7 +115,6 @@ app.post('/login', (req, res) => {
     const password = req.body.password;
 
     try {
-        console.log('når her til');
         //checks the existence of the credentials in the db
         login(email, password).then((isAuth) => {
             if (isAuth) {
@@ -308,9 +307,8 @@ function getUserId(username) {
  * @param {*} email
  * @param {*} password
  */
-async function login(email, password) {
-    addEventListener.defaultPrevented();
-    return await fetch(dataSecurityURL + '/login', {
+function login(email, password) {
+    return fetch(dataSecurityURL + '/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
