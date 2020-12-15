@@ -312,7 +312,7 @@ function isExpired(splitedDecryptedArr, indexOfTime, validInMinutes) {
 function isValidUser(email) {
     // the following uri is not right, and needs to be a fetch to the backend which contains user info about email
     // eslint-disable-next-line no-undef
-    return fetch(process.env.IS_USER_MOCK, {
+    return fetch(process.env.IS_USER, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -330,7 +330,7 @@ function isValidUser(email) {
 function postNewPassword(email, password) {
     // the password and the mail will be passed with fetch to the database API
     // eslint-disable-next-line no-undef
-    return fetch(process.env.POST_NEW_PASSWORD_MOCK, {
+    return fetch(process.env.POST_NEW_PASSWORD, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

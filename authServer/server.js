@@ -37,14 +37,14 @@ app.use(function (req, res, next) {
 let refreshSecret = fs.readFileSync('./refreshSecret.key', 'utf8');
 //subscription db URL
 // eslint-disable-next-line no-undef
-const subscriptionURL = process.env.SUBSCRIPTION_URL_MOCK;
+const subscriptionURL = process.env.SUBSCRIPTION_URL;
 //connetionSecurity URL
 // eslint-disable-next-line no-undef
-const dataSecurityURL = process.env.DATASECURITY_URL_MOCK;
+const dataSecurityURL = process.env.DATASECURITY_URL;
 //own service URL
 // eslint-disable-next-line no-undef
 //eslint-disable-next-line no-unused-vars
-const serviceUrl = process.env.SERVICE_URL_MOCK;
+const serviceUrl = process.env.SERVICE_URL;
 
 //age of access token
 const fiveMins = 5 * 60 * 1000;
