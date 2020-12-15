@@ -391,6 +391,7 @@ function removeRefreshId(refreshId) {
  * @param {*} username //data security expect the body to contain a field with key "username", although in reality it is a email
  */
 function getUserAgentsAndRefreshId(username) {
+    // eslint-disable-previous-line
     return fetch(dataSecurityURL + '/getUserAgents', {
         method: 'POST',
         headers: {
