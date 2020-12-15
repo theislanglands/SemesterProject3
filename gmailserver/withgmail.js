@@ -17,7 +17,7 @@ var mailDetails;
 var mailTitle = 'Reset your password';
 
 // eslint-disable-next-line no-undef
-var hyperlinkInEmail = process.env.HYPERLINK_IN_EMAIL_MOCKUP;
+var hyperlinkInEmail = process.env.HYPERLINK_IN_EMAIL_MOCK;
 
 var mailTitleNoti = 'Your password has been changed';
 
@@ -330,7 +330,7 @@ function isValidUser(email) {
 function postNewPassword(email, password) {
     // the password and the mail will be passed with fetch to the database API
     // eslint-disable-next-line no-undef
-    return fetch(process.env.POST_NEW_PASSWORD_MOCKUP, {
+    return fetch(process.env.POST_NEW_PASSWORD_MOCK, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
