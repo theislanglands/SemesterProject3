@@ -183,42 +183,28 @@ def parse_from_youtube_json(json_file):
     print(metadata)
     return parse_to_json(metadata)
 
+
+
+
+
+
 #test reading youtube JSON
-
-#file = open('/Users/theislanglands/Dropbox/SDU/Semester3/semesterprojekt/gitlab/media-acquisition/MediaAcquisition/json_examples_youtube/Rihanna_-_Diamonds_lWA2pjMjpBs.info.json')
-file = open('/Users/theislanglands/Dropbox/SDU/Semester3/semesterprojekt/media-acquisition/MediaAcquisition/json_examples_youtube/Celine_Dion_-_My_Heart_Will_Go_On_HD_A3QAqZQYLIQ.info.json')
-
+file = open('/Users/theislanglands/Dropbox/SDU/Semester3/semesterprojekt/gitlab/media-acquisition/MediaAcquisition/json_examples_youtube/Rihanna_-_Diamonds_lWA2pjMjpBs.info.json')
+#file = open('/Users/theislanglands/Dropbox/SDU/Semester3/semesterprojekt/media-acquisition/MediaAcquisition/json_examples_youtube/Celine_Dion_-_My_Heart_Will_Go_On_HD_A3QAqZQYLIQ.info.json')
 newJson = parse_from_youtube_json(file)
 print(newJson)
 exit()
 
-
 # test creating an metadata object
 metadata = Metadata()
 metadata.name = "My heart will go on"
 metadata.artist = "Celine Dion"
 metadata.audio_type = "mp3"
 metadata.audio_id = "YT73564856"
-
-exit()
-
-
-
-
-
-
-
-
-
-# test creating an metadata object
-metadata = Metadata()
-metadata.name = "My heart will go on"
-metadata.artist = "Celine Dion"
-metadata.audio_type = "mp3"
-metadata.audio_id = "YT73564856"
-
 print(metadata.name)
 print(metadata.artist)
+print(metadata)
+exit()
 
 # test parsing object to Json
 metadata_asJson = parse_to_json(metadata)
