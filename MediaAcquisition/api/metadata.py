@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 
 class Metadata:
@@ -16,7 +17,7 @@ class Metadata:
         self._track_nr = None
         self._total_track_count = None
 
-        self._audio_type = None
+        self._audio_type = "mp3"
         self._bitrate = None
 
         self._created_at = None
@@ -134,24 +135,75 @@ class Metadata:
     def updated_at(self, updated_at):
         self._updated_at = updated_at
 
-def parseToJson(self):
+    def __str__(self):
+        print("toString")
+        return "audio_id " + self.audio_id + \
+                  "\nname " + self.name + \
+                  "\nartist" + self.artist + \
+                  "\nduration " + self.duration + \
+                  "\nrelease year " + self._release_year + \
+                  "\nartwork link " + self.artwork + \
+                  "\npart of collection " + str(self.collection) + \
+                  "\ncollection name " + self.collection_name + \
+                  "\ntrack " + self.track_nr + " of " + self.total_track_count + \
+                  "\naudio type " + self.audio_type + \
+                  "\nbitrate " + self.bitrate + \
+                  "\ncreated at " + self.created_at +\
+                  "\nupdated at " + self.updated_at
+
+def parse_to_json(self):
     return_json = json.dumps(self.__dict__)
     return_json = return_json.replace('"_', '"')
     return return_json
 
-def parseFromYoutubeJson(self):
-    pass
+def parse_from_youtube_json(json_file):
+    #parsing json_filo to dict
+    data = json.load(json_file)
 
+    # creating empty metadata object
+    metadata = Metadata()
 
-#test
+    # adding data from youtube json to metadata object
+    metadata.audio_id = "YT_"+str(data['id'])
+
+    # if no track in json - use video title & uploader
+    if (data['track']):
+        metadata.name = data['track']
+        metadata.artist = data['artist']
+    else:
+        metadata.name = data['title']
+        metadata.artist = data['uploader']
+    metadata.duration = data['duration']
+    metadata.release_year = data['upload_date']
+    metadata.artwork = data['thumbnail']
+    metadata.created_at = str(datetime.now())
+
+    return parse_to_json(metadata)
+
+#test reading youtube JSON
+file = open('/Users/theislanglands/Dropbox/SDU/Semester3/semesterprojekt/gitlab/media-acquisition/MediaAcquisition/json_examples_youtube/Rihanna_-_Diamonds_lWA2pjMjpBs.info.json')
+newJson = parse_from_youtube_json(file)
+#asJson = parse_to_json(newJson)
+print(newJson)
+exit()
+
+# test creating an metadata object
 metadata = Metadata()
 metadata.name = "My heart will go on"
 metadata.artist = "Celine Dion"
-metadata.audio_type="mp3"
-metadata.audio_id="YT73564856"
+metadata.audio_type = "mp3"
+metadata.audio_id = "YT73564856"
 
 print(metadata.name)
 print(metadata.artist)
 
-metadata_asJson = parseToJson(metadata)
+# test parsing object to Json
+metadata_asJson = parse_to_json(metadata)
 print(metadata_asJson)
+print(metadata.audio_id)
+print(metadata.name)
+print(metadata.artist)
+print(metadata.duration)
+print(metadata.artwork)
+print(metadata.created_at)
+exit()
