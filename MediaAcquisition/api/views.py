@@ -1,7 +1,12 @@
+import sys
+import traceback
+
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseNotFound
 from django.views.decorators.csrf import csrf_exempt
-from models import Metadata
+from api.models import Metadata
+from api.domain.youtubedlp import YoutubeDL
+
 import requests
 import yt_dlp
 
@@ -11,15 +16,37 @@ import yt_dlp
 
 
 
-def api_call(request):
+def api_call(request, link):
     message = 'this is a dummy message'
-    return JsonResponse(message, safe=False)
+
+    try:
+
+        y = YoutubeDL()
+        data = y.get_json(link)
+        return JsonResponse(data)
+    except Exception:
+        return HttpResponse(traceback.format_exc() + '   ' + str(link))
+
+    try:
+        meta_data = Metadata.objects.filter(audio_id=link)
+        if meta_data.exists:
+            id = meta_data.values()[0]['audio_id']
+            return HttpResponseNotFound(id + ' is already in database')
+        try:
+            youtubeDL = YoutubeDL()
+            youtubeDL.get_json(link)
+        except Exception as e:
+            return HttpResponse (str(e.__cause__))
+    except Exception as e:
+        return HttpResponse('not found. ' + str(e))
+
+
 
 
 def add_youtube_audio(request, link):
     #PSEUDO recipe
+
     #check if link already in database - if true return error msg
-    #
     #download ONLY JSON data without MP3.
     #check JSON data if video exceeds limit of 128 gb - if true return error msg
     #download video to filesystem

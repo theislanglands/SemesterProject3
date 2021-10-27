@@ -1,8 +1,7 @@
-import json
-
 import yt_dlp
 
-if __name__ == '__main__':
+
+class YoutubeDL:
     ydl_opts = {
         'format': 'bestaudio/best',
         'writeinfojson': True,
@@ -13,19 +12,23 @@ if __name__ == '__main__':
             'preferredquality': '192',
 
         }], }
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        #ydl.download('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
-        response = ydl.extract_info('https://www.youtube.com/watch?v=A3QAqZQYLIQ')
-        print(response)
 
 
+    def init(self):
+        pass
+
+    def get_json(self, url):
+        with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
+            json_data = ydl.extract_info(url)
+            return json_data
 
 
+    def get_mp3(self):
+        pass
 
 
-
-
-
-
-
+if __name__ == '__main__':
+    y = YoutubeDL()
+    data = y.get_json('dQw4w9WgXcQ')
+    print(data['id'])
 

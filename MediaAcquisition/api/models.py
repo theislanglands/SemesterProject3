@@ -16,4 +16,7 @@ class Metadata(models.Model):
     bitrate = models.IntegerField(null=True)
 
     def __str__(self):
-        return self.name
+        return_string = self.audio_id + ' ' + self.name
+        return return_string
+
+

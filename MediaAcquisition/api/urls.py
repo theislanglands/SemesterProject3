@@ -3,7 +3,7 @@ from .views import *
 
 
 urlpatterns = [
-    path('dummy/', api_call),
+    path('dummy/<link>', api_call),
     path('json/<link>/', add_youtube_audio),
 ]
 
