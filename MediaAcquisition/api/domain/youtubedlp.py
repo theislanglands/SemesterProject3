@@ -16,7 +16,8 @@ if __name__ == '__main__':
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         #ydl.download('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
         response = ydl.extract_info('https://www.youtube.com/watch?v=xvFZjo5PgG0')
-        print(response['title'])
+        print(response)
+
 
 
 

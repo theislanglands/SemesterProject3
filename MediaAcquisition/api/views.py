@@ -9,24 +9,13 @@ import yt_dlp
 
 # Create your views here.
 
-ydl_opts = {
-        'format': 'bestaudio/best',
-        'writeinfojson': True,
-        'clean_infojson': True,
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-
-        }], }
-
-
 
 def api_call(request):
     message = 'this is a dummy message'
     return JsonResponse(message, safe=False)
 
-def upload_video(request, link):
+
+def add_youtube_audio(request, link):
     #PSEUDO recipe
     #check if link already in database - if true return error msg
     #download ONLY JSON data without MP3.
@@ -35,12 +24,24 @@ def upload_video(request, link):
     #send metadata to meta data team.
     #return 200 code succes
     #
-
     return JsonResponse(str(link), safe=False)
-    #
-    #with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-    #    response = ydl.extract_info(link)
-    #    return JsonResponse(response['title'])
 
-def send_meta(data):
+
+def get_audio(request, id):
     pass
+
+
+def add_custom_audio(request):
+    pass
+
+
+def delete_audio(request, id):
+    pass
+
+
+def send_meta_data(data):
+    pass
+
+
+
+
