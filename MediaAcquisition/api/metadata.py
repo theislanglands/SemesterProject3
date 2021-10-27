@@ -1,3 +1,6 @@
+import json
+
+
 class Metadata:
 
     def __init__(self):
@@ -26,7 +29,7 @@ class Metadata:
     @audio_id.setter
     def audio_id(self, audio_id):
         self._audio_id = audio_id
-    
+
     @property
     def name(self):
         return self._name
@@ -82,7 +85,7 @@ class Metadata:
     @collection_name.setter
     def collection_name(self, collection_name):
         self._collection_name = collection_name
-        
+
     @property
     def track_nr(self):
         return self._track_nr
@@ -131,4 +134,21 @@ class Metadata:
     def updated_at(self, updated_at):
         self._updated_at = updated_at
 
-    
+
+def parseToJson(self):
+    return_json = json.dumps(self.__dict__)
+    return_json = return_json.replace('"_', '"')
+    return return_json
+
+
+metadata = Metadata()
+metadata.name = "My heart will go on"
+metadata.artist = "Celine Dion"
+metadata.audio_type="mp3"
+metadata.audio_id="YT73564856"
+
+print(metadata.name)
+print(metadata.artist)
+
+metadata_asJson = parseToJson(metadata)
+print(metadata_asJson)
