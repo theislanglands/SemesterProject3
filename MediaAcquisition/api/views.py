@@ -10,6 +10,7 @@ import yt_dlp
 # Create your views here.
 
 
+
 def api_call(request):
     message = 'this is a dummy message'
     return JsonResponse(message, safe=False)
@@ -22,6 +23,7 @@ def add_youtube_audio(request, link):
     #check JSON data if video exceeds limit of 128 gb - if true return error msg
     #download video to filesystem
     #send metadata to meta data team.
+    #Retry if fail
     #return 200 code succes
     #
     return JsonResponse(str(link), safe=False)
@@ -37,11 +39,3 @@ def add_custom_audio(request):
 
 def delete_audio(request, id):
     pass
-
-
-def send_meta_data(data):
-    pass
-
-
-
-

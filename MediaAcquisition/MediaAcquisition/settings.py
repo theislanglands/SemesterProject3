@@ -78,13 +78,14 @@ WSGI_APPLICATION = 'MediaAcquisition.wsgi.application'
 DATABASES = {
    'default': {
        'ENGINE': 'django.db.backends.postgresql',
-       'NAME': '<database_name>',
-       'USER': '<database_username>',
-       'PASSWORD': '<password>',
-       'HOST': '<database_hostname_or_ip>',
-       'PORT': '<database_port>',
+       'NAME': 'media-acquisition',
+       'USER': 'root',
+       'PASSWORD': 'secret',
+       'HOST': '127.0.0.1',
+       'PORT': '5432',
    }
 }
+
 
 
 # Password validation
