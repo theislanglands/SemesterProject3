@@ -134,13 +134,16 @@ class Metadata:
     def updated_at(self, updated_at):
         self._updated_at = updated_at
 
-
 def parseToJson(self):
     return_json = json.dumps(self.__dict__)
     return_json = return_json.replace('"_', '"')
     return return_json
 
+def parseFromYoutubeJson(self):
+    pass
 
+
+#test
 metadata = Metadata()
 metadata.name = "My heart will go on"
 metadata.artist = "Celine Dion"
