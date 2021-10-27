@@ -157,6 +157,7 @@ def parse_to_json(self):
 
 def parse_from_youtube_json(json_file):
     #parsing json_filo to dict
+
     data = json.load(json_file)
 
     # creating empty metadata object
@@ -167,7 +168,7 @@ def parse_from_youtube_json(json_file):
 
     # if no track in json - use video title & uploader
     if 'track' in data:
-        metadata.name = data['track']
+        metadata.name = data["track"]
     else:
         metadata.name = data['title']
 
@@ -176,43 +177,15 @@ def parse_from_youtube_json(json_file):
     else:
         metadata.artist = data['uploader']
 
+    if 'album' in data:
+        metadata.collection = True
+        metadata.collection_name = data['album']
+
     metadata.duration = data['duration']
     metadata.release_year = data['upload_date']
     metadata.artwork = data['thumbnail']
-    metadata.created_at = str(datetime.now())
-    print(metadata)
+    metadata.created_at = str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+
+    #print(metadata)
     return parse_to_json(metadata)
 
-
-
-
-
-
-#test reading youtube JSON
-file = open('/Users/theislanglands/Dropbox/SDU/Semester3/semesterprojekt/gitlab/media-acquisition/MediaAcquisition/json_examples_youtube/Rihanna_-_Diamonds_lWA2pjMjpBs.info.json')
-#file = open('/Users/theislanglands/Dropbox/SDU/Semester3/semesterprojekt/media-acquisition/MediaAcquisition/json_examples_youtube/Celine_Dion_-_My_Heart_Will_Go_On_HD_A3QAqZQYLIQ.info.json')
-newJson = parse_from_youtube_json(file)
-print(newJson)
-exit()
-
-# test creating an metadata object
-metadata = Metadata()
-metadata.name = "My heart will go on"
-metadata.artist = "Celine Dion"
-metadata.audio_type = "mp3"
-metadata.audio_id = "YT73564856"
-print(metadata.name)
-print(metadata.artist)
-print(metadata)
-exit()
-
-# test parsing object to Json
-metadata_asJson = parse_to_json(metadata)
-print(metadata_asJson)
-print(metadata.audio_id)
-print(metadata.name)
-print(metadata.artist)
-print(metadata.duration)
-print(metadata.artwork)
-print(metadata.created_at)
-exit()
