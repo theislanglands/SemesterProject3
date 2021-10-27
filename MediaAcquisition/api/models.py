@@ -1,9 +1,7 @@
 from django.db import models
-import json
 
 
-class metadata(models.Model):
-
+class Metadata(models.Model):
     audio_id = models.CharField(max_length=255, primary_key=True)
     name = models.CharField(max_length=255)
     artist = models.CharField(max_length=255)

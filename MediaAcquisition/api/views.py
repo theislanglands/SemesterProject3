@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import JSONParser
+from models import Metadata
 import requests
 import yt_dlp
 
@@ -19,6 +19,7 @@ def api_call(request):
 def add_youtube_audio(request, link):
     #PSEUDO recipe
     #check if link already in database - if true return error msg
+    #
     #download ONLY JSON data without MP3.
     #check JSON data if video exceeds limit of 128 gb - if true return error msg
     #download video to filesystem
