@@ -321,3 +321,4 @@ fabric.properties
 # Cython debug symbols
 
 # End of https://www.toptal.com/developers/gitignore/api/python,pycharm,django
+/MediaAcquisition/youtubeDLManager/temp/
