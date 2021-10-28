@@ -14,7 +14,7 @@ import yt_dlp
 # Create your views here.
 
 
-
+#this is a test class, don't use it
 def api_call(request, link):
     message = 'this is a dummy message'
 
@@ -44,8 +44,7 @@ def api_call(request, link):
 
 
 def add_youtube_audio(request, link):
-    #PSEUDO recipe
-    #check if link already in database - if true return error msg
+    #check if link already in database
     try:
         return_meta_data = Metadata.objects.filter(audio_id=link)
 
@@ -53,14 +52,7 @@ def add_youtube_audio(request, link):
             id = return_meta_data.values()[0]['audio_id']
             return HttpResponseNotFound(id + ' is already in database')
         else:
-            try:
-
-
-                ##CHeck for exceeding 128 gb if true, return error
-
-
-
-
+                #download youtubeJSON data
                 y = YoutubeDL()
                 data = y.get_json(link)
                 print(str(data))
@@ -69,8 +61,6 @@ def add_youtube_audio(request, link):
                 new_entry = Metadata(id)
                 new_entry.save()
                 return HttpResponse('du er et fgt')
-            except Exception:
-                return HttpResponse(traceback.format_exc() + '   ' + str(link))
     except Exception:
         return HttpResponse(traceback.format_exc())
     #check if link already in database - if true return error msg
@@ -94,7 +84,4 @@ def add_custom_audio(request):
 
 
 def delete_audio(request, id):
-
-
-
-
+    pass

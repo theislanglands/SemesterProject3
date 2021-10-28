@@ -4,6 +4,6 @@ from .views import *
 
 urlpatterns = [
     path('dummy/<link>', api_call),
-    path('upload/<link>/', add_youtube_audio),
+    path('upload/<link>/', add_youtube_audio)
 ]
 
