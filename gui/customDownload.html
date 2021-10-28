@@ -2,24 +2,25 @@
 
     <head>
         <link rel="stylesheet" href="css/style.css">
+        <script src="customUpload.js"></script>
     </head>
 
 
     <body>
 
-        <div>
-            <form action="upload.php" method="">
-                <input type="text" name="name" placeholder="Song Name">
+        <div id="customAudioForm">
+            
+                <input type="text" name="name" id="name" placeholder="Song Name">
                 <input type="text" name="artist" placeholder="Artist Name">
                 <input type="number" name="year" placeholder="Release Year">
                 <input type="text" name="collection" placeholder="Collection">
                 <input type="number" name="track_nr" placeholder="Track Number">
                 <input type="number" name="total_track_count" placeholder="Total Track Count">
-                <input type="file" name="art" accept="image/jpeg, image/png">
-                <input type="file" name="audio">
+                <input type="file" name="art" id="art" accept="image/jpeg, image/png">
+                <input type="file" name="audio" id="audio">
 
-                <input type="submit">
-            </form>
+                <button type="submit" onclick="return cuSubmit()">Submit</button>
+            
         </div>
 
     </body>
