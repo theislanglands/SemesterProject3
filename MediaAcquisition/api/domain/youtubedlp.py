@@ -1,6 +1,5 @@
 import yt_dlp
 
-
 class YoutubeDL:
     ydl_opts = {
         'format': 'bestaudio/best',
@@ -23,7 +22,10 @@ class YoutubeDL:
             return json_data
 
 
-    def get_mp3(self):
+    def get_mp3(self, url):
+        #Download mp3
+        #send to server
+        #if succes. return TRue, 200 'ok'
         pass
 
 
@@ -31,4 +33,6 @@ if __name__ == '__main__':
     y = YoutubeDL()
     data = y.get_json('dQw4w9WgXcQ')
     print(data['id'])
+
+
 
