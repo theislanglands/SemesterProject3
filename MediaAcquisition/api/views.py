@@ -20,7 +20,6 @@ def api_call(request, link):
     message = 'this is a dummy message'
 
     try:
-
         y = YoutubeDL()
         data = y.get_json(link)
         return JsonResponse(data)
@@ -45,7 +44,6 @@ def api_call(request, link):
 
 def add_youtube_audio(request, link):
     #PSEUDO recipe
-
     #check if link already in database - if true return error msg
     #download ONLY JSON data without MP3.
     #check JSON data if video exceeds limit of 128 gb - if true return error msg
@@ -58,6 +56,7 @@ def add_youtube_audio(request, link):
 
 
 def get_audio(request, id):
+
     pass
 
 
