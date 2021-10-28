@@ -37,6 +37,7 @@ class YoutubeDL:
 
 if __name__ == '__main__':
     y = YoutubeDL()
+    print(y.get_json('vosH4sRJgQA'))
     # data = y.get_json('vosH4sRJgQA')
     y.get_mp3(['vosH4sRJgQA'])
 
