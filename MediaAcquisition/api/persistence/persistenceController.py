@@ -11,10 +11,9 @@ pw = 'MediaAcquisition09!'
 
 ftp = FTP(host)  # connect to host, default port (21)
 ftp.login(username, pw)
-print(ftp.getwelcome())  # check connection
+# print(ftp.getwelcome())  # check connection
 ftp.cwd(root)  # change workingdirectory
-ftp.dir()  # show contents of folder
-id = "all_my_love"
+#ftp.dir()  # show contents of folder
 
 
 def storeAudio(localFilePath, fileNameOnServer):
@@ -27,13 +26,16 @@ def storeAudio(localFilePath, fileNameOnServer):
         print('Ftp fail -> ', e)
         return False
 
-def check_id(YoutubeID):
-    pass
-
+def check_id(youtube_id):
+    # check with youtube API if a video ecist with that id
+   pass
 
 def checkIfExist(id):
-    pass
-
+    filename = id + '.mp3'  # adds mp3 to id
+    for fn in ftp.nlst():  # looping through all filenames on server
+        if fn == filename:
+            return True
+    return False
 
 def getAudio(id):
     returnURL = 'http://' + domain + '/' + root + '/' + id + '.mp3'
@@ -45,7 +47,12 @@ def downloadAudio(id, path):
     ftp.retrbinary("RETR " + filename + ", open(filename, 'wb').write)")  # henter fil ned ad ftp
 
 
-filepath = '/Users/theislanglands/Dropbox/SDU/Semester3/semesterprojekt/media-acquisition/MediaAcquisition/api/persistence/test-upload.txt'
+#Test
+#filepath = '/Users/theislanglands/Dropbox/SDU/Semester3/semesterprojekt/media-acquisition/MediaAcquisition/api/persistence/test-upload.txt'
 # storeAudio(filepath, 'test-upload.txt')
 
-print(getAudio("all_my_love"))
+#print(getAudio("all_my_love"))
+
+print(checkIfExist("all_my_love"))
+
+
