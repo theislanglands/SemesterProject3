@@ -1,7 +1,6 @@
 from django.db import models
 
 
-    duration = None
 class Metadata(models.Model):
     audio_id = models.CharField(max_length=255, primary_key=True)
     name = models.CharField(max_length=255)

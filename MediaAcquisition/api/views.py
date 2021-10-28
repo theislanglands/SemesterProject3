@@ -6,7 +6,6 @@ from django.http import HttpResponse, JsonResponse, HttpResponseNotFound
 from django.views.decorators.csrf import csrf_exempt
 from api.models import Metadata
 from api.domain.youtubedlp import YoutubeDL
-from api.metadata import Metadata
 import requests
 import yt_dlp
 
@@ -49,24 +48,31 @@ def add_youtube_audio(request, link):
     #check if link already in database - if true return error msg
     try:
         return_meta_data = Metadata.objects.filter(audio_id=link)
-        if return_meta_data.exists:
+
+        if return_meta_data:
             id = return_meta_data.values()[0]['audio_id']
             return HttpResponseNotFound(id + ' is already in database')
         else:
             try:
 
+
+                ##CHeck for exceeding 128 gb if true, return error
+
+
+
+
                 y = YoutubeDL()
                 data = y.get_json(link)
-                name = data['name']
-                artist = data['artist']
-                id = data['audio_id']
-                new_entry = Metadata(id, name, artist)
+                print(str(data))
+                id = data['id']
+                print(id)
+                new_entry = Metadata(id)
                 new_entry.save()
                 return HttpResponse('du er et fgt')
             except Exception:
                 return HttpResponse(traceback.format_exc() + '   ' + str(link))
-    except Exception as e:
-        return HttpResponse(str(e.__cause__))
+    except Exception:
+        return HttpResponse(traceback.format_exc())
     #check if link already in database - if true return error msg
     #download ONLY JSON data without MP3.
     #check JSON data if video exceeds limit of 128 gb - if true return error msg
@@ -88,6 +94,7 @@ def add_custom_audio(request):
 
 
 def delete_audio(request, id):
-    pass
+
+
 
 
