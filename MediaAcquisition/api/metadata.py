@@ -158,7 +158,7 @@ def parse_to_json(self):
 def parse_from_youtube_json(json_file):
     #parsing json_filo to dict
 
-    data = json.load(json_file)
+    data = json.load(json_file)      #TODO implement function for a json string, instead of a file. spørg joachim
 
     # creating empty metadata object
     metadata = Metadata()
