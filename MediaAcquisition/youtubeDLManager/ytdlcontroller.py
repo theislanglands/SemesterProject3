@@ -1,3 +1,5 @@
+import os
+
 import yt_dlp
 
 
@@ -6,7 +8,7 @@ class YoutubeDL:
         'format': 'bestaudio/best',
         'writeinfojson': True,
         'clean_infojson': True,
-        'outtmpl': '/home/baumann/PycharmProjects/media-acquisition/MediaAcquisition/youtubeDLManager/temp/YT_%(id)s.%(ext)s',
+        'outtmpl': os.getcwd() + '/temp' '/YT_%(id)s.%(ext)s',
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
