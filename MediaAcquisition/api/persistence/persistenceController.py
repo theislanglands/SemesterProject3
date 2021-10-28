@@ -1,5 +1,6 @@
 import ftplib
 from ftplib import FTP
+import requests
 
 # ftp config
 host = 'ftp.foreignlands.dk'
@@ -13,8 +14,7 @@ ftp = FTP(host)  # connect to host, default port (21)
 ftp.login(username, pw)
 # print(ftp.getwelcome())  # check connection
 ftp.cwd(root)  # change workingdirectory
-#ftp.dir()  # show contents of folder
-
+#ftp.dir()  # show contents of working directory
 
 def storeAudio(localFilePath, fileNameOnServer):
     try:
@@ -27,8 +27,8 @@ def storeAudio(localFilePath, fileNameOnServer):
         return False
 
 def check_id(youtube_id):
-    # check with youtube API if a video ecist with that id
-   pass
+    pass
+    # done with try-catch i yt downloader
 
 def checkIfExist(id):
     filename = id + '.mp3'  # adds mp3 to id
@@ -41,18 +41,20 @@ def getAudio(id):
     returnURL = 'http://' + domain + '/' + root + '/' + id + '.mp3'
     return returnURL
 
-
 def downloadAudio(id, path):
     filename = id + '.mp3'
     ftp.retrbinary("RETR " + filename + ", open(filename, 'wb').write)")  # henter fil ned ad ftp
 
-
-#Test
-#filepath = '/Users/theislanglands/Dropbox/SDU/Semester3/semesterprojekt/media-acquisition/MediaAcquisition/api/persistence/test-upload.txt'
-# storeAudio(filepath, 'test-upload.txt')
-
-#print(getAudio("all_my_love"))
-
-print(checkIfExist("all_my_love"))
+def delete_audio(id):
+    filename = id + '.mp3'
+    print(filename)
+    text = ftp.delete(filename)
+    print(text)
+    # returns status of delete
+    if text.find('250') != -1:
+        return True
+    else:
+        print("Delete unsuccesful")
+        return False
 
 
