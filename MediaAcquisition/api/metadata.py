@@ -135,6 +135,33 @@ class Metadata:
     def updated_at(self, updated_at):
         self._updated_at = updated_at
 
+    def sort_meta_data(self, data):
+        # if no track in json - use video title & uploader
+
+
+        if 'track' in data:
+            self.name = data["track"]
+        else:
+            self.name = data['title']
+
+        if 'artist' in data:
+            self.artist = data['artist']
+        else:
+            self.artist = data['uploader']
+
+        if 'album' in data:
+            self.collection = True
+            self.collection_name = data['album']
+
+        self.duration = data['duration']
+        self.release_year = data['upload_date']
+        self.artwork = data['thumbnail']
+        self.created_at = str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+
+        # print(metadata)
+        return parse_to_json(self)
+
+
     def __str__(self):
         return "audio_id: " + self.audio_id + \
                "\nname: " + self.name + \

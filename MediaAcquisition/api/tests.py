@@ -44,5 +44,3 @@ class MetaDataTestCase(TestCase):
         self.assertEqual(metadata_result, newJson, "youtube metadata failed - denne test har bugs i metadata_result")
 
 
-
-

@@ -17,10 +17,13 @@ class YoutubeDL:
         pass
 
     def get_json(self, url):
-        with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
-            json_data = ydl.extract_info(url, download=False)
-            return json_data
+        try:
 
+            with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
+                json_data = ydl.extract_info(url, download=False)
+                return json_data
+        except Exception:
+            return None
 
 
 
