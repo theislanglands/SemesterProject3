@@ -76,7 +76,7 @@ def add_youtube_audio(request, link):
     #check if link already in database - if true return error msg
     #download ONLY JSON data without MP3.
     #check JSON data if video exceeds limit of 128 gb - if true return error msg
-    #download video to filesystem
+    #download mp3 to filesystem
     #send metadata to meta data team.
     #Retry if fail
     #return 200 code succes
@@ -93,8 +93,23 @@ def add_custom_audio(request):
     pass
 
 
-def delete_audio(request, id):
+def delete_audio(request, link):
+    try:
+        return_meta_data = Metadata.objects.filter(audio_id=link)
 
+        if not return_meta_data:
+            id = return_meta_data.values()[0]['audio_id']
+            return HttpResponseNotFound(id + ' does not exist in the database')
+        else:
+            try:
+                id = return_meta_data.values()[0]['audio_id']
+                delete_entry = Metadata(id)
+                delete_entry.delete()
+                return HttpResponse('File has been deleted')
+            except Exception:
+                return HttpResponse(traceback.format_exc() + '   ' + str(link))
+    except Exception:
+        return HttpResponse(traceback.format_exc())
 
 
 
