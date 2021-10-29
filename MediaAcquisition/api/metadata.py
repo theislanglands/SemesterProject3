@@ -191,7 +191,9 @@ class Metadata:
 
         # creating empty metadata object
 
-        dict = {}
+        dict = {'aduio_id': None, 'name': None,'artist':None,'duration':None,'release_year':None,'artwork':None,
+                'collection':False,'collection_name':None,'track_nr':None,'total_track_count':None,'audio_type':'mp3',
+                'bitrate':None,'created_at':None,'updated_at':None}
 
         audio_id = None
         self._name = None
@@ -216,26 +218,26 @@ class Metadata:
 
         # if no track in json - use video title & uploader
         if 'track' in data:
-            self.name = data["track"]
+            dict["name"] = data["track"]
         else:
-            self.name = data['title']
+            dict["name"] = data['title']
 
         if 'artist' in data:
-            self.artist = data['artist']
+            dict["artist"] = data['artist']
         else:
-            self.artist = data['uploader']
+            dict["artist"] = data['uploader']
 
         if 'album' in data:
-            self.collection = True
-            self.collection_name = data['album']
+            dict["collection"] = True
+            dict["collection_name"] = data['album']
 
-        self.duration = data['duration']
-        self.release_year = data['upload_date']
-        self.artwork = data['thumbnail']
-        self.created_at = str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+        dict["duration"] = data['duration']
+        dict["release_year"] = data['upload_date']
+        dict["artwork"] = data['thumbnail']
+        dict["created_at"] = str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
         #print(metadata)
-        return self
+        return dict
 
 
 
