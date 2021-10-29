@@ -1,6 +1,5 @@
 import ftplib
 from ftplib import FTP
-import requests
 
 # ftp config
 host = 'ftp.foreignlands.dk'
@@ -10,13 +9,16 @@ username = 'foreignlands.dk'
 port = 21
 pw = 'MediaAcquisition09!'
 
+#
 ftp = FTP(host)  # connect to host, default port (21)
 ftp.login(username, pw)
-# print(ftp.getwelcome())  # check connection
-ftp.cwd(root)  # change workingdirectory
-#ftp.dir()  # show contents of working directory
+# print(ftp.getwelcome())  # check connection & print welcome
+ftp.cwd(root)  # change working directory to root
+# ftp.dir()  # show contents of working directory
+
 
 def storeAudio(localFilePath, fileNameOnServer):
+    file = None
     try:
         file = open(localFilePath, "rb")  # open file to send
         ftp.storbinary('STOR ' + '/' + root + '/' + fileNameOnServer, file)  # send the file
@@ -26,9 +28,14 @@ def storeAudio(localFilePath, fileNameOnServer):
         print('Ftp fail -> ', e)
         return False
 
+    finally:
+        file.close()
+
+
 def check_id(youtube_id):
     pass
     # done with try-catch i yt downloader
+
 
 def checkIfExist(id):
     filename = id + '.mp3'  # adds mp3 to id
@@ -37,24 +44,24 @@ def checkIfExist(id):
             return True
     return False
 
+
 def getAudio(id):
     returnURL = 'http://' + domain + '/' + root + '/' + id + '.mp3'
     return returnURL
 
-def downloadAudio(id, path):
+
+def downloadAudio(id, path): #not used, but maybe later!
     filename = id + '.mp3'
     ftp.retrbinary("RETR " + filename + ", open(filename, 'wb').write)")  # henter fil ned ad ftp
 
+
 def delete_audio(id):
     filename = id + '.mp3'
-    print(filename)
-    text = ftp.delete(filename)
-    print(text)
-    # returns status of delete
-    if text.find('250') != -1:
+    status = ftp.delete(filename)
+    print(status)
+
+    # returns status of delete operation
+    if status.find('250') != -1:
         return True
     else:
-        print("Delete unsuccesful")
         return False
-
-

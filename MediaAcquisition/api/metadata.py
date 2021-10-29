@@ -157,8 +157,11 @@ def parse_to_json(self):
 
 def parse_from_youtube_json(json_file):
     #parsing json_filo to dict
+    #data = json.load(json_file)      #TODO implement function for a json string, instead of a file. spørg joachim
 
-    data = json.load(json_file)      #TODO implement function for a json string, instead of a file. spørg joachim
+    #jason string to dict
+    data = json.load(json_file)
+    #print(data)
 
     # creating empty metadata object
     metadata = Metadata()
@@ -189,3 +192,9 @@ def parse_from_youtube_json(json_file):
     #print(metadata)
     return parse_to_json(metadata)
 
+#test
+metadata_result = open('/Users/theislanglands/Dropbox/SDU/Semester3/semesterprojekt/media-acquisition/MediaAcquisition/json_examples_youtube/Calum_Scott_-_You_Are_The_Reason_Official_Video_ShZ978fBl6Y.info.json')
+result = json.load(metadata_result)
+result_str = "" + result
+print(result_str)
+#parse_from_youtube_json(metadata_result)
