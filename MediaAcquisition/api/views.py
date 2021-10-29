@@ -45,7 +45,6 @@ def add_youtube_audio(request, link):
             if filesize > 137438953472: # 128 GB is bytes
                 return HttpResponse('Filesize exceeds the 128 GB limit')
 
-            #todo: Add sorting at metadata object
 
             new_entry = AudioObject(data['id'], data)
             new_entry.save()
