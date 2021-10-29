@@ -8,3 +8,4 @@ urlpatterns = [
     path('delete_track/<link>', delete_audio),
     path('get_track/<link>', get_audio)
 ]
+

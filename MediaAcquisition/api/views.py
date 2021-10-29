@@ -9,7 +9,7 @@ from api.domain.youtubedlp import YoutubeDL
 import requests
 import yt_dlp
 import json
-from metadata import Metadata
+from api.metadata import Metadata
 
 # Create your views here.
 
@@ -56,10 +56,13 @@ def add_youtube_audio(request, link):
 
 
             parser = Metadata()
-            parser.sort_meta_data(data)
+            meta_obj = parser.parse_from_youtube_json(data)
 
+            print(meta_obj.audio_id + ' ' + meta_obj.name + ' ' + meta_obj.artist)
 
-            new_entry = AudioObject(id)
+            return HttpResponse('succes')
+
+            new_entry = AudioObject(meta_obj.audio_id)
             new_entry.save()
             return HttpResponse('New track URL added to database')
 

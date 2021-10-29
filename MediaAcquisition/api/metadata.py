@@ -138,6 +138,7 @@ class Metadata:
     def sort_meta_data(self, data):
         # if no track in json - use video title & uploader
 
+        print(str(data))
 
         if 'track' in data:
             self.name = data["track"]
@@ -158,8 +159,9 @@ class Metadata:
         self.artwork = data['thumbnail']
         self.created_at = str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
-        # print(metadata)
-        return parse_to_json(self)
+        return self.parse_to_json(self)
+
+
 
 
     def __str__(self):
@@ -177,42 +179,43 @@ class Metadata:
                 "\ncreated at " + str(self.created_at) + \
                 "\nupdated at " + str(self.updated_at)
 
-def parse_to_json(self):
-    return_json = json.dumps(self.__dict__)
-    return_json = return_json.replace('"_', '"')
-    return return_json
+    def parse_to_json(self):
+        return_json = json.dumps(self.__dict__)
+        return_json = return_json.replace('"_', '"')
+        return return_json
 
-def parse_from_youtube_json(json_file):
-    #parsing json_filo to dict
+    def parse_from_youtube_json(self, json_file):
+        #parsing json_filo to dict
 
-    data = json.load(json_file)
+        data = json.load(json_file)
 
-    # creating empty metadata object
-    metadata = Metadata()
+        # creating empty metadata object
 
-    # adding data from youtube json to metadata object
-    metadata.audio_id = "YT_"+str(data['id'])
+        # adding data from youtube json to metadata object
+        self.audio_id = "YT_"+str(data['id'])
 
-    # if no track in json - use video title & uploader
-    if 'track' in data:
-        metadata.name = data["track"]
-    else:
-        metadata.name = data['title']
+        # if no track in json - use video title & uploader
+        if 'track' in data:
+            self.name = data["track"]
+        else:
+            self.name = data['title']
 
-    if 'artist' in data:
-        metadata.artist = data['artist']
-    else:
-        metadata.artist = data['uploader']
+        if 'artist' in data:
+            self.artist = data['artist']
+        else:
+            self.artist = data['uploader']
 
-    if 'album' in data:
-        metadata.collection = True
-        metadata.collection_name = data['album']
+        if 'album' in data:
+            self.collection = True
+            self.collection_name = data['album']
 
-    metadata.duration = data['duration']
-    metadata.release_year = data['upload_date']
-    metadata.artwork = data['thumbnail']
-    metadata.created_at = str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+        self.duration = data['duration']
+        self.release_year = data['upload_date']
+        self.artwork = data['thumbnail']
+        self.created_at = str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
-    #print(metadata)
-    return parse_to_json(metadata)
+        #print(metadata)
+        return self
+
+
 
