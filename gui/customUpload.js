@@ -1,5 +1,4 @@
 
-    
     window.onload = () => {
         
         var maxArtSize = 2; //in MB
@@ -27,7 +26,9 @@
     }
 
     function cuSubmit(){
-        
+
+        const httpRequest = new XMLHttpRequest()
+        const apiEndpoint = "ADDRESS";
         var artFile;
         var audioFile;
         var metaDataJson = {};
@@ -55,7 +56,18 @@
                 
         //send data to api
         
-       
+        httpRequest.open('POST', apiEndpoint, true); //open request to api
+
+        //Send the proper header information along with the request
+        httpRequest.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
+
+        httpRequest.onreadystatechange = function() { //Call a function when the state changes.
+            if(httpRequest.readyState == 4 && httpRequest.status == 200) {
+                alert(httpRequest.responseText);
+            }
+        }
+        //add 2 files (art and audio)
+        httpRequest.send(metaDataJson);
     
 
 
