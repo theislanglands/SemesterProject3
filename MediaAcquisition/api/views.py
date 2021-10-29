@@ -32,7 +32,6 @@ def add_youtube_audio(request, link):
     try:
         return_meta_data = AudioObject.objects.filter(audio_id=link)
         if return_meta_data:
-            id = return_meta_data.values()[0]['audio_id']
             return HttpResponseNotFound('Song already in database')
         else:
             # download youtubeJSON data
