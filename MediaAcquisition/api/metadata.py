@@ -191,6 +191,26 @@ class Metadata:
 
         # creating empty metadata object
 
+        dict = {}
+
+        audio_id = None
+        self._name = None
+        self._artist = None
+        self._duration = None
+        self._release_year = None
+        self._artwork = None
+
+        self._collection = False
+        self._collection_name = None
+        self._track_nr = None
+        self._total_track_count = None
+
+        self._audio_type = "mp3"
+        self._bitrate = None
+
+        self._created_at = None
+        self._updated_at = None
+
         # adding data from youtube json to metadata object
         self.audio_id = "YT_"+str(data['id'])
 
