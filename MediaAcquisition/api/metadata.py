@@ -150,10 +150,11 @@ class Metadata:
                 "\ncreated at " + str(self.created_at) + \
                 "\nupdated at " + str(self.updated_at)
 
-def parse_to_json(self):
-    return_json = json.dumps(self.__dict__)
-    return_json = return_json.replace('"_', '"')
-    return return_json
+    def parse_to_json(self):
+        return_json = json.dumps(self.__dict__)
+        #TODO deal med danske bogstaver!
+        return_json = return_json.replace('"_', '"') #fjerner underscore fra variable navne
+        return return_json
 
 def parse_from_youtube_json(json_file):
     #parsing json_filo to dict
