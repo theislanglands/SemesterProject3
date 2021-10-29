@@ -53,9 +53,9 @@ def add_youtube_audio(request, link):
             data = y.get_json(link)
             if data == None:
                 return HttpResponseNotFound('URL is not a valid youtube link')
-
+            # checks wether filesize is larger that 128 GB
             filesize = data["filesize"]
-            if filesize > 137438953472:
+            if filesize > 137438953472: # 128 GB is bytes
                 return HttpResponse('Filesize exceeds the 128 GB limit')
 
             parser = Metadata()
