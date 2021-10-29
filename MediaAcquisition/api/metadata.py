@@ -3,7 +3,6 @@ from datetime import datetime
 
 
 class Metadata:
-
     def __init__(self):
         self._audio_id = None
         self._name = None
@@ -181,42 +180,41 @@ class Metadata:
 
     def parse_to_json(self):
         return_json = json.dumps(self.__dict__)
-        return_json = return_json.replace('"_', '"')
+        #TODO deal med danske bogstaver!
+        return_json = return_json.replace('"_', '"') #fjerner underscore fra variable navne
         return return_json
 
-    def parse_from_youtube_json(self, json_file):
-        #parsing json_filo to dict
-
-        data = json.load(json_file)
-
+    def parse_from_youtube_json(self, data):
         # creating empty metadata object
+        metadata = Metadata()
 
-        dict = {'aduio_id': None, 'name': None,'artist':None,'duration':None,'release_year':None,'artwork':None,
-                'collection':False,'collection_name':None,'track_nr':None,'total_track_count':None,'audio_type':'mp3',
-                'bitrate':None,'created_at':None,'updated_at':None}
+        # adding data from youtube json to metadata object
+        metadata.audio_id = "YT_"+str(data['id'])
 
         # if no track in json - use video title & uploader
         if 'track' in data:
-            dict["name"] = data["track"]
+            metadata.name = data["track"]
         else:
-            dict["name"] = data['title']
+            metadata.name = data['title']
 
         if 'artist' in data:
-            dict["artist"] = data['artist']
+            metadata.artist = data['artist']
         else:
-            dict["artist"] = data['uploader']
+            metadata.artist = data['uploader']
 
         if 'album' in data:
-            dict["collection"] = True
-            dict["collection_name"] = data['album']
+            metadata.collection = True
+            metadata.collection_name = data['album']
 
-        dict["duration"] = data['duration']
-        dict["release_year"] = data['upload_date']
-        dict["artwork"] = data['thumbnail']
-        dict["created_at"] = str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+        metadata.duration = data['duration']
+        metadata.release_year = data['upload_date']
+        metadata.artwork = data['thumbnail']
+        metadata.created_at = str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
         #print(metadata)
-        return dict
+
+        return metadata.parse_to_json()
+
 
 
 

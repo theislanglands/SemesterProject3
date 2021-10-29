@@ -320,6 +320,7 @@ fabric.properties
 
 # Cython debug symbols
 
+<<<<<<< HEAD
 
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,phpstorm
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,phpstorm
@@ -448,3 +449,7 @@ fabric.properties
 
 
 # End of https://www.toptal.com/developers/gitignore/api/python,pycharm,django,visualstudiocode,phpstorm
+=======
+# End of https://www.toptal.com/developers/gitignore/api/python,pycharm,django
+/MediaAcquisition/youtubeDLManager/temp/
+>>>>>>> youtubeDL
