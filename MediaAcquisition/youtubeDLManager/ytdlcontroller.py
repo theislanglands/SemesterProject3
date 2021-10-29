@@ -2,14 +2,15 @@ import os
 
 import yt_dlp
 
-# from MediaAcquisition.api import metadata
+
 from yt_dlp import YoutubeDL
+from MediaAcquisition.api.metadata import Metadata
 
 from MediaAcquisition.api.persistence.persistenceController import PersistanceController
 
 
 class YoutubeAudioDL:
-    persitence = PersistanceController()
+    persistence = PersistanceController()
 
     ydl_opts = {
         'format': 'bestaudio/best',
@@ -25,10 +26,12 @@ class YoutubeAudioDL:
     def init(self):
         pass
 
-    def get_json(self, url):
+    def get_json(self, youtubeID):
         with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
-            json_data = ydl.extract_info(url, download=False)
-            return json_data
+            json_data = ydl.extract_info(youtubeID, download=False)
+            meta = Metadata()
+            json_new = meta.parse_from_youtube_json(json_data)
+            return json_new
 
     def get_mp3(self, youtube_id):
 
@@ -61,4 +64,10 @@ class YoutubeAudioDL:
 
 if __name__ == '__main__':
     y = YoutubeAudioDL()
-    print(y.get_mp3(['vosH4sRJgQA']))
+    meta = Metadata()
+    print(y.get_json('vosH4sRJgQA'))
+    # print(y.get_mp3(['vosH4sRJgQA'])
+    #json_new = meta.parse_from_youtube_json(json)
+    #print(json_new)
+
+
