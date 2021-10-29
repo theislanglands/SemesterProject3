@@ -2,11 +2,11 @@ import os
 
 import yt_dlp
 
-
 from yt_dlp import YoutubeDL
 from MediaAcquisition.api.metadata import Metadata
 
 from MediaAcquisition.api.persistence.persistenceController import PersistanceController
+
 
 class YoutubeAudioDL:
     persistence = PersistanceController()
@@ -25,9 +25,9 @@ class YoutubeAudioDL:
     def init(self):
         pass
 
-    def get_json(self, youtubeID):
+    def get_json(self, youtube_id):
         with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
-            json_data = ydl.extract_info(youtubeID, download=False)
+            json_data = ydl.extract_info(youtube_id[0], download=False)
             meta = Metadata()
             json_new = meta.parse_from_youtube_json(json_data)
             return json_new
@@ -44,13 +44,13 @@ class YoutubeAudioDL:
         # print("lp: " + local_path)
         success = self.persistence.storeAudio(local_path + filename, filename)
 
-        #handle success responce
+        # handle success responce
         if success:
             try:
-                os.remove(local_path + filename) # delete local
+                os.remove(local_path + filename)  # delete local
             except IOError as e:
                 print("error: local file not deleted\n" + e)
-                #TODO: THEN do what?
+                # TODO: THEN do what?
             finally:
                 return '200 OK'
         else:
@@ -58,12 +58,13 @@ class YoutubeAudioDL:
 
         # TODO retry 5 gange
 
-if __name__ == '__main__':
-    y = YoutubeAudioDL()
-    meta = Metadata()
-    print(y.get_json('vosH4sRJgQA'))
-    # print(y.get_mp3(['vosH4sRJgQA'])
-    #json_new = meta.parse_from_youtube_json(json)
-    #print(json_new)
+    def getALL(self, youtubeID):
+        self.get_mp3(youtubeID)
+        jsondata = self.get_json(youtubeID)
+
+        return jsondata
 
 
+#if __name__ == '__main__':
+#    y = YoutubeAudioDL()
+#    y.getALL(['j8fHNdrZTSI'])
