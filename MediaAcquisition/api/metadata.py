@@ -195,27 +195,6 @@ class Metadata:
                 'collection':False,'collection_name':None,'track_nr':None,'total_track_count':None,'audio_type':'mp3',
                 'bitrate':None,'created_at':None,'updated_at':None}
 
-        audio_id = None
-        self._name = None
-        self._artist = None
-        self._duration = None
-        self._release_year = None
-        self._artwork = None
-
-        self._collection = False
-        self._collection_name = None
-        self._track_nr = None
-        self._total_track_count = None
-
-        self._audio_type = "mp3"
-        self._bitrate = None
-
-        self._created_at = None
-        self._updated_at = None
-
-        # adding data from youtube json to metadata object
-        self.audio_id = "YT_"+str(data['id'])
-
         # if no track in json - use video title & uploader
         if 'track' in data:
             dict["name"] = data["track"]
@@ -238,6 +217,15 @@ class Metadata:
 
         #print(metadata)
         return dict
+
+
+
+
+
+
+if __name__ == '__main__':
+    parser = Metadata()
+    parser.parse_from_youtube_json()
 
 
 
