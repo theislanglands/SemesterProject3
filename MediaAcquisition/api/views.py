@@ -38,11 +38,13 @@ def add_youtube_audio(request, link):
             y = YoutubeDL()
             data = y.get_json(link)
             if data == None:
-                return HttpResponseNotFound('URL is not a valid youtube link')
+                return HttpResponseNotFound('URL not valid')
             # checks wether filesize is larger that 128 GB
             filesize = data["filesize"]
             if filesize > 137438953472: # 128 GB is bytes
                 return HttpResponse('Filesize exceeds the 128 GB limit')
+
+
 
 
             new_entry = AudioObject(data['id'], data)
@@ -58,7 +60,7 @@ def get_audio(request, link):
     try:
         return_meta_data = AudioObject.objects.filter(audio_id=link)
         if not return_meta_data:
-            return HttpResponseNotFound('does not exist in the database')
+            return HttpResponseNotFound('Song URL invalid OR not in database')
         else:
             dict = {'audio_id': return_meta_data.values()[0]['audio_id'], 'metadata': return_meta_data.values()[0]['JSON']}
             return JsonResponse(dict)
@@ -68,6 +70,7 @@ def get_audio(request, link):
 
 
 def add_local_audio(request):
+
     pass
 
 
@@ -75,7 +78,7 @@ def delete_audio(request, link):
     try:
         return_meta_data = AudioObject.objects.filter(audio_id=link)
         if not return_meta_data:
-            return HttpResponseNotFound('Song ID not found in database')
+            return HttpResponseNotFound('Song URL invalid OR not in database')
         else:
                 id = return_meta_data.values()[0]['audio_id']
                 delete_entry = AudioObject(id)
@@ -83,5 +86,3 @@ def delete_audio(request, link):
                 return HttpResponse('File has been deleted')
     except Exception:
         return HttpResponse(traceback.format_exc())
-
-
