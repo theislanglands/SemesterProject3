@@ -1,67 +1,68 @@
 import ftplib
 from ftplib import FTP
 
-# ftp config
-host = 'ftp.foreignlands.dk'
-domain = 'foreignlands.dk'
-root = 'MediaAcquisition'
-username = 'foreignlands.dk'
-port = 21
-pw = 'MediaAcquisition09!'
 
-#
-ftp = FTP(host)  # connect to host, default port (21)
-ftp.login(username, pw)
-# print(ftp.getwelcome())  # check connection & print welcome
-ftp.cwd(root)  # change working directory to root
-# ftp.dir()  # show contents of working directory
+class PersistanceController:
 
-
-def storeAudio(localFilePath, fileNameOnServer):
-    file = None
-    try:
-        file = open(localFilePath, "rb")  # open file to send
-        ftp.storbinary('STOR ' + '/' + root + '/' + fileNameOnServer, file)  # send the file
-        return True
-
-    except ftplib.all_errors as e:
-        print('Ftp fail -> ', e)
-        return False
-
-    finally:
-        file.close()
+    def __init__(self):
+        self.host = 'ftp.foreignlands.dk'
+        self.domain = 'foreignlands.dk'
+        self.root = 'MediaAcquisition'
+        self.username = 'foreignlands.dk'
+        self.port = 21
+        self.pw = 'MediaAcquisition09!'
+        # ftp config
+        self.ftp = FTP(self.host)  # connect to host, default port (21)
+        self.ftp.login(self.username, self.pw)
+        self.ftp.cwd(self.root)  # change working directory to root
 
 
-def check_id(youtube_id):
-    pass
-    # done with try-catch i yt downloader
+    def storeAudio(self, localFilePath, fileNameOnServer):
 
-
-def checkIfExist(id):
-    filename = id + '.mp3'  # adds mp3 to id
-    for fn in ftp.nlst():  # looping through all filenames on server
-        if fn == filename:
+        file = None
+        try:
+            file = open(localFilePath, "rb")  # open file to send
+            self.ftp.storbinary('STOR ' + '/' + self.root + '/' + fileNameOnServer, file)  # send the file
             return True
-    return False
+
+        except ftplib.all_errors as e:
+            print('Ftp fail -> ', e)
+            return False
+
+        finally:
+            file.close()
 
 
-def getAudio(id):
-    returnURL = 'http://' + domain + '/' + root + '/' + id + '.mp3'
-    return returnURL
+    def check_id(self, youtube_id):
+        pass
+        # done with try-catch i yt downloader
 
 
-def downloadAudio(id, path): #not used, but maybe later!
-    filename = id + '.mp3'
-    ftp.retrbinary("RETR " + filename + ", open(filename, 'wb').write)")  # henter fil ned ad ftp
-
-
-def delete_audio(id):
-    filename = id + '.mp3'
-    status = ftp.delete(filename)
-    print(status)
-
-    # returns status of delete operation
-    if status.find('250') != -1:
-        return True
-    else:
+    def checkIfExist(self, id):
+        filename = id + '.mp3'  # adds mp3 to id
+        for fn in self.ftp.nlst():  # looping through all filenames on server
+            if fn == filename:
+                return True
         return False
+
+
+    def getAudio(self, id):
+        returnURL = 'http://' + self.domain + '/' + self.root + '/' + id + '.mp3'
+        return returnURL
+
+
+    def downloadAudio(self, id, path):  # not used, but maybe later!
+        filename = id + '.mp3'
+        self.ftp.retrbinary("RETR " + filename + ", open(filename, 'wb').write)")  # henter fil ned ad ftp
+
+
+    def delete_audio(self, id):
+        filename = id + '.mp3'
+        status = self.ftp.delete(filename)
+        print(status)
+
+        # returns status of delete operation
+        if status.find('250') != -1:
+            return True
+        else:
+            return False
