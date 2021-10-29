@@ -3,7 +3,6 @@ from datetime import datetime
 
 
 class Metadata:
-
     def __init__(self):
         self._audio_id = None
         self._name = None
@@ -156,46 +155,35 @@ class Metadata:
         return_json = return_json.replace('"_', '"') #fjerner underscore fra variable navne
         return return_json
 
-def parse_from_youtube_json(json_file):
-    #parsing json_filo to dict
-    #data = json.load(json_file)      #TODO implement function for a json string, instead of a file. spørg joachim
+    def parse_from_youtube_json(self, data):
+        # creating empty metadata object
+        metadata = Metadata()
 
-    #jason string to dict
-    data = json.load(json_file)
-    #print(data)
+        # adding data from youtube json to metadata object
+        metadata.audio_id = "YT_"+str(data['id'])
 
-    # creating empty metadata object
-    metadata = Metadata()
+        # if no track in json - use video title & uploader
+        if 'track' in data:
+            metadata.name = data["track"]
+        else:
+            metadata.name = data['title']
 
-    # adding data from youtube json to metadata object
-    metadata.audio_id = "YT_"+str(data['id'])
+        if 'artist' in data:
+            metadata.artist = data['artist']
+        else:
+            metadata.artist = data['uploader']
 
-    # if no track in json - use video title & uploader
-    if 'track' in data:
-        metadata.name = data["track"]
-    else:
-        metadata.name = data['title']
+        if 'album' in data:
+            metadata.collection = True
+            metadata.collection_name = data['album']
 
-    if 'artist' in data:
-        metadata.artist = data['artist']
-    else:
-        metadata.artist = data['uploader']
+        metadata.duration = data['duration']
+        metadata.release_year = data['upload_date']
+        metadata.artwork = data['thumbnail']
+        metadata.created_at = str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
-    if 'album' in data:
-        metadata.collection = True
-        metadata.collection_name = data['album']
+        #print(metadata)
 
-    metadata.duration = data['duration']
-    metadata.release_year = data['upload_date']
-    metadata.artwork = data['thumbnail']
-    metadata.created_at = str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+        return metadata.parse_to_json()
 
-    #print(metadata)
-    return parse_to_json(metadata)
 
-#test
-metadata_result = open('/Users/theislanglands/Dropbox/SDU/Semester3/semesterprojekt/media-acquisition/MediaAcquisition/json_examples_youtube/Calum_Scott_-_You_Are_The_Reason_Official_Video_ShZ978fBl6Y.info.json')
-result = json.load(metadata_result)
-result_str = "" + result
-print(result_str)
-#parse_from_youtube_json(metadata_result)

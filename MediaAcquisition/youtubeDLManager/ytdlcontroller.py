@@ -8,7 +8,6 @@ from MediaAcquisition.api.metadata import Metadata
 
 from MediaAcquisition.api.persistence.persistenceController import PersistanceController
 
-
 class YoutubeAudioDL:
     persistence = PersistanceController()
 
@@ -34,25 +33,23 @@ class YoutubeAudioDL:
             return json_new
 
     def get_mp3(self, youtube_id):
-
+        # Download mp3
         with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
-            # Download mp3
             ydl.download(youtube_id)
 
-        # send to server
+        # store in filesystem on server
         local_path = os.getcwd() + '/temp/'
         filename = 'YT_' + youtube_id[0] + '.mp3'
-
         # print("fn: " + filename)
         # print("lp: " + local_path)
+        success = self.persistence.storeAudio(local_path + filename, filename)
 
-        # store in filesystem and delete local
-        success = self.persitence.storeAudio(local_path + filename, filename)
+        #handle success responce
         if success:
             try:
-                os.remove(local_path + filename)
+                os.remove(local_path + filename) # delete local
             except IOError as e:
-                print("local file not deleted \n" + e)
+                print("error: local file not deleted\n" + e)
                 #TODO: THEN do what?
             finally:
                 return '200 OK'
@@ -60,7 +57,6 @@ class YoutubeAudioDL:
             return 'error 500: internal server error'
 
         # TODO retry 5 gange
-
 
 if __name__ == '__main__':
     y = YoutubeAudioDL()
