@@ -32,7 +32,7 @@ class YoutubeAudioDL:
             json_new = meta.parse_from_youtube_json(json_data)
             return json_new
 
-    def get_mp3(self, youtube_id):
+    def store_mp3(self, youtube_id):
         # Download mp3
         with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
             ydl.download(youtube_id)
@@ -59,7 +59,7 @@ class YoutubeAudioDL:
         # TODO retry 5 gange
 
     def getALL(self, youtubeID):
-        self.get_mp3(youtubeID)
+        self.store_mp3(youtubeID)
         jsondata = self.get_json(youtubeID)
 
         return jsondata
