@@ -1,6 +1,5 @@
 import yt_dlp
 
-
 class YoutubeDL:
     ydl_opts = {
         'format': 'bestaudio/best',

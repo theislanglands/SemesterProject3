@@ -2,11 +2,8 @@ import os
 
 import yt_dlp
 
-from yt_dlp import YoutubeDL
-from MediaAcquisition.api.metadata import Metadata
-
-from MediaAcquisition.api.persistence.persistenceController import PersistanceController
-
+from api.metadata import Metadata
+from api.persistence.persistenceController import PersistanceController
 
 class YoutubeAudioDL:
     persistence = PersistanceController()
@@ -65,6 +62,6 @@ class YoutubeAudioDL:
         return jsondata
 
 
-#if __name__ == '__main__':
+# if __name__ == '__main__':
 #    y = YoutubeAudioDL()
 #    y.getALL(['j8fHNdrZTSI'])
