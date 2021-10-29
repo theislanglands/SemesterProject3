@@ -191,7 +191,7 @@ class Metadata:
 
         # creating empty metadata object
 
-        dict = {}
+        dict = {'audio_id' : None,}
 
         audio_id = None
         self._name = None

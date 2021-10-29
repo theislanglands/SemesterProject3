@@ -58,7 +58,10 @@ def add_youtube_audio(request, link):
             if filesize > 137438953472:
                 return HttpResponse('Filesize exceeds the 128 GB limit')
 
+            parser = Metadata()
+            data = parser.parse_from_youtube_json(data)
 
+            return JsonResponse(data)
 
             new_entry = AudioObject(data['id'], data)
             new_entry.save()
@@ -99,7 +102,7 @@ def add_local_audio(request):
 def delete_audio(request, link):
     try:
         return_meta_data = AudioObject.objects.filter(audio_id=link)
-        if not return_meta_data:
+        if return_meta_data:
             id = return_meta_data.values()[0]['audio_id']
             return HttpResponseNotFound(id + ' doesnt exist ')
         else:
