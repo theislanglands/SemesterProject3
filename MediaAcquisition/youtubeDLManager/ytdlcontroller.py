@@ -52,7 +52,7 @@ class YoutubeAudioDL:
                     os.remove(local_path + filename)  # delete local
                 except Exception as e:
                     print("error: local file not deleted\n" + str(e))
-                    # TODO: THEN do what?
+                    # TODO: THEN do what? - Not tilføj kun en enkelt try catch
             else:
                 return 'error 500: internal server error'
         except Exception:
