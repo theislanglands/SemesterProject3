@@ -7,7 +7,5 @@ class AudioObject(models.Model):
 
 
     def __str__(self):
-        return_string = self.audio_id + ' ' + self.name
-        return return_string
-
+        return self.audio_id
 

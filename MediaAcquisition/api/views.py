@@ -86,3 +86,25 @@ def delete_audio(request, link):
                 return HttpResponse('File has been deleted')
     except Exception:
         return HttpResponse(traceback.format_exc())
+
+
+def get_all_tracks(request):
+    try:
+        all_entries = list(AudioObject.objects.all())
+        data = {}
+        tmp = 0
+        print(all_entries)
+        for x in range(len(all_entries)):
+            print(tmp)
+            data[f'track {tmp}'] = str(all_entries[x])
+            tmp = tmp + 1
+        print(data)
+        print(type(data['track 1']))
+
+        if all_entries:
+            return JsonResponse(data)
+        else:
+            return HttpResponse('no entries in database')
+    except Exception:
+        return HttpResponseNotFound(traceback.format_exc())
+
