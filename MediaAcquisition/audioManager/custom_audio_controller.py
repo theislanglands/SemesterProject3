@@ -3,10 +3,10 @@ import os
 from api.metadata import Metadata
 from api.persistence.persistenceController import PersistanceController
 
-
 class CustomAudio:
     persistence = PersistanceController()
 
+    #TODO: muligt at refactor med youtube-store audio (hvis der bliver tid!)
     def store_mp3(self, filename):
         try:
             # store in filesystem on server
