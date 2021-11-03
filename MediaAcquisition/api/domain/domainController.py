@@ -18,6 +18,10 @@ class domainController:
         success = self.custom_audio.store_mp3(audio_mp3)
         return success
 
+    def store_artwork(self, jpg_file):
+        success = self.persistance.storeArtwork(self, jpg_file)
+        return success
+
     def get_audio(self, id):
         return self.persistance.getAudio(id)
 
