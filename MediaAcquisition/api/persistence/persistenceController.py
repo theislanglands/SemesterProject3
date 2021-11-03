@@ -8,6 +8,8 @@ class PersistanceController:
         self.host = 'ftp.foreignlands.dk'
         self.domain = 'foreignlands.dk'
         self.root = 'MediaAcquisition'
+        self.audioroot = 'audio'
+        self.artworkroot = 'artwork'
         self.username = 'foreignlands.dk'
         self.port = 21
         self.pw = 'MediaAcquisition09!'
@@ -18,11 +20,25 @@ class PersistanceController:
 
 
     def storeAudio(self, localFilePath, fileNameOnServer):
-
         file = None
         try:
             file = open(localFilePath, "rb")  # open file to send
-            self.ftp.storbinary('STOR ' + '/' + self.root + '/' + fileNameOnServer, file)  # send the file
+            self.ftp.storbinary('STOR ' + '/' + self.root + '/' + self.audioroot + '/' + fileNameOnServer, file)  # send the file
+            return True
+
+        except ftplib.all_errors as e:
+            print('Ftp fail -> ', e)
+            return False
+
+        finally:
+            file.close()
+
+    def storeArtwork(self, localFilePath, fileNameOnServer):
+        file = None
+        try:
+            file = open(localFilePath, "rb")  # open file to send
+            self.ftp.storbinary('STOR ' + '/' + self.root + '/' + self.artworkroot + '/' + fileNameOnServer,
+                                file)  # send the file
             return True
 
         except ftplib.all_errors as e:
@@ -51,8 +67,7 @@ class PersistanceController:
             return 'http://' + self.domain + '/' + self.root + '/' + 'YT_' + id + '.mp3'
         else:
             return None
-
-
+        
     def downloadAudio(self, id, path):  # not used, but maybe later!
         filename = id + '.mp3'
         self.ftp.retrbinary("RETR " + filename + ", open(filename, 'wb').write)")  # henter fil ned ad ftp

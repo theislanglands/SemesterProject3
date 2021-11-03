@@ -31,10 +31,9 @@ function cuSubmit() {
     let artFile;
     let audioFile;
     const metaDataJson = {};
-
     let all = document.querySelectorAll("#customAudioForm input");
 
-    // Receives files: artwork & audio mp3
+    // Receives files from form: artwork & audio mp3
     for (let field of all) {
         if (field.type == "file") {
 
