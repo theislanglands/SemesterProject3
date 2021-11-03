@@ -47,8 +47,10 @@ class PersistanceController:
 
 
     def getAudio(self, id):
-        returnURL = 'http://' + self.domain + '/' + self.root + '/' + id + '.mp3'
-        return returnURL
+        if (self.checkIfExist(id)):
+            return 'http://' + self.domain + '/' + self.root + '/' + id + '.mp3'    
+        else:
+            return None
 
 
     def downloadAudio(self, id, path):  # not used, but maybe later!

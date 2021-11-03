@@ -23,25 +23,26 @@ class YoutubeAudioDL:
         pass
 
     def get_json(self, youtube_id):
+        id = [youtube_id]
         try:
             with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
-                json_data = ydl.extract_info(youtube_id[0], download=False)
+                json_data = ydl.extract_info(id[0], download=False)
                 meta = Metadata()
                 json_new = meta.parse_from_youtube_json(json_data)
                 return json_new
         except Exception:
             return None
 
-
     def store_mp3(self, youtube_id):
+        id = [youtube_id]
         try:
             # Download mp3
             with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
-                ydl.download(youtube_id)
+                ydl.download(id)
 
             # store in filesystem on server
             local_path = os.getcwd() + '/temp/'
-            filename = 'YT_' + youtube_id[0] + '.mp3'
+            filename = 'YT_' + id[0] + '.mp3'
             # print("fn: " + filename)
             # print("lp: " + local_path)
             success = self.persistence.storeAudio(local_path + filename, filename)
@@ -59,7 +60,7 @@ class YoutubeAudioDL:
             return None
 
 
-            # TODO retry 5 gange
+            #TODO retry 5 gange
 
     def getALL(self, youtubeID):
         self.store_mp3(youtubeID)
@@ -67,7 +68,6 @@ class YoutubeAudioDL:
 
         return jsondata
 
-
-# if __name__ == '__main__':
-#    y = YoutubeAudioDL()
-#    y.getALL(['j8fHNdrZTSI'])
+if __name__ == '__main__':
+    y = YoutubeAudioDL()
+    print(y.getALL('j8fHNdrZTSI'))
