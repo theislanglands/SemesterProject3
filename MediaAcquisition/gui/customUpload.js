@@ -55,7 +55,7 @@ function cuSubmit() {
     metaDataJson['track_nr'] = document.getElementById("track_nr").value;
     metaDataJson['total_track_count'] = document.getElementById("total_track_count").value;
     let jsonFile = JSON.stringify(metaDataJson)
-
+    console.log(jsonFile)
 
 /*
 //send data to api
