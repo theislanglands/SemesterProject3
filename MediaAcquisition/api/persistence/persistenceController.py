@@ -47,7 +47,7 @@ class PersistanceController:
 
 
     def getAudio(self, id):
-        returnURL = 'http://' + self.domain + '/' + self.root + '/' + id + '.mp3'
+        returnURL = 'http://' + self.domain + '/' + self.root + '/YT_' + id + '.mp3'
         return returnURL
 
 

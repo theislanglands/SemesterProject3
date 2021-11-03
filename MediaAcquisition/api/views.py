@@ -33,23 +33,20 @@ def add_youtube_audio(request, link):
         return_meta_data = AudioObject.objects.filter(audio_id=link)
         if return_meta_data:
             return HttpResponseNotFound('Song already in database')
-        else:
-            # download youtubeJSON data
-            y = YoutubeDL()
-            data = y.get_json(link)
-            if data == None:
-                return HttpResponseNotFound('URL not valid')
-            # checks wether filesize is larger that 128 GB
-            filesize = data["filesize"]
-            if filesize > 137438953472: # 128 GB is bytes
-                return HttpResponse('Filesize exceeds the 128 GB limit')
+
+        #Download Metadata and sort it
+        data = globalController.get_json(link)
+        data = json.loads(data)
+        if data == None:
+            return HttpResponseNotFound('URL not valid')
+        #check filesize before upload
+        new_entry = AudioObject(data['audio_id'], data)
+        new_entry.save()
+
+        globalController.store_mp3(link)
 
 
-
-
-            new_entry = AudioObject(data['id'], data)
-            new_entry.save()
-            return HttpResponse('New song added to database')
+        return HttpResponse('New song added to database')
 
     except Exception:
         return HttpResponse(traceback.format_exc())
