@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from api.models import AudioObject
 from api.domain.youtubedlp import YoutubeDL
 import requests
+import yt_dlp
 import json
 from api.metadata import Metadata
 
@@ -42,10 +43,7 @@ def add_youtube_audio(request, link):
         new_entry = AudioObject(data['audio_id'], data)
         new_entry.save()
 
-        #start new thread
-        #Run store_youtube_mp3
-        #Catch return message
-        domainController.store_youtube_mp3(link)
+        globalController.store_mp3(link)
 
 
         return HttpResponse('New song added to database')
