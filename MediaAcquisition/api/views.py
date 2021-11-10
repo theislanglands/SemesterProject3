@@ -110,6 +110,10 @@ def get_all_tracks(request):
     except Exception:
         return HttpResponseNotFound(traceback.format_exc())
 
-def index(request):
-    return render(request, 'youtubeDownload.html')
+def youtubegui(request):
+    return render(request, 'youtubeUpload.html')
+
+def usergui(request):
+    return render(request, 'customUpload.html')
+
 
