@@ -2,6 +2,8 @@ import traceback
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, HttpResponseNotFound
 from django.views.decorators.csrf import csrf_exempt
+
+from api.domain.domainController import domainController
 from api.models import AudioObject
 from api.domain.youtubedlp import YoutubeDL
 import requests
@@ -24,10 +26,9 @@ def api_call(request, link):
     except Exception:
         return HttpResponse(traceback.format_exc() + '   ' + str(link))
 
-
-
-
 def add_youtube_audio(request, link):
+
+    globalController = domainController()
     # check if link already in database
     try:
         return_meta_data = AudioObject.objects.filter(audio_id=link)
@@ -43,7 +44,7 @@ def add_youtube_audio(request, link):
         new_entry = AudioObject(data['audio_id'], data)
         new_entry.save()
 
-        globalController.store_mp3(link)
+        globalController.store_youtube_mp3(link)
 
 
         return HttpResponse('New song added to database')
@@ -52,10 +53,18 @@ def add_youtube_audio(request, link):
         return HttpResponse(traceback.format_exc())
 
 
-
 def get_audio(request, link):
+    globalController = domainController()
+
+    return HttpResponse(globalController.get_audio(link))
+
+def get_metadata(request, link):
+    globalController = domainController()
+
+    # returns metadata from django db
     try:
         return_meta_data = AudioObject.objects.filter(audio_id=link)
+
         if not return_meta_data:
             return HttpResponseNotFound('Song URL invalid OR not in database')
         else:
