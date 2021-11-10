@@ -11,7 +11,7 @@ urlpatterns = [
     path('get_metadata/<link>', get_metadata),
 
     path('addaudio/youtube', youtubegui),
-    path('addaudio/user', usergui)
-
+    path('addaudio/user', usergui),
+    path('', home)
 ]
 

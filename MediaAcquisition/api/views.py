@@ -116,4 +116,8 @@ def youtubegui(request):
 def usergui(request):
     return render(request, 'customUpload.html')
 
+def home(request):
+    return render(request, 'index.html')
+
+
 
