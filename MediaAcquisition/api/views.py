@@ -74,11 +74,8 @@ def get_metadata(request, link):
         return HttpResponse(traceback.format_exc())
     pass
 
-
 def add_local_audio(request):
-
     pass
-
 
 def delete_audio(request, link):
     try:
@@ -92,7 +89,6 @@ def delete_audio(request, link):
                 return HttpResponse('File has been deleted')
     except Exception:
         return HttpResponse(traceback.format_exc())
-
 
 def get_all_tracks(request):
     try:
@@ -113,4 +109,7 @@ def get_all_tracks(request):
             return HttpResponse('no entries in database')
     except Exception:
         return HttpResponseNotFound(traceback.format_exc())
+
+def index(request):
+    return render(request, 'youtubeDownload.html')
 
