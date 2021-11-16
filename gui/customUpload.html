@@ -1,28 +1,41 @@
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 
     <head>
         <link rel="stylesheet" href="css/style.css">
-        <script src="customUpload.html"></script>
+        <script src="customUpload.js"></script>
     </head>
 
     <body>
         <div id="customAudioForm">
-            
-                <input type="text" name="name" id="name" placeholder="Song Name">
-                <input type="text" name="artist" id="artist" placeholder="Artist Name">
-                <input type="number" name="release_year" id="release_year" placeholder="Release Year">
-                <input type="checkbox" name="is_collection" id="is_collection">
-                <input type="text" name="collection_name" id="collection_name" placeholder="Collection">
-                <input type="number" name="track_nr" id="track_nr" placeholder="Track Number">
-                <input type="number" name="total_track_count" id="total_track_count" placeholder="Total Track Count">
-                <br>
+                <div>
+                    <input type="text" name="name" id="name" placeholder="Song Name">
+                </div>
+                <div>
+                    <input type="text" name="artist" id="artist" placeholder="Artist Name">
+                </div>
+                <div>
+                    <input type="number" name="release_year" id="release_year" placeholder="Release Year">
+                </div>
+                <div>
+                    <input type="checkbox" name="is_collection" id="is_collection">Part of collection</input>
+                    <input type="text" class="col" disabled="true" name="collection_name" id="collection_name" placeholder="album / playlist name">
+                    <input type="number" class="col" disabled="true" name="track_nr" id="track_nr" placeholder="Track Number">
+                    <input type="number" class="col" disabled="true" name="total_track_count" id="total_track_count" placeholder="Total Track Count">
+                </div>
+
+                <div>
                 <label for="art">Upload artwork</label>
                 <input type="file" name="art" id="art" accept="image/jpeg, image/png">
-                <br>
+                </div>
+
+                <div>
                 <label for="audio">Upload mp3 audio</label>
                 <input type="file" name="audio" id="audio" accept="audio/*">
-                <br>
+                </div>
+
+                <div>
                 <button type="submit" onclick="return cuSubmit()">Submit</button>
+                </div>
         </div>
 
     </body>
