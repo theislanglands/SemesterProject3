@@ -16,9 +16,9 @@ window.addEventListener("load", e => {
 
         // get youtube id from url via regex
         if (linkInput.includes(".be/")) { //if link is from "Share" btn
-            linkInput = linkInput.match(/(?<=be\/)\w*/);
+            linkInput = linkInput.match(/(?<=be\/).{11}/);
         } else if (linkInput.includes("watch?v=")) { //if link is from url (works if in playlist aswell)
-            linkInput = linkInput.match(/(?<=v\=)\w*/);
+            linkInput = linkInput.match(/(?<=v\=).{11}/);
         }
 
         //id to json
