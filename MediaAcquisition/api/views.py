@@ -1,6 +1,6 @@
 import traceback
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse, HttpResponseNotFound
+from django.http import HttpResponse, JsonResponse, HttpResponseNotFound, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 
 from api.domain.domainController import domainController
@@ -9,6 +9,8 @@ from api.domain.youtubedlp import YoutubeDL
 import requests
 import yt_dlp
 import json
+from django.shortcuts import render
+from .forms import UploadFileForm
 from api.metadata import Metadata
 
 
@@ -37,9 +39,11 @@ def add_youtube_audio(request, link):
 
         #Download Metadata and sort it
         data = globalController.get_json(link)
-        data = json.loads(data)
+
         if data == None:
             return HttpResponseNotFound('URL not valid')
+        data = json.loads(data)
+
         #check filesize before upload
         new_entry = AudioObject(data['audio_id'], data)
         new_entry.save()
@@ -75,7 +79,31 @@ def get_metadata(request, link):
     pass
 
 def add_local_audio(request):
+    #Modtager request
+    #Parse metadata til DB
+    #Parse File and send to Filesystem
+
+
+
+    globalController = domainController()
+
+    globalController.store_custom_mp3()
+
     pass
+
+
+def upload_file(request):
+    if request.method == 'POST':
+        form = ModelFormWithFileField(request.POST, request.FILES)
+        if form.is_valid():
+            # file is saved
+            form.save()
+            return HttpResponseRedirect('/success/url/')
+    else:
+        form = ModelFormWithFileField()
+    return render(request, 'upload.html', {'form': form})
+
+
 
 def delete_audio(request, link):
     try:
