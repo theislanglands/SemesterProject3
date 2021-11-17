@@ -10,6 +10,8 @@ urlpatterns = [
     path('get_all_tracks/', get_all_tracks),
     path('get_metadata/<link>', get_metadata),
 
+    path('add_cu', add_cu),
+
     path('addaudio/youtube', youtubegui),
     path('addaudio/user', usergui),
     path('', home)

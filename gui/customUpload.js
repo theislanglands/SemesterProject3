@@ -1,6 +1,6 @@
 
 //const httpRequest = new XMLHttpRequest()
-var apiEndpoint = 'http://127.0.0.1:8000/data/add_track';
+var apiEndpoint = 'http://127.0.0.1:8000/data/add_cu';
 
 window.onload = () => {
     var maxArtSize = 2; //in MB
@@ -45,26 +45,10 @@ function showCollectionFields(){
 }
 
 function cuSubmit() {
+    // håndterer submit knappen
     let artFile;
     let audioFile;
     const metaDataJson = {};
-
-    /*
-    let all = document.querySelectorAll("#customAudioForm input");
-
-    // Receives files from form: artwork & audio mp3
-    for (let field of all) {
-        if (field.type === "file") {
-            var file = document.getElementById(field.getAttribute("id")).files[0];
-            if (file != null) {
-                artFile = file;
-            } else {
-                audioFile = file;
-            }
-        }
-    }
-
-     */
 
     // Retrieve values from form
     metaDataJson['name'] = document.getElementById("name").value;
@@ -74,43 +58,31 @@ function cuSubmit() {
     metaDataJson['collection_name'] = document.getElementById("collection_name").value;
     metaDataJson['track_nr'] = document.getElementById("track_nr").value;
     metaDataJson['total_track_count'] = document.getElementById("total_track_count").value;
+
+    // create json - string from metadata
     let jsonFile = JSON.stringify(metaDataJson)
-    console.log(jsonFile)
-
-    artFile = document.getElementById('').files[0];
-
-
-//send data to api
 
     // creating FormData() object to post
     const data = new FormData();
     data.append('metadata', jsonFile);
-    data.append('artwork', document.getElementById('artfile'))
-    data.append('mp3file', document.getElementsById('audiofile'))
+    data.append('artwork', document.getElementById('artfile').files[0])
+    data.append('mp3file', document.getElementById('audiofile').files[0])
     /*
        The FormData interface provides a way to easily construct a set of key/value pairs representing form fields and their values, which can then be easily sent using the XMLHttpRequest. send() method.
        It uses the same format a form would use if the encoding type were set to "multipart/form-data" .14 Sep 2021
     */
 
+    console.log(data.get('metadata'));
+    console.log(data.get('artwork'));
+    console.log(data.get('mp3file'));
+
+    //send formdata to api
+
     //sending post request with fetch api interface and printing result
+    //headers: {'Content-Type': 'multipart/form-data'},
 
     fetch(apiEndpoint, {
         method: 'POST',
-        headers: {
-            Content-Type: multipart/form-data; boundary=aBoundaryString
-
-            --aBoundaryString
-            Content-Disposition: form-data; name="metadata"
-            Content-Type: Content-type: application/json
-
-            --aBoundaryString
-            Content-Disposition: form-data; name="artfile"
-            Content-Type: image/jpeg
-
-            --aBoundaryString
-            Content-Disposition: form-data; name="audiofile"
-            Content-Type: audio/mpeg3
-            },
         body: data
     })
         .then(response => response.json())
@@ -118,7 +90,7 @@ function cuSubmit() {
             console.log('Success:', result);
         })
         .catch(error => {
-            console.error('Error:', error);
+            //console.error('Error:', error);
         });
 }
 
@@ -130,9 +102,7 @@ https://stackoverflow.com/questions/36067767/how-do-i-upload-a-file-with-the-js-
 
 
 
-
-
-
+// GAMLE EKSPERIMENTER
 
     /*
     var urllink = apiEndpoint + linkInput;
@@ -168,3 +138,20 @@ $.ajax({
     //add 2 files (art and audio)
     httpRequest.send(metaDataJson, audioFile, artFile);
 */
+
+/*
+Gammel løsning
+
+let all = document.querySelectorAll("#customAudioForm input");
+// Receives files from form: artwork & audio mp3
+for (let field of all) {
+    if (field.type === "file") {
+        var file = document.getElementById(field.getAttribute("id")).files[0];
+        if (file != null) {
+            artFile = file;
+        } else {
+            audioFile = file;
+        }
+    }
+}
+ */

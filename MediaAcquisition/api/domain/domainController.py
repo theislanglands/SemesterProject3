@@ -28,5 +28,5 @@ class domainController:
     def delete_audio(self, id):
         return self.persistance.delete_audio(id)
 
-dc = domainController()
-print(dc.store_artwork('Céline_Dion.jpeg'))
+# dc = domainController()
+# print(dc.store_custom_mp3('zapsplat'))

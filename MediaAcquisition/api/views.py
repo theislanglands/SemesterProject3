@@ -10,7 +10,6 @@ import requests
 import yt_dlp
 import json
 from django.shortcuts import render
-from .forms import UploadFileForm
 from api.metadata import Metadata
 
 
@@ -103,8 +102,6 @@ def upload_file(request):
         form = ModelFormWithFileField()
     return render(request, 'upload.html', {'form': form})
 
-
-
 def delete_audio(request, link):
     try:
         return_meta_data = AudioObject.objects.filter(audio_id=link)
@@ -147,5 +144,13 @@ def usergui(request):
 def home(request):
     return render(request, 'index.html')
 
+
+def add_cu(request):
+
+     #   return HttpResponse('post hej')
+
+    json = request.POST.get("metadata")
+
+    return HttpResponse("recieved " + str(json))
 
 

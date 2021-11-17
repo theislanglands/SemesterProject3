@@ -20,9 +20,6 @@ class PersistanceController:
 
     def storeAudio(self, localFilePath, fileNameOnServer):
 
-        #print(localFilePath)
-        #exit()
-
         file = None
         try:
             file = open(localFilePath, "rb")  # open file to send
