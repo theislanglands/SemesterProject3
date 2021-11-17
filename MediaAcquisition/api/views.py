@@ -37,9 +37,11 @@ def add_youtube_audio(request, link):
 
         #Download Metadata and sort it
         data = globalController.get_json(link)
-        data = json.loads(data)
         if data == None:
             return HttpResponseNotFound('URL not valid')
+
+        data = json.loads(data)
+
         #check filesize before upload
         new_entry = AudioObject(data['audio_id'], data)
         new_entry.save()
@@ -50,7 +52,7 @@ def add_youtube_audio(request, link):
         return HttpResponse('New song added to database')
 
     except Exception:
-        return HttpResponse(traceback.format_exc())
+        return HttpResponse(traceback.format_exc() + str(data))
 
 
 def get_audio(request, link):
