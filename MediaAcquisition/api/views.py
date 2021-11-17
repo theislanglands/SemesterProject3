@@ -39,10 +39,10 @@ def add_youtube_audio(request, link):
 
         #Download Metadata and sort it
         data = globalController.get_json(link)
+        data = json.loads(data)
 
         if data == None:
             return HttpResponseNotFound('URL not valid')
-        data = json.loads(data)
 
         #check filesize before upload
         new_entry = AudioObject(data['audio_id'], data)
