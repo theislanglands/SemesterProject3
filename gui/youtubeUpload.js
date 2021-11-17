@@ -26,22 +26,37 @@ window.addEventListener("load", e => {
 
         //send data to api
         var urllink = apiEndpoint + linkInput;
-        console.log(urllink);
+        
 
         $.ajax({
-            method: "post",
+            method: "get",
             url: urllink,
+            dataType: 'text',
 
+            beforeSend: function(){
+                document.getElementById('loader').style.display = "block";
+            },
+            
+            success: function (result) {
+                alert(result);
+            },
+
+            complete: function(){
+                document.getElementById("loader").style.display = "none";
+                
+            }
+            
+
+        
+/*
             success: function (result) {
                 $('body').append(result)
             },
 
             error: function () {
                 alert("error something went wrong");
-            }
+            }   */
         });
     }
-})
+});
 
-
-    
