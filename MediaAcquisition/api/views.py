@@ -10,7 +10,8 @@ import requests
 import yt_dlp
 import json
 from django.shortcuts import render
-from .forms import AudioStore
+from .forms import AudioForm
+
 from api.metadata import Metadata
 
 
@@ -94,14 +95,17 @@ def add_local_audio(request):
 
 def upload_file(request):
     if request.method == 'POST':
-        form = ModelFormWithFileField(request.POST, request.FILES)
+        form = AudioForm(request.POST, request.FILES)
         if form.is_valid():
-            # file is saved
             form.save()
             return HttpResponseRedirect('/success/url/')
+        else:
+            return HttpResponseNotFound('Form is invalid')
     else:
-        form = ModelFormWithFileField()
+        form = AudioForm()
     return render(request, 'upload.html', {'form': form})
+
+
 
 
 

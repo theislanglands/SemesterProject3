@@ -12,7 +12,7 @@ class AudioObject(models.Model):
 
 
 class AudioStore(models.Model):
-   record = models.FileField(upload_to='/temp')
+   record = models.FileField(upload_to='temp')
    class Meta:
        db_table = 'audiofile'
 
