@@ -1,7 +1,6 @@
 
-const httpRequest = new XMLHttpRequest()
-const apiEndpoint = "ADDRESS";
-
+//const httpRequest = new XMLHttpRequest()
+var apiEndpoint = 'http://127.0.0.1:8000/data/add_track';
 
 window.onload = () => {
     var maxArtSize = 2; //in MB
@@ -15,7 +14,6 @@ window.addEventListener("load", e=> {
         showCollectionFields();
     });
 });
-
 
 function scaleBytes(x, scale) {
     for (var i = 0; i < scale; i++) {
@@ -50,12 +48,13 @@ function cuSubmit() {
     let artFile;
     let audioFile;
     const metaDataJson = {};
+
+    /*
     let all = document.querySelectorAll("#customAudioForm input");
 
     // Receives files from form: artwork & audio mp3
     for (let field of all) {
-        if (field.type == "file") {
-
+        if (field.type === "file") {
             var file = document.getElementById(field.getAttribute("id")).files[0];
             if (file != null) {
                 artFile = file;
@@ -64,6 +63,8 @@ function cuSubmit() {
             }
         }
     }
+
+     */
 
     // Retrieve values from form
     metaDataJson['name'] = document.getElementById("name").value;
@@ -76,10 +77,82 @@ function cuSubmit() {
     let jsonFile = JSON.stringify(metaDataJson)
     console.log(jsonFile)
 
-/*
+    artFile = document.getElementById('').files[0];
+
+
 //send data to api
 
-// check up 'JQUERY!
+    // creating FormData() object to post
+    const data = new FormData();
+    data.append('metadata', jsonFile);
+    data.append('artwork', document.getElementById('artfile'))
+    data.append('mp3file', document.getElementsById('audiofile'))
+    /*
+       The FormData interface provides a way to easily construct a set of key/value pairs representing form fields and their values, which can then be easily sent using the XMLHttpRequest. send() method.
+       It uses the same format a form would use if the encoding type were set to "multipart/form-data" .14 Sep 2021
+    */
+
+    //sending post request with fetch api interface and printing result
+
+    fetch(apiEndpoint, {
+        method: 'POST',
+        headers: {
+            Content-Type: multipart/form-data; boundary=aBoundaryString
+
+            --aBoundaryString
+            Content-Disposition: form-data; name="metadata"
+            Content-Type: Content-type: application/json
+
+            --aBoundaryString
+            Content-Disposition: form-data; name="artfile"
+            Content-Type: image/jpeg
+
+            --aBoundaryString
+            Content-Disposition: form-data; name="audiofile"
+            Content-Type: audio/mpeg3
+            },
+        body: data
+    })
+        .then(response => response.json())
+        .then(result => {
+            console.log('Success:', result);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
+/*
+Snakkede med niels i webtech om vores upload fil 'problem' han kom op med flg idé
+https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+https://stackoverflow.com/questions/36067767/how-do-i-upload-a-file-with-the-js-fetch-api
+ */
+
+
+
+
+
+
+
+    /*
+    var urllink = apiEndpoint + linkInput;
+    console.log(urllink);
+$.ajax({
+            method: "post",
+            url: urllink,
+
+            success: function (result) {
+                $('body').append(result)
+            },
+
+            error: function () {
+                alert("error something went wrong");
+            }
+        });
+}
+
+
+/*
 
     httpRequest.open('POST', apiEndpoint, true); //open request to api
 
@@ -94,17 +167,4 @@ function cuSubmit() {
 
     //add 2 files (art and audio)
     httpRequest.send(metaDataJson, audioFile, artFile);
-$.ajax({
-            method: "post",
-            url: urllink,
-
-            success: function (result) {
-                $('body').append(result)
-            },
-
-            error: function () {
-                alert("error something went wrong");
-            }
-        });
- */
-}
+*/

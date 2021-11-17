@@ -2,13 +2,17 @@
 
     <head>
         <link rel="stylesheet" href="css/style.css">
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
         <script src="customUpload.js"></script>
     </head>
 
     <body>
 
         <div id="customAudioForm">
+            <div>
             <h1>Add song to system</h1>
+            </div>
+
                 <div>
                     <input type="text" name="name" id="name" placeholder="Song Name">
                 </div>
@@ -19,20 +23,20 @@
                     <input type="number" name="release_year" id="release_year" placeholder="Release Year">
                 </div>
                 <div>
-                    <input type="checkbox" name="is_collection" id="is_collection">Part of collection</input>
-                    <input type="text" class="col" disabled="true" name="collection_name" id="collection_name" placeholder="album / playlist name">
-                    <input type="number" class="col" disabled="true" name="track_nr" id="track_nr" placeholder="Track Number">
+                    <input type="checkbox" name="is_collection" id="is_collection">Part of collection</input><br>
+                    <input type="text" class="col" disabled="true" name="collection_name" id="collection_name" placeholder="album / playlist name"><br>
+                    <input type="number" class="col" disabled="true" name="track_nr" id="track_nr" placeholder="Track Number"><br>
                     <input type="number" class="col" disabled="true" name="total_track_count" id="total_track_count" placeholder="Total Track Count">
                 </div>
 
                 <div>
-                <label for="art">Upload artwork</label>
-                <input type="file" name="art" id="art" accept="image/jpeg, image/png">
+                <label for="artfile">Upload artwork</label>
+                <input type="file" name="artfile" id="artfile" accept="image/jpeg, image/png">
                 </div>
 
                 <div>
-                <label for="audio">Upload mp3 audio</label>
-                <input type="file" name="audio" id="audio" accept="audio/*">
+                <label for="audiofile">Upload mp3 audio</label>
+                <input type="file" name="audiofile" id="audiofile" accept="audio/*">
                 </div>
 
                 <div>
