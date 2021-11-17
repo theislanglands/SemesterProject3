@@ -58,8 +58,6 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
-ALLOWED_HOSTS=['*']
-
 ROOT_URLCONF = 'MediaAcquisition.urls'
 
 TEMPLATES = [
