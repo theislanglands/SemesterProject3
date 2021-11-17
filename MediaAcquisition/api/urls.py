@@ -8,10 +8,6 @@ urlpatterns = [
     path('delete_track/<link>', delete_audio),
     path('get_track/<link>', get_audio),
     path('get_all_tracks/', get_all_tracks),
-    path('get_metadata/<link>', get_metadata),
-
-    path('addaudio/youtube', youtubegui),
-    path('addaudio/user', usergui),
-    path('', home)
+    path('get_metadata/<link>', get_metadata)
 ]
 
