@@ -19,6 +19,10 @@ class PersistanceController:
         self.ftp.cwd(self.root)  # change working directory to root
 
     def storeAudio(self, localFilePath, fileNameOnServer):
+
+        #print(localFilePath)
+        #exit()
+
         file = None
         try:
             file = open(localFilePath, "rb")  # open file to send
@@ -33,6 +37,8 @@ class PersistanceController:
             file.close()
 
     def storeArtwork(self, localFilePath, fileNameOnServer):
+       
+
         file = None
         try:
             file = open(localFilePath, "rb")  # open file to send
