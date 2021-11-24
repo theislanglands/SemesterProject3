@@ -1,6 +1,5 @@
-
 //const httpRequest = new XMLHttpRequest()
-var apiEndpoint = 'http://127.0.0.1:8000/data/add_cu';
+var apiEndpoint = 'http://127.0.0.1:8000/add_custom';
 
 window.onload = () => {
     var maxArtSize = 2; //in MB
@@ -9,7 +8,7 @@ window.onload = () => {
     addSizeListener("audio", scaleBytes(maxAudioSize, 3));
 }
 
-window.addEventListener("load", e=> {
+window.addEventListener("load", e => {
     document.getElementById('is_collection').addEventListener('click', e => {
         showCollectionFields();
     });
@@ -32,11 +31,11 @@ function addSizeListener(id, size) {
     }
 }
 
-function showCollectionFields(){
+function showCollectionFields() {
     let elements = document.getElementsByClassName("col");
 
-    for (let i=0; i<elements.length; i++){
-        if (document.getElementById("is_collection").checked){
+    for (let i = 0; i < elements.length; i++) {
+        if (document.getElementById("is_collection").checked) {
             elements[i].disabled = false;
         } else {
             elements[i].disabled = true;
@@ -83,7 +82,12 @@ function cuSubmit() {
 
     fetch(apiEndpoint, {
         method: 'POST',
-        body: data
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        },
+        body: data,
+
+
     })
         .then(response => response.json())
         .then(result => {
@@ -101,42 +105,41 @@ https://stackoverflow.com/questions/36067767/how-do-i-upload-a-file-with-the-js-
  */
 
 
-
 // GAMLE EKSPERIMENTER
 
-    /*
-    var urllink = apiEndpoint + linkInput;
-    console.log(urllink);
+/*
+var urllink = apiEndpoint + linkInput;
+console.log(urllink);
 $.ajax({
-            method: "post",
-            url: urllink,
+        method: "post",
+        url: urllink,
 
-            success: function (result) {
-                $('body').append(result)
-            },
+        success: function (result) {
+            $('body').append(result)
+        },
 
-            error: function () {
-                alert("error something went wrong");
-            }
-        });
+        error: function () {
+            alert("error something went wrong");
+        }
+    });
 }
 
 
 /*
 
-    httpRequest.open('POST', apiEndpoint, true); //open request to api
+httpRequest.open('POST', apiEndpoint, true); //open request to api
 
 //Send the proper header information along with the request
-    httpRequest.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
+httpRequest.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
 
-    httpRequest.onreadystatechange = function () { //Call a function when the state changes.
-        if (httpRequest.readyState == 4 && httpRequest.status == 200) {
-            alert(httpRequest.responseText);
-        }
+httpRequest.onreadystatechange = function () { //Call a function when the state changes.
+    if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+        alert(httpRequest.responseText);
     }
+}
 
-    //add 2 files (art and audio)
-    httpRequest.send(metaDataJson, audioFile, artFile);
+//add 2 files (art and audio)
+httpRequest.send(metaDataJson, audioFile, artFile);
 */
 
 /*
