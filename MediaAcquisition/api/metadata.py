@@ -3,7 +3,6 @@ from datetime import datetime
 from uuid import uuid4
 from django.template.defaultfilters import slugify
 
-
 class Metadata:
     def __init__(self):
         self._audio_id = None

@@ -1,4 +1,5 @@
 import os
+import requests
 
 from api.metadata import Metadata
 from api.persistence.persistenceController import PersistanceController
@@ -46,3 +47,25 @@ class CustomAudio:
         except Exception:
             return None
 
+    def post_metadata(self, metadata_json, endpoint_url):
+        # send metadata_json via an HTTP request to selected endpoint
+
+        response = requests.post(endpoint_url, json=metadata_json)
+        print('response from server:',response.text)
+        #response_as_dictionary = response.json()
+
+        status = response.status_code
+
+        if status != 200:
+            print("error: " + str(status))
+             #TODO - what if send fails - delete audiofrom db?
+            return '500'
+        else:
+            print("metadata succesfully send!")
+            return '200'
+
+
+if __name__ == '__main__':
+    parser = CustomAudio()
+    metadata_test = '{"name": "My Heart Will Go On", "artist": "Celine Dion", "is_collection": "true", "collection_name": "New York World Tour", "track_nr": "1", "total_track_count": "5", "release_year": "1992", "path_to_artwork": "https:/forbkbksdf"}'
+    print(parser.post_metadata(metadata_test, 'https://foreignlands.dk'))
