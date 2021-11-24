@@ -90,7 +90,7 @@ DATABASES = {
         'NAME': 'media_acquisition',
         'USER': 'root',
         'PASSWORD': '',
-        'HOST': '127.0.0.1',
+        'HOST': 'database',
         'PORT': '3306',
     }
 }
