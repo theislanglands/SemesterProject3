@@ -52,17 +52,13 @@ class CustomAudio:
 
         response = requests.post(endpoint_url, json=metadata_json)
         print('response from server:',response.text)
-        #response_as_dictionary = response.json()
+        print(response.request)
 
-        status = response.status_code
-
-        if status != 200:
-            print("error: " + str(status))
-             #TODO - what if send fails - delete audiofrom db?
-            return '500'
+        if response.ok:
+            return "metadata succesfully send!"
         else:
-            print("metadata succesfully send!")
-            return '200'
+            # TODO - what if send fails - delete audiofrom db?
+            return "error: " + response.reason
 
 
 if __name__ == '__main__':
