@@ -5,12 +5,10 @@ from django.http import HttpResponse, JsonResponse, HttpResponseNotFound, HttpRe
 from api.domain.domainController import domainController
 from api.models import *
 from api.domain.youtubedlp import YoutubeDL
-import requests
-import yt_dlp
+
 import json
 from django.shortcuts import render
 from api.forms import AudioForm
-from api.metadata import Metadata
 
 
 # todo: Add sorting at metadata object
@@ -103,7 +101,7 @@ def upload_file(request):
             if not request.FILES['audiofile'] is None:
                 instance = AudioFile(audiofile=request.FILES['audiofile'])
                 instance.save()
-                return HttpResponseRedirect('succes')
+                return HttpResponse('succes' + ' '+ request.POST['title'])
             else:
                 return HttpResponse('error getting file')
         else:
@@ -111,6 +109,8 @@ def upload_file(request):
         return render(request, 'form_test.html', {'form': form})
     except Exception:
         return HttpResponse(traceback.format_exc())
+
+
 #todo: Add logic to controller or other file
 #todo: CHeck if file content is None/null or empty
 ##TOdo: Save file with CU_
