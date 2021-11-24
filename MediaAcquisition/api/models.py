@@ -11,8 +11,7 @@ class AudioObject(models.Model):
 
 
 class AudioFile(models.Model):
-    #name = forms.CharField(max_length=255)
-    #title = forms.CharField(max_length=255)
+    name = forms.CharField(max_length=255)
+    title = forms.CharField(max_length=255)
     #artfile = forms.FileField(required=False)
     audiofile = models.FileField(upload_to='temp')
-

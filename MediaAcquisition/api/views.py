@@ -103,7 +103,7 @@ def upload_file(request):
             if not request.FILES['audiofile'] is None:
                 instance = AudioFile(audiofile=request.FILES['audiofile'])
                 instance.save()
-                return HttpResponseRedirect('succes' + request.POST['title'])
+                return HttpResponseRedirect('succes')
             else:
                 return HttpResponse('error getting file')
         else:
