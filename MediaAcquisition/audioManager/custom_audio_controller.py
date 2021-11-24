@@ -12,7 +12,7 @@ class CustomAudio:
         try:
             # store in filesystem on server
             local_path = os.getcwd() + '/temp/'
-            filename = 'CU_' + filename + '.mp3'
+            filename = filename + '.mp3'
             # print("fn: " + filename)
             # print("lp: " + local_path)
             success = self.persistence.storeAudio(local_path + filename, filename)
@@ -29,7 +29,8 @@ class CustomAudio:
         except Exception:
             return None
 
-    def store_artwork(self, filename):
+    def storeArtwork(self, filename):
+
         try:
             # store in filesystem on server
             local_path = os.getcwd() + '/temp/'

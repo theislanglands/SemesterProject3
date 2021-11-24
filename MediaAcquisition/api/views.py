@@ -124,8 +124,6 @@ def __handle_uploaded_file(f):
             destination.write(chunk)
 
 
-
-
 def delete_audio(request, link):
     try:
         return_meta_data = AudioObject.objects.filter(audio_id=link)
@@ -168,5 +166,13 @@ def usergui(request):
 def home(request):
     return render(request, 'index.html')
 
+
+def add_cu(request):
+
+    json = request.POST.get("metadata")
+    artfile = request.FILES.get("artwork")
+    audiofile = request.FILES.get("mp3file")
+
+    return HttpResponse("recieved " + str(json))
 
 

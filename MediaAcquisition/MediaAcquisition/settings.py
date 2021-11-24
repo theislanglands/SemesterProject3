@@ -47,6 +47,8 @@ INSTALLED_APPS = [
 
 ]
 
+#CSRF on/off - uncomment csrf line
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -88,8 +90,8 @@ DATABASES = {
         'NAME': 'media_acquisition',
         'USER': 'root',
         'PASSWORD': '',
-        'HOST': 'database',
-        'PORT': 3306,
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
     }
 }
 
