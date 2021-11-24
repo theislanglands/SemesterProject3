@@ -218,12 +218,3 @@ class Metadata:
 
 
 
-
-
-
-if __name__ == '__main__':
-    parser = Metadata()
-    parser.parse_from_youtube_json()
-
-
-

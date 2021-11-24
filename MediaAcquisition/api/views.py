@@ -1,17 +1,15 @@
 import traceback
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, HttpResponseNotFound, HttpResponseRedirect
-from django.views.decorators.csrf import csrf_exempt
 
 from api.domain.domainController import domainController
-from api.models import AudioObject
+from api.models import *
 from api.domain.youtubedlp import YoutubeDL
 import requests
 import yt_dlp
 import json
 from django.shortcuts import render
-from .forms import AudioForm
-
+from api.forms import AudioForm
 from api.metadata import Metadata
 
 
@@ -40,10 +38,13 @@ def add_youtube_audio(request, link):
 
         #Download Metadata and sort it
         data = globalController.get_json(link)
-        data = json.loads(data)
 
         if data == None:
             return HttpResponseNotFound('URL not valid')
+
+        data = json.loads(data)
+
+
 
         #check filesize before upload
         new_entry = AudioObject(data['audio_id'], data)
@@ -84,27 +85,43 @@ def add_local_audio(request):
     #Parse metadata til DB
     #Parse File and send to Filesystem
 
-
-
     globalController = domainController()
 
-    globalController.store_custom_mp3()
 
     pass
 
 
-def upload_file(request):
-    if request.method == 'POST':
-        form = AudioForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect('/success/url/')
-        else:
-            return HttpResponseNotFound('Form is invalid')
-    else:
-        form = AudioForm()
-    return render(request, 'upload.html', {'form': form})
 
+
+
+
+
+
+def upload_file(request):
+    try:
+        if request.method == 'POST':
+            if not request.FILES['audiofile'] is None:
+                instance = AudioFile(audiofile=request.FILES['audiofile'])
+                instance.save()
+                return HttpResponseRedirect('succes' + request.POST['title'])
+            else:
+                return HttpResponse('error getting file')
+        else:
+            form = AudioForm()
+        return render(request, 'form_test.html', {'form': form})
+    except Exception:
+        return HttpResponse(traceback.format_exc())
+#todo: Add logic to controller or other file
+#todo: CHeck if file content is None/null or empty
+##TOdo: Save file with CU_
+##Try to send an audio object by HTTP
+
+
+
+def __handle_uploaded_file(f):
+    with open('/home/emil/Desktop/Projekt/media-acquisition/MediaAcquisition/api/domain/temp/rickboy.mp3', 'wb+') as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
 
 
 
