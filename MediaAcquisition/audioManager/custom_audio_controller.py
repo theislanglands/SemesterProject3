@@ -27,3 +27,22 @@ class CustomAudio:
                 return 'error 500: internal server error'
         except Exception:
             return None
+
+    def store_artwork(self, filename):
+        try:
+            # store in filesystem on server
+            local_path = os.getcwd() + '/temp/'
+            success = self.persistence.storeArtwork(local_path + filename, filename)
+
+            # handle success response
+            if success:
+                try:
+                    os.remove(local_path + filename)  # delete local
+                except Exception as e:
+                    print("error: local file not deleted\n" + str(e))
+                    # TODO: THEN do what?
+            else:
+                return 'error 500: internal server error'
+        except Exception:
+            return None
+
