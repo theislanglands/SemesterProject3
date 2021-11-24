@@ -20,7 +20,8 @@ import api
 from api import urls
 
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('data/', include(api.urls)),
+    path('', include(api.urls)),
 ]

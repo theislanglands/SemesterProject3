@@ -1,10 +1,9 @@
 from django import forms
-from api.models import AudioStore
 
 
-class AudioForm(forms.ModelForm):
-    class Meta:
-        model=AudioStore
-        fields=['record']
-
+class AudioForm(forms.Form):
+    name = forms.CharField(max_length=255)
+    title = forms.CharField(max_length=255)
+    artfile = forms.FileField(required=False)
+    audiofile = forms.FileField()
 
