@@ -28,5 +28,8 @@ class domainController:
     def delete_audio(self, id):
         return self.persistance.delete_audio(id)
 
-# dc = domainController()
-# print(dc.store_custom_mp3('zapsplat'))
+    def post_metadata(self, metadata_json, endpoint_url):
+        return self.custom_audio.post_metadata(self, metadata_json, endpoint_url)
+
+#dc = domainController()
+#print(dc.store_mp3('IJLj1aTmSxw'))
