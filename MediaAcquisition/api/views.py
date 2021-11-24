@@ -147,8 +147,6 @@ def home(request):
 
 def add_cu(request):
 
-     #   return HttpResponse('post hej')
-
     json = request.POST.get("metadata")
     artfile = request.FILES.get("artwork")
     audiofile = request.FILES.get("mp3file")
