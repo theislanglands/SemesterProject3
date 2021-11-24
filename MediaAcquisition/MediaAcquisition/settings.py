@@ -86,9 +86,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'media_acquisition',
-        'USER': 'testuser',
-        'PASSWORD': 'ida',
-        'HOST': 'localhost',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': 'database',
         'PORT': 3306,
     }
 }

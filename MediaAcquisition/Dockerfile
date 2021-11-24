@@ -14,3 +14,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
+CMD sh -c "python3 manage.py wait_for_database && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000"
