@@ -1,7 +1,7 @@
 import traceback
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, HttpResponseNotFound, HttpResponseRedirect
-
+import os
 from api.domain.domainController import domainController
 from api.models import *
 from api.domain.youtubedlp import YoutubeDL
@@ -30,7 +30,8 @@ def add_youtube_audio(request, link):
     globalController = domainController()
     # check if link already in database
     try:
-        return_meta_data = AudioObject.objects.filter(audio_id=link)
+        query = 'YT_' + link
+        return_meta_data = AudioObject.objects.filter(audio_id=query)
         if return_meta_data:
             return HttpResponseNotFound('Song already in database')
 
@@ -78,32 +79,28 @@ def get_metadata(request, link):
         return HttpResponse(traceback.format_exc())
     pass
 
-def add_local_audio(request):
-    #Modtager request
-    #Parse metadata til DB
-    #Parse File and send to Filesystem
-
-    globalController = domainController()
-
-
-    pass
-
-
-
-
-
-
 
 
 def upload_file(request):
     try:
         if request.method == 'POST':
             if not request.FILES['audiofile'] is None:
-                instance = AudioFile(audiofile=request.FILES['audiofile'])
+                #1. use metadaData class to parse dict object to JSON
+
+                data = dict(request.POST.items())
+
+                #2. extract size of audiofile, BUT WAIT! wouldn't it be better to check
+                # file size on front end to avoid large files being transfered to the webserver.
+
+                #2. save metadata + artwork + json data + audio id
+                instance = AudioFile(artfile=request.FILES['artfile'], audiofile=request.FILES['audiofile'], JSON=data)
                 instance.save()
-                return HttpResponse('succes' + ' '+ request.POST['title'])
-            else:
-                return HttpResponse('error getting file')
+
+                #3. upload mp3 file to remote file system - how is the id of the custom_track determined?
+
+                #globalController = domainController()
+                #globalController.store_custom_mp3()
+                return HttpResponse(request.POST['name'] + ' uploaded')
         else:
             form = AudioForm()
         return render(request, 'form_test.html', {'form': form})
@@ -111,22 +108,10 @@ def upload_file(request):
         return HttpResponse(traceback.format_exc())
 
 
-#todo: Add logic to controller or other file
-#todo: CHeck if file content is None/null or empty
-##TOdo: Save file with CU_
-##Try to send an audio object by HTTP
-
-
-
-def __handle_uploaded_file(f):
-    with open('/home/emil/Desktop/Projekt/media-acquisition/MediaAcquisition/api/domain/temp/rickboy.mp3', 'wb+') as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
-
-
 def delete_audio(request, link):
     try:
-        return_meta_data = AudioObject.objects.filter(audio_id=link)
+        query = 'YT_' + link
+        return_meta_data = AudioObject.objects.filter(audio_id=query)
         if not return_meta_data:
             return HttpResponseNotFound('Song URL invalid OR not in database')
         else:
@@ -144,12 +129,8 @@ def get_all_tracks(request):
         tmp = 0
         print(all_entries)
         for x in range(len(all_entries)):
-            print(tmp)
             data[f'track {tmp}'] = str(all_entries[x])
             tmp = tmp + 1
-        print(data)
-        print(type(data['track 1']))
-
         if all_entries:
             return JsonResponse(data)
         else:
