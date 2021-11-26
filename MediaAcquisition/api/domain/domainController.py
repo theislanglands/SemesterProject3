@@ -14,7 +14,7 @@ class domainController:
     def store_youtube_mp3(self, youtube_id):
         return self.yt_download.store_mp3(youtube_id)
 
-    def store_custom_mp3(self, audio_mp3):   #TODO Recieve .mp3 file, and pass to the file to Storage.
+    def store_custom_mp3(self, audio_mp3):
         success = self.custom_audio.store_mp3(audio_mp3)
         return success
 

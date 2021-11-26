@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: django-service
+  name: t09-django-service
 spec:
   selector:
-    app: django
+    app: t09-django
   type: LoadBalancer
   ports:
     - protocol: TCP
@@ -15,34 +15,35 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: django-deployment
+  name: t09-django-deployment
   labels:
-    app: django
+    app: t09-django
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: django
+      app: t09-django
   template:
     metadata:
       labels:
-        app: django
+        app: t09-django
     spec:
       containers:
-        - name: django
-          image: gitlab.sdu.dk:5050/semester-project-e2021/team-09/media-acquisition/django:test
+        - name: t09-django
+          image: gitlab.sdu.dk:5050/semester-project-e2021/team-09/media-acquisition/django:latest
           ports:
             - containerPort: 8000
       imagePullSecrets:
       - name: registry-credentials
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mysql
+  name: t09-mysql
 spec:
   selector:
-    app: mysql
+    app: t09-mysql
   ports:
     - protocol: TCP
       port: 3306
@@ -52,21 +53,21 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mysql
+  name: t09-mysql
   labels:
-    app: mysql
+    app: t09-mysql
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mysql
+      app: t09-mysql
   template:
     metadata:
       labels:
-        app: mysql
+        app: t09-mysql
     spec:
       containers:
-        - name: mysql
+        - name: t09-mysql
           image: gitlab.sdu.dk:5050/semester-project-e2021/team-09/media-acquisition/mysql
           ports:
           - containerPort: 3306

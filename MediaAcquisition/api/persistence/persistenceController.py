@@ -34,7 +34,6 @@ class PersistanceController:
             file.close()
 
     def storeArtwork(self, localFilePath, fileNameOnServer):
-       
 
         file = None
         try:

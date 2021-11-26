@@ -5,7 +5,7 @@ import os
 from api.domain.domainController import domainController
 from api.models import *
 from api.domain.youtubedlp import YoutubeDL
-
+from uuid import uuid4
 import json
 from django.shortcuts import render
 from api.forms import AudioForm
@@ -43,8 +43,6 @@ def add_youtube_audio(request, link):
 
         data = json.loads(data)
 
-
-
         #check filesize before upload
         new_entry = AudioObject(data['audio_id'], data)
         new_entry.save()
@@ -79,8 +77,6 @@ def get_metadata(request, link):
         return HttpResponse(traceback.format_exc())
     pass
 
-
-
 def upload_file(request):
     try:
         if request.method == 'POST':
@@ -89,21 +85,35 @@ def upload_file(request):
 
                 data = dict(request.POST.items())
 
-                #2. extract size of audiofile, BUT WAIT! wouldn't it be better to check
-                # file size on front end to avoid large files being transfered to the webserver.
+                filename = request.FILES['mp3file'].name
+
+                # remove .mp3
+                filename = filename[:-4]
+
+                # uuid
+                randomuuid = uuid4().hex
+
+                # change request name
+                request.FILES['mp3file'].name = "CA_" + str(randomuuid) + ".mp3"
+                #print(request.FILES['mp3file'].name)
+
+                #TODO
+                # redigere metadata - så der bliver tilføjet duration, etc inden den bliver lagret i vores db
+                # dvs kør igennem metode i metadata klassen!
+                # TODO refactor temp/temp/temp/temp
 
                 #2. save metadata + artwork + json data + audio id
                 instance = AudioFile(artfile=request.FILES['artwork'], audiofile=request.FILES['mp3file'], JSON=data)
                 instance.save()
 
                 #3. upload mp3 file to remote file system - how is the id of the custom_track determined?
+                globalController = domainController()
+                globalController.store_custom_mp3( request.FILES['mp3file'].name )
 
-                #globalController = domainController()
-                #globalController.store_custom_mp3()
-                return HttpResponse(request.POST['metadata'] + ' uploaded')
+                return HttpResponse('Successfully uploaded ' + filename + '!')
         else:
             form = AudioForm()
-        return render(request, 'form_test.html', {'form': form})
+            return render(request, 'form_test.html', {'form': form})
     except Exception:
         return HttpResponse(traceback.format_exc())
 
