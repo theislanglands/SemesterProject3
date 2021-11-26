@@ -102,7 +102,7 @@ def upload_file(request):
                 return HttpResponse(filename + ' uploaded')
         else:
             form = AudioForm()
-        return render(request, 'form_test.html', {'form': form})
+            return render(request, 'form_test.html', {'form': form})
     except Exception:
         return HttpResponse(traceback.format_exc())
 

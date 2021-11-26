@@ -41,7 +41,7 @@ class YoutubeAudioDL:
                 ydl.download(id)
 
             # store in filesystem on server
-            local_path = os.getcwd() + '/temp/'
+            local_path = os.getcwd() + '/audioManager/temp/temp/'
             filename = 'YT_' + id[0] + '.mp3'
             # print("fn: " + filename)
             # print("lp: " + local_path)
