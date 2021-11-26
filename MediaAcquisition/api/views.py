@@ -86,7 +86,8 @@ def upload_file(request):
                 data = dict(request.POST.items())
 
                 filename = request.FILES['mp3file'].name
-                # fjerne .mp3
+
+                # remove .mp3
                 filename = filename[:-4]
 
                 # uuid
@@ -96,13 +97,14 @@ def upload_file(request):
                 request.FILES['mp3file'].name = "CA_" + filename + "_" + str(randomuuid) + ".mp3"
                 #print(request.FILES['mp3file'].name)
 
-                #2. extract size of audiofile, BUT WAIT! wouldn't it be better to check
-                # file size on front end to avoid large files being transfered to the webserver.
+                #TODO
+                # redigere metadata - så der bliver tilføjet duration, etc inden den bliver lagret i vores db
+                # dvs kør igennem metode i metadata klassen!
+                # TODO refactor temp/temp/temp/temp
 
                 #2. save metadata + artwork + json data + audio id
                 instance = AudioFile(artfile=request.FILES['artwork'], audiofile=request.FILES['mp3file'], JSON=data)
                 instance.save()
-
 
                 #3. upload mp3 file to remote file system - how is the id of the custom_track determined?
                 globalController = domainController()
