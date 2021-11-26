@@ -5,7 +5,7 @@ import os
 from api.domain.domainController import domainController
 from api.models import *
 from api.domain.youtubedlp import YoutubeDL
-
+from uuid import uuid4
 import json
 from django.shortcuts import render
 from api.forms import AudioForm
@@ -85,6 +85,17 @@ def upload_file(request):
 
                 data = dict(request.POST.items())
 
+                filename = request.FILES['mp3file'].name
+                # fjerne .mp3
+                filename = filename[:-4]
+
+                # uuid
+                randomuuid = uuid4().hex
+
+                # change request name
+                request.FILES['mp3file'].name = "CA_" + filename + "_" + str(randomuuid) + ".mp3"
+                #print(request.FILES['mp3file'].name)
+
                 #2. extract size of audiofile, BUT WAIT! wouldn't it be better to check
                 # file size on front end to avoid large files being transfered to the webserver.
 
@@ -92,14 +103,12 @@ def upload_file(request):
                 instance = AudioFile(artfile=request.FILES['artwork'], audiofile=request.FILES['mp3file'], JSON=data)
                 instance.save()
 
-                filename = request.FILES['mp3file'].filename
-                print(filename)
 
                 #3. upload mp3 file to remote file system - how is the id of the custom_track determined?
                 globalController = domainController()
-                globalController.store_custom_mp3('filename')
+                globalController.store_custom_mp3( request.FILES['mp3file'].name )
 
-                return HttpResponse(filename + ' uploaded')
+                return HttpResponse('uploaded ' + filename)
         else:
             form = AudioForm()
             return render(request, 'form_test.html', {'form': form})

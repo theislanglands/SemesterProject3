@@ -12,7 +12,7 @@ class YoutubeAudioDL:
         'format': 'bestaudio/best',
         # 'writeinfojson': True,
         'clean_infojson': True,
-        'outtmpl': os.getcwd() + '/temp' '/YT_%(id)s.%(ext)s',
+        'outtmpl': os.getcwd() + '/audioManager/temp/temp' '/YT_%(id)s.%(ext)s',
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
