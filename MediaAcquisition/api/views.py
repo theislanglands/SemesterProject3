@@ -93,13 +93,13 @@ def upload_file(request):
                 instance.save()
 
                 filename = request.FILES['mp3file'].filename
-                print(filename);
+                print(filename)
 
                 #3. upload mp3 file to remote file system - how is the id of the custom_track determined?
                 globalController = domainController()
-                globalController.store_custom_mp3('MediaAcquisition/media/temp/*.mp3')
+                globalController.store_custom_mp3('filename')
 
-                return HttpResponse(request.POST['metadata'] + ' uploaded')
+                return HttpResponse(filename + ' uploaded')
         else:
             form = AudioForm()
         return render(request, 'form_test.html', {'form': form})

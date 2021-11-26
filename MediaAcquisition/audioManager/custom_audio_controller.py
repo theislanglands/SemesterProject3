@@ -11,11 +11,18 @@ class CustomAudio:
     def store_mp3(self, filename):
         try:
             # store in filesystem on server
+            #local path
             local_path = os.getcwd() + '/temp/'
-            filename = filename + '.mp3'
+            # MediaAcquisition/media/temp/
+
+            # filename = filename + '.mp3'
             # print("fn: " + filename)
             # print("lp: " + local_path)
             success = self.persistence.storeAudio(local_path + filename, filename)
+
+
+
+
 
             # handle success response
             if success:
