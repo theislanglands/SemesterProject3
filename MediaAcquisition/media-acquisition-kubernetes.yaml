@@ -34,7 +34,7 @@ spec:
           ports:
             - containerPort: 8000
       imagePullSecrets:
-      - name: registry-credentials
+      - name: registry-credentials #registry-credentidals er ikke i SDU klusteret
 
 ---
 apiVersion: v1
@@ -72,4 +72,4 @@ spec:
           ports:
           - containerPort: 3306
       imagePullSecrets:
-      - name: registry-credentials
+      - name: registry-credentials #registry-credentidals er ikke i SDU klusteret
