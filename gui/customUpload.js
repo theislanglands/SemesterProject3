@@ -82,9 +82,14 @@ function cuSubmit() {
 
     fetch(apiEndpoint, {
         method: 'POST',
-        headers: {
+
+       /* headers: {
             'Content-Type': 'multipart/form-data'
+
         },
+
+        */
+
         body: data,
 
 
