@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="65307d06-52d2-4f60-9504-c03413c47d0c" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MediaAcquisition/.idea/MediaAcquisition.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../MediaAcquisition/.idea/MediaAcquisition.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MediaAcquisition/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../MediaAcquisition/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../MediaAcquisition/api/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/../MediaAcquisition/api/urls.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ComposerSettings">
+    <execution />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectId" id="218ZBjMbjGHuNINRRmik8G8QhEX" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="vue.rearranger.settings.migration" value="true" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="65307d06-52d2-4f60-9504-c03413c47d0c" name="Changes" comment="" />
+      <created>1637324549056</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1637324549056</updated>
+      <workItem from="1637324554188" duration="242000" />
+      <workItem from="1637655729202" duration="263000" />
+      <workItem from="1637656083850" duration="65000" />
+      <workItem from="1637658646228" duration="225000" />
+      <workItem from="1637741090869" duration="1865000" />
+      <workItem from="1637747618705" duration="511000" />
+      <workItem from="1637914610123" duration="113000" />
+      <workItem from="1637914758640" duration="1546000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

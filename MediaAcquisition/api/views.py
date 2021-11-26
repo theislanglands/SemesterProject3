@@ -43,8 +43,6 @@ def add_youtube_audio(request, link):
 
         data = json.loads(data)
 
-
-
         #check filesize before upload
         new_entry = AudioObject(data['audio_id'], data)
         new_entry.save()
@@ -79,8 +77,6 @@ def get_metadata(request, link):
         return HttpResponse(traceback.format_exc())
     pass
 
-
-
 def upload_file(request):
     try:
         if request.method == 'POST':
@@ -96,10 +92,13 @@ def upload_file(request):
                 instance = AudioFile(artfile=request.FILES['artwork'], audiofile=request.FILES['mp3file'], JSON=data)
                 instance.save()
 
-                #3. upload mp3 file to remote file system - how is the id of the custom_track determined?
+                filename = request.FILES['mp3file'].filename
+                print(filename);
 
-                #globalController = domainController()
-                #globalController.store_custom_mp3()
+                #3. upload mp3 file to remote file system - how is the id of the custom_track determined?
+                globalController = domainController()
+                globalController.store_custom_mp3('MediaAcquisition/media/temp/*.mp3')
+
                 return HttpResponse(request.POST['metadata'] + ' uploaded')
         else:
             form = AudioForm()
