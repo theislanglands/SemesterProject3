@@ -110,7 +110,7 @@ def upload_file(request):
                 globalController = domainController()
                 globalController.store_custom_mp3( request.FILES['mp3file'].name )
 
-                return HttpResponse('uploaded ' + filename)
+                return HttpResponse('Successfully uploaded ' + filename + '!')
         else:
             form = AudioForm()
             return render(request, 'form_test.html', {'form': form})
