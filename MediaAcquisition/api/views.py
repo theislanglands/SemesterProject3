@@ -94,7 +94,7 @@ def upload_file(request):
                 randomuuid = uuid4().hex
 
                 # change request name
-                request.FILES['mp3file'].name = "CA_" + filename + "_" + str(randomuuid) + ".mp3"
+                request.FILES['mp3file'].name = "CA_" + str(randomuuid) + ".mp3"
                 #print(request.FILES['mp3file'].name)
 
                 #TODO
