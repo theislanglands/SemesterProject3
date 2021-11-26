@@ -1,5 +1,5 @@
 include:
   - project: 'semester-project-e2021/team-12/ci-cd'
-    ref: main
+    ref: dev
     file: 'pipelines/team09.yml'
 
