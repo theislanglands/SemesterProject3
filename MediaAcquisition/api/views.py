@@ -84,7 +84,7 @@ def get_metadata(request, link):
 def upload_file(request):
     try:
         if request.method == 'POST':
-            if not request.FILES['audiofile'] is None:
+            if not request.FILES['mp3file'] is None:
                 #1. use metadaData class to parse dict object to JSON
 
                 data = dict(request.POST.items())
@@ -93,14 +93,14 @@ def upload_file(request):
                 # file size on front end to avoid large files being transfered to the webserver.
 
                 #2. save metadata + artwork + json data + audio id
-                instance = AudioFile(artfile=request.FILES['artfile'], audiofile=request.FILES['audiofile'], JSON=data)
+                instance = AudioFile(artfile=request.FILES['artwork'], audiofile=request.FILES['mp3file'], JSON=data)
                 instance.save()
 
                 #3. upload mp3 file to remote file system - how is the id of the custom_track determined?
 
                 #globalController = domainController()
                 #globalController.store_custom_mp3()
-                return HttpResponse(request.POST['name'] + ' uploaded')
+                return HttpResponse(request.POST['metadata'] + ' uploaded')
         else:
             form = AudioForm()
         return render(request, 'form_test.html', {'form': form})
