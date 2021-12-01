@@ -112,7 +112,7 @@ def add_custom_audio(request):
                 # TODO refactor temp/temp/temp/temp
 
                 #2. save metadata + artwork + json data + audio id
-                instance = AudioFile(audio_id = audio_id, JSON=data)
+                instance = AudioFile(audio_id = audio_id, audiofile = request.FILES['mp3file'], artfile = request.FILES['artwork'], JSON=data)
                 instance.save()
 
                 #3. upload mp3 file to remote file system - how is the id of the custom_track determined?
