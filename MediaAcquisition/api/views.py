@@ -32,7 +32,8 @@ def add_youtube_audio(request, link):
         new_entry.save()
 
         globalController.store_youtube_mp3(link)
-        return HttpResponse('New song added to database')
+
+        return HttpResponse('New song added to System')
     except Exception:
         return HttpResponseNotFound('There was an error adding the youtube track')
 
@@ -40,6 +41,7 @@ def add_youtube_audio(request, link):
 def get_audio(request, link):
     try:
         globalController = domainController()
+
         return HttpResponse(globalController.get_audio(link))
     except Exception:
         return HttpResponseNotFound('There was an error getting the track')
@@ -48,7 +50,7 @@ def get_audio(request, link):
 
 def get_metadata(request, link):
     try:
-        select = link[0:2]
+        select = link[0:3]
         if select == 'YT_':
             return_meta_data = AudioObject.objects.filter(audio_id=link)
             if not return_meta_data:
@@ -61,13 +63,14 @@ def get_metadata(request, link):
                 return HttpResponseNotFound('Song URL invalid OR not in database')
             dict = {'audio_id': return_meta_data.values()[0]['audio_id'], 'metadata': return_meta_data.values()[0]['JSON']}
             return JsonResponse(dict)
+        else:
+            return HttpResponse(link + ' not found in database')
     except Exception:
         return HttpResponseNotFound('There was an error getting the metadata')
 
 
 def add_custom_audio(request):
     globalController = domainController()
-
     try:
         if request.method == 'POST':
             if not request.FILES['mp3file'] is None:
@@ -125,38 +128,42 @@ def add_custom_audio(request):
 
 def delete_audio(request, link):
     try:
-        select = link[0:2]
+        ##TODO: Fix delete in persistance
+        globalController = domainController()
+        globalController.delete_audio(link)
+        return HttpResponse('succes')
+
+        select = link[0:3]
         if select == 'YT_':
-            query = 'YT_' + link
-            return_meta_data = AudioObject.objects.filter(audio_id=query)
+            return_meta_data = AudioObject.objects.filter(audio_id=link)
             if not return_meta_data:
                 return HttpResponseNotFound('Song URL invalid OR not in database')
 
-            id = return_meta_data.values()[0]['audio_id']
-            delete_entry = AudioObject(id)
-            delete_entry.delete()
             globalController = domainController()
-            globalController.delete_audio(id)
+            globalController.delete_audio(link)
+
+            delete_entry = AudioObject(return_meta_data.values()[0]['audio_id'])
+            delete_entry.delete()
 
             return HttpResponse('File has been deleted')
 
         elif select == 'CA_':
-            query = 'CA_' + link
-            return_meta_data = AudioFile.objects.filter(audio_id=query)
+            return_meta_data = AudioFile.objects.filter(audio_id=link)
             if not return_meta_data:
                 return HttpResponseNotFound('Song URL invalid OR not in database')
 
-            id = return_meta_data.values()[0]['audio_id']
-            delete_entry = AudioFile(id)
+            globalController = domainController()
+            globalController.delete_audio(link)
+
+            delete_entry = AudioFile(return_meta_data.values()[0]['audio_id'])
             delete_entry.delete()
 
-            globalController = domainController()
-            globalController.delete_audio(id)
-
             return HttpResponse('File has been deleted')
+        else:
+            return HttpResponse(select + ' not found in file system or database')
 
-    except Exception:
-        return HttpResponse(traceback.format_exc())
+    except Exception as e:
+        return HttpResponse(str(e))
 
 
 def get_all_tracks(request):
@@ -170,7 +177,8 @@ def get_all_tracks(request):
             tmp = tmp + 1
 
         for x in range(len(CA_entries)):
-            data[f'track {tmp}'] = str(CA_entries[x])
+            ##TOdo: make sure there is an audio id when saving custom audio
+            data[f'track {tmp}'] = str(CA_entries[x].audio_id)
             tmp = tmp + 1
 
         return JsonResponse(data)

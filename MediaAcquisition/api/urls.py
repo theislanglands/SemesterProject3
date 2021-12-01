@@ -7,6 +7,5 @@ urlpatterns = [
     path('get_track/<link>', get_audio),
     path('get_all_tracks/', get_all_tracks),
     path('get_metadata/<link>', get_metadata),
-    path('add_custom', add_custom_audio)
+    path('add_custom/', add_custom_audio)
 ]
-
