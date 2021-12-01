@@ -7,7 +7,7 @@ services:
   web:
     build: .
     links:
-      - "db:mysql"
+      - "db:t09-mysql"
     ports:
       - "8000:8000"
     depends_on:
