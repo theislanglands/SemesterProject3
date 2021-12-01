@@ -132,13 +132,11 @@ def delete_audio(request, link):
             if not return_meta_data:
                 return HttpResponseNotFound('Song URL invalid OR not in database')
 
-            id = return_meta_data.values()[0]['audio_id']
-            delete_entry = AudioObject(id)
-            delete_entry.delete()
-
-            ##Todo: delete_audio not working properly
             globalController = domainController()
             globalController.delete_audio(link)
+
+            delete_entry = AudioObject(return_meta_data.values()[0]['audio_id'])
+            delete_entry.delete()
 
             return HttpResponse('File has been deleted')
 
@@ -147,12 +145,11 @@ def delete_audio(request, link):
             if not return_meta_data:
                 return HttpResponseNotFound('Song URL invalid OR not in database')
 
-            id = return_meta_data.values()[0]['audio_id']
-            delete_entry = AudioFile(id)
-            delete_entry.delete()
-
             globalController = domainController()
             globalController.delete_audio(link)
+
+            delete_entry = AudioFile(return_meta_data.values()[0]['audio_id'])
+            delete_entry.delete()
 
             return HttpResponse('File has been deleted')
         else:
@@ -173,7 +170,8 @@ def get_all_tracks(request):
             tmp = tmp + 1
 
         for x in range(len(CA_entries)):
-            data[f'track {tmp}'] = str(CA_entries[x])
+            ##TOdo: make sure there is an audio id when saving custom audio
+            data[f'track {tmp}'] = str(CA_entries[x].audio_id)
             tmp = tmp + 1
 
         return JsonResponse(data)
