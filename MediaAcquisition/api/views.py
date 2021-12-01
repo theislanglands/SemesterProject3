@@ -11,6 +11,11 @@ import json
 from django.shortcuts import render
 from api.forms import AudioForm
 from mutagen.mp3 import MP3
+import logging
+
+
+##logging
+logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.DEBUG)
 
 
 def add_youtube_audio(request, link):
@@ -97,7 +102,7 @@ def add_custom_audio(request):
 
                 # get duration of mp3
                 duration = MP3(request.FILES['mp3file']).info.length
-                #print(duration)
+                print(duration)
 
                 # get bitrate of mp3
                 bitrate = MP3(request.FILES['mp3file']).info.bitrate / 1000
@@ -124,11 +129,6 @@ def add_custom_audio(request):
 
 def delete_audio(request, link):
     try:
-        ##TODO: Fix delete in persistance
-        globalController = domainController()
-        globalController.delete_audio(link)
-        return HttpResponse('succes')
-
         select = link[0:3]
         if select == 'YT_':
             return_meta_data = AudioObject.objects.filter(audio_id=link)
@@ -142,7 +142,6 @@ def delete_audio(request, link):
             delete_entry.delete()
 
             return HttpResponse('File has been deleted')
-
         elif select == 'CA_':
             return_meta_data = AudioFile.objects.filter(audio_id=link)
             if not return_meta_data:
@@ -159,7 +158,7 @@ def delete_audio(request, link):
             return HttpResponse(select + ' not found in file system or database')
 
     except Exception as e:
-        return HttpResponse(str(e))
+        return HttpResponse(traceback.format_exc())
 
 
 def get_all_tracks(request):
