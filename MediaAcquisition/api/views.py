@@ -118,7 +118,7 @@ def upload_file(request):
         return HttpResponse(traceback.format_exc())
 
 
-def delete_audio(request, link):
+def delete_audio(request, link): ##TODO must delete from DB & filesystem
     try:
         query = 'YT_' + link
         return_meta_data = AudioObject.objects.filter(audio_id=query)
