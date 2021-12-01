@@ -11,6 +11,11 @@ import json
 from django.shortcuts import render
 from api.forms import AudioForm
 from mutagen.mp3 import MP3
+import logging
+
+
+##logging
+logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.DEBUG)
 
 
 def add_youtube_audio(request, link):
@@ -69,6 +74,7 @@ def get_metadata(request, link):
 
 
 def add_custom_audio(request):
+    logging.DEBUG('Incoming request')
     globalController = domainController()
     try:
         if request.method == 'POST':
@@ -76,6 +82,7 @@ def add_custom_audio(request):
                 #1. use metadaData class to parse dict object to JSON
 
                 formdata = dict(request.POST.items())
+
                 filename = request.FILES['mp3file'].name
 
                 #artwork name
@@ -95,7 +102,7 @@ def add_custom_audio(request):
 
                 # get duration of mp3
                 duration = MP3(request.FILES['mp3file']).info.length
-                #print(duration)
+                print(duration)
 
                 # get bitrate of mp3
                 bitrate = MP3(request.FILES['mp3file']).info.bitrate / 1000
