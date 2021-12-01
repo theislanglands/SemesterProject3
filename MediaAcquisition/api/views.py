@@ -4,7 +4,7 @@ from django.http import HttpResponse, JsonResponse, HttpResponseNotFound, HttpRe
 import os
 from api.models import *
 from api.domain.domainController import domainController
-from api import Metadata
+from api.metadata import Metadata
 from api.domain.youtubedlp import YoutubeDL
 from uuid import uuid4
 import json
@@ -14,73 +14,58 @@ from mutagen.mp3 import MP3
 
 
 
-# todo: Add sorting at metadata object
-# todo: Refactor APIviews
-
-
-# this is a test don't use it
-def api_call(request, link):
-    message = 'this is a dummy message'
-    try:
-        y = YoutubeDL()
-        data = y.get_json(link)
-        return JsonResponse(data)
-    except Exception:
-        return HttpResponse(traceback.format_exc() + '   ' + str(link))
-
 def add_youtube_audio(request, link):
-
     globalController = domainController()
-    # check if link already in database
     try:
         query = 'YT_' + link
         return_meta_data = AudioObject.objects.filter(audio_id=query)
         if return_meta_data:
             return HttpResponseNotFound('Song already in database')
-
         #Download Metadata and sort it
         data = globalController.get_json(link)
-
         if data == None:
             return HttpResponseNotFound('URL not valid')
 
         data = json.loads(data)
 
-        #check filesize before upload
         new_entry = AudioObject(data['audio_id'], data)
         new_entry.save()
 
         globalController.store_youtube_mp3(link)
-
-
         return HttpResponse('New song added to database')
-
     except Exception:
-        return HttpResponse(traceback.format_exc())
+        return HttpResponseNotFound('There was an error adding the youtube track')
 
 
 def get_audio(request, link):
-    globalController = domainController()
+    try:
+        globalController = domainController()
+        return HttpResponse(globalController.get_audio(link))
+    except Exception:
+        return HttpResponseNotFound('There was an error getting the track')
 
-    return HttpResponse(globalController.get_audio(link))
+
 
 def get_metadata(request, link):
-    globalController = domainController()
-
-    # returns metadata from django db
     try:
-        return_meta_data = AudioObject.objects.filter(audio_id=link)
-
-        if not return_meta_data:
-            return HttpResponseNotFound('Song URL invalid OR not in database')
-        else:
+        select = link[0:2]
+        if select == 'YT_':
+            return_meta_data = AudioObject.objects.filter(audio_id=link)
+            if not return_meta_data:
+                return HttpResponseNotFound('Song URL invalid OR not in database')
+            dict = {'audio_id': return_meta_data.values()[0]['audio_id'], 'metadata': return_meta_data.values()[0]['JSON']}
+            return JsonResponse(dict)
+        elif select == 'CA_':
+            return_meta_data = AudioFile.objects.filter(audio_id=link)
+            if not return_meta_data:
+                return HttpResponseNotFound('Song URL invalid OR not in database')
             dict = {'audio_id': return_meta_data.values()[0]['audio_id'], 'metadata': return_meta_data.values()[0]['JSON']}
             return JsonResponse(dict)
     except Exception:
-        return HttpResponse(traceback.format_exc())
-    pass
+        return HttpResponseNotFound('There was an error getting the metadata')
 
-def upload_file(request):
+
+def add_custom_audio(request):
     globalController = domainController()
 
     try:
@@ -88,7 +73,7 @@ def upload_file(request):
             if not request.FILES['mp3file'] is None:
                 #1. use metadaData class to parse dict object to JSON
 
-                data = dict(request.POST.items())
+                formdata = dict(request.POST.items())
 
                 filename = request.FILES['mp3file'].name
 
@@ -118,34 +103,8 @@ def upload_file(request):
                 # get bitrate of mp3
                 bitrate = MP3(request.FILES['mp3file']).info.bitrate / 1000
 
-                #creating metadata object
-                metadata = Metadata()
+                data = globalController.get_custom_json(formdata, audio_id, duration, artwork_url, bitrate)
 
-
-                #modify metadata fra form så det har samme format som youtube
-                #audio_id - skal tilføjes
-                #name - OK
-                #artist - OK
-                #duration - virker (måske) skal lige testes
-                #release_year - OK
-                #artwork - url/artwork/filename
-
-                #collection:
-                #collection_name
-                #track_nr
-                #total_track_count
-
-                #audio_type = "mp3" - OK
-                #bitrate: virker (måske) skal lige testes
-
-                #created_at = MANGLER
-                #updated_at: null
-
-
-
-                #TODO
-                # redigere metadata - så der bliver tilføjet duration, etc inden den bliver lagret i vores db
-                # dvs kør igennem metode i metadata klassen!
                 # TODO refactor temp/temp/temp/temp
 
                 #2. save metadata + artwork + json data + audio id
@@ -172,22 +131,25 @@ def delete_audio(request, link):
             return_meta_data = AudioObject.objects.filter(audio_id=query)
             if not return_meta_data:
                 return HttpResponseNotFound('Song URL invalid OR not in database')
+
             id = return_meta_data.values()[0]['audio_id']
             delete_entry = AudioObject(id)
             delete_entry.delete()
+            globalController = domainController()
+            globalController.delete_audio(id)
+
             return HttpResponse('File has been deleted')
 
         elif select == 'CA_':
-            ##Delete audio from DB
             query = 'CA_' + link
             return_meta_data = AudioFile.objects.filter(audio_id=query)
             if not return_meta_data:
                 return HttpResponseNotFound('Song URL invalid OR not in database')
+
             id = return_meta_data.values()[0]['audio_id']
             delete_entry = AudioFile(id)
             delete_entry.delete()
 
-            ##delete file from filesystem
             globalController = domainController()
             globalController.delete_audio(id)
 
@@ -196,38 +158,33 @@ def delete_audio(request, link):
     except Exception:
         return HttpResponse(traceback.format_exc())
 
+
 def get_all_tracks(request):
     try:
-        all_entries = list(AudioObject.objects.all())
+        YT_entries = list(AudioObject.objects.all())
+        CA_entries = list(AudioFile.objects.all())
         data = {}
         tmp = 0
-        print(all_entries)
-        for x in range(len(all_entries)):
-            data[f'track {tmp}'] = str(all_entries[x])
+        for x in range(len(YT_entries)):
+            data[f'track {tmp}'] = str(YT_entries[x])
             tmp = tmp + 1
-        if all_entries:
-            return JsonResponse(data)
-        else:
-            return HttpResponse('no entries in database')
+
+        for x in range(len(CA_entries)):
+            data[f'track {tmp}'] = str(CA_entries[x])
+            tmp = tmp + 1
+
+        return JsonResponse(data)
     except Exception:
         return HttpResponseNotFound(traceback.format_exc())
+
 
 def youtubegui(request):
     return render(request, 'youtubeUpload.html')
 
+
 def usergui(request):
     return render(request, 'customUpload.html')
 
+
 def home(request):
     return render(request, 'index.html')
-
-
-def add_cu(request):
-
-    json = request.POST.get("metadata")
-    artfile = request.FILES.get("artwork")
-    audiofile = request.FILES.get("mp3file")
-
-    return HttpResponse("recieved " + str(json))
-
-

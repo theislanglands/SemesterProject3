@@ -61,6 +61,9 @@ class CustomAudio:
             # TODO - what if send fails - delete audiofrom db?
             return "error: " + response.reason
 
+    def get_json(self, data, audio_id, duration, artwork_url, bitrate):
+        meta = Metadata()
+        return meta.parse_from_custom_audio_json(data, audio_id, duration, artwork_url, bitrate)
 
 if __name__ == '__main__':
     parser = CustomAudio()
