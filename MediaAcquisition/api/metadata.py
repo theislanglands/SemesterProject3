@@ -214,20 +214,19 @@ class Metadata:
 
         return metadata.parse_to_json()
 
-
     def parse_from_custom_audio_json(self, json_formdata, audio_id, duration, artwork_url, bitrate):
         # creating empty metadata object
         metadata = Metadata()
-
+        #print("in parse from custom method")
+        #print(str(json_formdata))
         #convert json_formdata to dict
         data = json.loads(json_formdata)
-
         metadata.audio_id = audio_id
         metadata.name = data['name']
         metadata.artist = data['artist']
 
         # check if collection
-        if data['is_collection']:
+        if data['part of collection']:
             metadata.collection = True
             metadata.collection_name = data['collection_name']
             metadata.track_nr = data['track_nr']
@@ -238,6 +237,8 @@ class Metadata:
         metadata.artwork = artwork_url
         metadata.bitrate = bitrate
         metadata.created_at = str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+
+        #print(str(metadata.parse_to_json()))
 
         return metadata.parse_to_json()
 

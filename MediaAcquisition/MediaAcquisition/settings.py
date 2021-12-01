@@ -90,7 +90,7 @@ DATABASES = {
         'NAME': 'media_acquisition',
         'USER': 'root',
         'PASSWORD': '',
-        'HOST': 't09-mysql',
+        'HOST': '127.0.0.1',
         'PORT': '3306',
     }
 }

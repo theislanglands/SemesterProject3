@@ -33,7 +33,7 @@ class CustomAudio:
 
         try:
             # store in filesystem on server
-            local_path = os.getcwd() + '/temp/'
+            local_path = os.getcwd() + '/audioManager/temp/'
             success = self.persistence.storeArtwork(local_path + filename, filename)
 
             # handle success response

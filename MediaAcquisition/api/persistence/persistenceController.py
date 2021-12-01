@@ -34,7 +34,7 @@ class PersistanceController:
             file.close()
 
     def storeArtwork(self, localFilePath, fileNameOnServer):
-
+        self.ftp.cwd('/' + self.root + '/' + self.artworkroot)
         file = None
         try:
             file = open(localFilePath, "rb")  # open file to send

@@ -45,8 +45,6 @@ def get_audio(request, link):
     except Exception:
         return HttpResponseNotFound('There was an error getting the track')
 
-
-
 def get_metadata(request, link):
     try:
         select = link[0:3]
@@ -69,13 +67,17 @@ def get_metadata(request, link):
 
 
 def add_custom_audio(request):
+
     globalController = domainController()
+
     try:
         if request.method == 'POST':
             if not request.FILES['mp3file'] is None:
                 #1. use metadaData class to parse dict object to JSON
 
                 formdata = dict(request.POST.items())
+                formJson = formdata['metadata']
+
                 filename = request.FILES['mp3file'].name
 
                 #artwork name
@@ -99,12 +101,13 @@ def add_custom_audio(request):
 
                 # get bitrate of mp3
                 bitrate = MP3(request.FILES['mp3file']).info.bitrate / 1000
-                data = globalController.get_custom_json(formdata, audio_id, duration, artwork_url, bitrate)
+
+                data = globalController.get_custom_json(formJson, audio_id, duration, artwork_url, bitrate)
 
                 # TODO refactor temp/temp/temp/temp
 
                 #2. save metadata + artwork + json data + audio id
-                instance = AudioFile(artfile=request.FILES['artwork'], audiofile=request.FILES['mp3file'], JSON=data)
+                instance = AudioFile(audio_id = audio_id, JSON=data)
                 instance.save()
 
                 #3. upload mp3 file to remote file system - how is the id of the custom_track determined?
