@@ -73,6 +73,7 @@ class PersistanceController:
 
     def delete_audio(self, id):
         filename = id + '.mp3'
+        self.ftp.cwd('/' + self.root + '/' + self.audioroot)
         status = self.ftp.delete(filename)
         print(status)
 
