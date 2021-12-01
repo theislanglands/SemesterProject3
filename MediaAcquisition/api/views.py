@@ -13,7 +13,6 @@ from api.forms import AudioForm
 from mutagen.mp3 import MP3
 
 
-
 def add_youtube_audio(request, link):
     globalController = domainController()
     try:
@@ -77,35 +76,29 @@ def add_custom_audio(request):
                 #1. use metadaData class to parse dict object to JSON
 
                 formdata = dict(request.POST.items())
-
                 filename = request.FILES['mp3file'].name
 
-                # remove .mp3
-                filename = filename[:-4]
-
-                # uuid
-                randomuuid = uuid4().hex
-
-                #audio_id
-                audio_id = "CA_" + str(randomuuid)
-
-                #artwork_id
+                #artwork name
                 artwork_filename = request.FILES['artwork'].name
 
                 #artwork url
                 artwork_url = globalController.get_artwork_path() + "/" + artwork_filename
 
-                # change request name
+                # generating unique id for audio file uuid
+                randomuuid = uuid4().hex
+
+                # audio_id
+                audio_id = "CA_" + str(randomuuid)
+
+                # changing name of audio file in request name
                 request.FILES['mp3file'].name = audio_id + ".mp3"
 
                 # get duration of mp3
                 duration = MP3(request.FILES['mp3file']).info.length
-                print(duration)
-                exit()
+                #print(duration)
 
                 # get bitrate of mp3
                 bitrate = MP3(request.FILES['mp3file']).info.bitrate / 1000
-
                 data = globalController.get_custom_json(formdata, audio_id, duration, artwork_url, bitrate)
 
                 # TODO refactor temp/temp/temp/temp
@@ -196,3 +189,6 @@ def usergui(request):
 
 def home(request):
     return render(request, 'index.html')
+
+# docker-compose build
+# docker-compose up
