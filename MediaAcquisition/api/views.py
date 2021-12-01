@@ -32,6 +32,7 @@ def add_youtube_audio(request, link):
         new_entry.save()
 
         globalController.store_youtube_mp3(link)
+
         return HttpResponse('New song added to System')
     except Exception:
         return HttpResponseNotFound('There was an error adding the youtube track')
@@ -40,6 +41,7 @@ def add_youtube_audio(request, link):
 def get_audio(request, link):
     try:
         globalController = domainController()
+
         return HttpResponse(globalController.get_audio(link))
     except Exception:
         return HttpResponseNotFound('There was an error getting the track')
@@ -126,6 +128,11 @@ def add_custom_audio(request):
 
 def delete_audio(request, link):
     try:
+        ##TODO: Fix delete in persistance
+        globalController = domainController()
+        globalController.delete_audio(link)
+        return HttpResponse('succes')
+
         select = link[0:3]
         if select == 'YT_':
             return_meta_data = AudioObject.objects.filter(audio_id=link)
