@@ -2,13 +2,16 @@ import traceback
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, HttpResponseNotFound, HttpResponseRedirect
 import os
-from api.domain.domainController import domainController
 from api.models import *
+from api.domain.domainController import domainController
+from api import Metadata
 from api.domain.youtubedlp import YoutubeDL
 from uuid import uuid4
 import json
 from django.shortcuts import render
 from api.forms import AudioForm
+from mutagen.mp3 import MP3
+
 
 
 # todo: Add sorting at metadata object
@@ -78,6 +81,8 @@ def get_metadata(request, link):
     pass
 
 def upload_file(request):
+    globalController = domainController()
+
     try:
         if request.method == 'POST':
             if not request.FILES['mp3file'] is None:
@@ -93,9 +98,50 @@ def upload_file(request):
                 # uuid
                 randomuuid = uuid4().hex
 
+                #audio_id
+                audio_id = "CA_" + str(randomuuid)
+
+                #artwork_id
+                artwork_filename = request.FILES['artwork'].name
+
+                #artwork url
+                artwork_url = globalController.get_artwork_path() + "/" + artwork_filename
+
                 # change request name
-                request.FILES['mp3file'].name = "CA_" + str(randomuuid) + ".mp3"
-                #print(request.FILES['mp3file'].name)
+                request.FILES['mp3file'].name = audio_id + ".mp3"
+
+                # get duration of mp3
+                duration = MP3(request.FILES['mp3file']).info.length
+                print(duration)
+                exit()
+
+                # get bitrate of mp3
+                bitrate = MP3(request.FILES['mp3file']).info.bitrate / 1000
+
+                #creating metadata object
+                metadata = Metadata()
+
+
+                #modify metadata fra form så det har samme format som youtube
+                #audio_id - skal tilføjes
+                #name - OK
+                #artist - OK
+                #duration - virker (måske) skal lige testes
+                #release_year - OK
+                #artwork - url/artwork/filename
+
+                #collection:
+                #collection_name
+                #track_nr
+                #total_track_count
+
+                #audio_type = "mp3" - OK
+                #bitrate: virker (måske) skal lige testes
+
+                #created_at = MANGLER
+                #updated_at: null
+
+
 
                 #TODO
                 # redigere metadata - så der bliver tilføjet duration, etc inden den bliver lagret i vores db
@@ -107,8 +153,8 @@ def upload_file(request):
                 instance.save()
 
                 #3. upload mp3 file to remote file system - how is the id of the custom_track determined?
-                globalController = domainController()
                 globalController.store_custom_mp3( request.FILES['mp3file'].name )
+                globalController.store_artwork(request.FILES['artwork'].name)
 
                 return HttpResponse('Successfully uploaded ' + filename + '!')
         else:
@@ -120,15 +166,33 @@ def upload_file(request):
 
 def delete_audio(request, link):
     try:
-        query = 'YT_' + link
-        return_meta_data = AudioObject.objects.filter(audio_id=query)
-        if not return_meta_data:
-            return HttpResponseNotFound('Song URL invalid OR not in database')
-        else:
-                id = return_meta_data.values()[0]['audio_id']
-                delete_entry = AudioObject(id)
-                delete_entry.delete()
-                return HttpResponse('File has been deleted')
+        select = link[0:2]
+        if select == 'YT_':
+            query = 'YT_' + link
+            return_meta_data = AudioObject.objects.filter(audio_id=query)
+            if not return_meta_data:
+                return HttpResponseNotFound('Song URL invalid OR not in database')
+            id = return_meta_data.values()[0]['audio_id']
+            delete_entry = AudioObject(id)
+            delete_entry.delete()
+            return HttpResponse('File has been deleted')
+
+        elif select == 'CA_':
+            ##Delete audio from DB
+            query = 'CA_' + link
+            return_meta_data = AudioFile.objects.filter(audio_id=query)
+            if not return_meta_data:
+                return HttpResponseNotFound('Song URL invalid OR not in database')
+            id = return_meta_data.values()[0]['audio_id']
+            delete_entry = AudioFile(id)
+            delete_entry.delete()
+
+            ##delete file from filesystem
+            globalController = domainController()
+            globalController.delete_audio(id)
+
+            return HttpResponse('File has been deleted')
+
     except Exception:
         return HttpResponse(traceback.format_exc())
 
