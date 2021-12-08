@@ -214,47 +214,33 @@ class Metadata:
 
         return metadata.parse_to_json()
 
-    def parse_from_custom_audio_json(self, json_string):
+    def parse_from_custom_audio_json(self, json_formdata, audio_id, duration, artwork_url, bitrate):
         # creating empty metadata object
         metadata = Metadata()
-
-        #convert json to dict
-        data = json.loads(json_string)
-
-        #generate random uuid
-        randomuuid = uuid4().hex
-
-        # generating id
-        id = "CA_" + data['name'] + "_" + str(randomuuid)
-
-        # slugify makes id - url-friendly!
-        id = slugify(id)
-
-        # adding data from youtube json to metadata object
-        metadata.audio_id = id
-
+        #print("in parse from custom method")
+        #print(str(json_formdata))
+        #convert json_formdata to dict
+        data = json.loads(json_formdata)
+        metadata.audio_id = audio_id
         metadata.name = data['name']
         metadata.artist = data['artist']
 
         # check if collection
-        if data['is_collection']:
+        if data['part of collection']:
             metadata.collection = True
             metadata.collection_name = data['collection_name']
             metadata.track_nr = data['track_nr']
             metadata.total_track_count = data['total_track_count']
 
-        #TODO: dette skal appendes i emils controller! mp3 filens metadata om duration skal addes til json objectet inden det sendes her!
-        # metadata.duration = data['duration']
-        
+        metadata.duration = duration
         metadata.release_year = data['release_year']
-
-        #TODO: path to artwork
-        metadata.artwork = data['path_to_artwork']
-
+        metadata.artwork = artwork_url
+        metadata.bitrate = bitrate
         metadata.created_at = str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
-        return metadata.parse_to_json()
+        #print(str(metadata.parse_to_json()))
 
+        return metadata.parse_to_json()
 
 if __name__ == '__main__':
     parser = Metadata()

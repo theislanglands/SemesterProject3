@@ -1,5 +1,5 @@
 //const httpRequest = new XMLHttpRequest()
-var apiEndpoint = 'http://127.0.0.1:8000/add_custom';
+var apiEndpoint = 'http://127.0.0.1:8000/add_custom/';
 
 window.onload = () => {
     var maxArtSize = 2; //in MB

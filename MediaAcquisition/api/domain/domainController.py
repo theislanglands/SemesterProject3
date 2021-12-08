@@ -31,5 +31,15 @@ class domainController:
     def post_metadata(self, metadata_json, endpoint_url):
         return self.custom_audio.post_metadata(self, metadata_json, endpoint_url)
 
+    def get_artwork_path(self):
+        domain = self.persistance.domain
+        root = self.persistance.root
+        artwork_root = self.persistance.artworkroot
+        artwork_url = domain + "/" + root + "/" + artwork_root
+        return artwork_url
+
+    def get_custom_json(self, data, audio_id, duration, artwork_url, bitrate):
+        return self.custom_audio.get_json(data, audio_id, duration, artwork_url, bitrate)
+
 #dc = domainController()
 #print(dc.store_mp3('IJLj1aTmSxw'))
