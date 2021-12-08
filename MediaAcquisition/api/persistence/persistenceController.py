@@ -34,7 +34,7 @@ class PersistanceController:
             file.close()
 
     def storeArtwork(self, localFilePath, fileNameOnServer):
-
+        self.ftp.cwd('/' + self.root + '/' + self.artworkroot)
         file = None
         try:
             file = open(localFilePath, "rb")  # open file to send
@@ -73,6 +73,7 @@ class PersistanceController:
 
     def delete_audio(self, id):
         filename = id + '.mp3'
+        self.ftp.cwd('/' + self.root + '/' + self.audioroot)
         status = self.ftp.delete(filename)
         print(status)
 

@@ -33,7 +33,7 @@ class CustomAudio:
 
         try:
             # store in filesystem on server
-            local_path = os.getcwd() + '/temp/'
+            local_path = os.getcwd() + '/audioManager/temp/'
             success = self.persistence.storeArtwork(local_path + filename, filename)
 
             # handle success response
@@ -61,6 +61,9 @@ class CustomAudio:
             # TODO - what if send fails - delete audiofrom db?
             return "error: " + response.reason
 
+    def get_json(self, data, audio_id, duration, artwork_url, bitrate):
+        meta = Metadata()
+        return meta.parse_from_custom_audio_json(data, audio_id, duration, artwork_url, bitrate)
 
 if __name__ == '__main__':
     parser = CustomAudio()
