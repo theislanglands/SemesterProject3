@@ -43,8 +43,6 @@ class YoutubeAudioDL:
             # store in filesystem on server
             local_path = os.getcwd() + '/audioManager/temp/temp/'
             filename = 'YT_' + id[0] + '.mp3'
-            # print("fn: " + filename)
-            # print("lp: " + local_path)
             success = self.persistence.storeAudio(local_path + filename, filename)
 
             # handle success responce
@@ -68,7 +66,3 @@ class YoutubeAudioDL:
         jsondata = self.get_json(youtubeID)
 
         return jsondata
-
-if __name__ == '__main__':
-    y = YoutubeAudioDL()
-    print(y.getALL('j8fHNdrZTSI'))
