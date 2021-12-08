@@ -217,6 +217,8 @@ class Metadata:
 
         #convert json_formdata to dict
         data = json.loads(json_formdata)
+
+        # add attributes to metadata object
         metadata.audio_id = audio_id
         metadata.name = data['name']
         metadata.artist = data['artist']

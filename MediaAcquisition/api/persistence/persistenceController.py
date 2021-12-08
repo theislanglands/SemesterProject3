@@ -4,6 +4,7 @@ from ftplib import FTP
 class PersistanceController:
 
     def __init__(self):
+        # connection to ftp server
         self.host = 'ftp.foreignlands.dk'
         self.domain = 'foreignlands.dk'
         self.root = 'MediaAcquisition'
@@ -49,10 +50,6 @@ class PersistanceController:
         finally:
             file.close()
 
-    def check_id(self, youtube_id):
-        pass
-        # done with try-catch i yt downloader
-
     def checkIfExist(self, id):
         self.ftp.cwd('/' + self.root + '/' + self.audioroot)  # change working directory to root
         filename = id + '.mp3'  # adds mp3 to id
@@ -66,10 +63,6 @@ class PersistanceController:
             return 'http://' + self.domain + '/' + self.root + '/' + self.audioroot + '/' + id + '.mp3'
         else:
             return None
-        
-    def downloadAudio(self, id, path):  # not used, but maybe later!
-        filename = id + '.mp3'
-        self.ftp.retrbinary("RETR " + filename + ", open(filename, 'wb').write)")  # henter fil ned ad ftp
 
     def delete_audio(self, id):
         filename = id + '.mp3'
