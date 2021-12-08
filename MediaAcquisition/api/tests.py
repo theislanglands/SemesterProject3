@@ -1,7 +1,33 @@
 from django.test import TestCase
 from api.metadata import *
+from django.test.utils import setup_test_environment
+from django.test import client, TestCase
+from django.urls import reverse
 import requests
 
+class test_views(TestCase):
+    def setUp(self):
+        # Should put things directly in database
+        self.client.get(reverse("add_yt", kwargs={'link':'JMieOvbuX8E'}))
+        self.client.get(reverse("add_yt", kwargs={'link':'e8X3ACToii0'}))
+
+    def test_api_call(self):
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 404)
+
+    # setup_test_environment()
+    def test_get_all_tracks(self):
+        response = self.client.get(reverse("get_all_tracks"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "YT_JMieOvbuX8E")
+        self.assertContains(response, "YT_e8X3ACToii0")
+
+    def test_get_track(self):
+        response = self.client.get(reverse("get_track",  kwargs={'link': 'YT_JMieOvbuX8E'}))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "foreignlands") #todo needs to be changed
+
+    #def test_
 
 class MetaDataTestCase(TestCase):
     # test creating an metadata object
