@@ -210,8 +210,6 @@ class Metadata:
         metadata.artwork = data['thumbnail']
         metadata.created_at = str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
-        #print(metadata)
-
         return metadata.parse_to_json()
 
     def parse_from_custom_audio_json(self, json_formdata, audio_id, duration, artwork_url, bitrate):
@@ -238,14 +236,7 @@ class Metadata:
         metadata.bitrate = bitrate
         metadata.created_at = str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
-        #print(str(metadata.parse_to_json()))
-
         return metadata.parse_to_json()
-
-if __name__ == '__main__':
-    parser = Metadata()
-    metadata_test = '{"name": "My Heart Will Go On", "artist": "Celine Dion", "is_collection": "true", "collection_name": "New York World Tour", "track_nr": "1", "total_track_count": "5", "release_year": "1992", "path_to_artwork": "https:/forbkbksdf"}'
-    print(parser.parse_from_custom_audio_json(metadata_test))
 
 
 
