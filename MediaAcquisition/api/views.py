@@ -126,7 +126,7 @@ def add_custom_audio(request):
         return HttpResponse(traceback.format_exc())
 
 
-def delete_audio(request, link):
+def delete_audio(request, link): ##TODO must delete from DB & filesystem
     try:
         select = link[0:3]
         if select == 'YT_':
