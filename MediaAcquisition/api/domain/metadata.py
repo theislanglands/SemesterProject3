@@ -161,7 +161,6 @@ class Metadata:
 
         return self.parse_to_json(self)
 
-
     def __str__(self):
         return "audio_id: " + self.audio_id + \
                "\nname: " + self.name + \
@@ -215,8 +214,7 @@ class Metadata:
     def parse_from_custom_audio_json(self, json_formdata, audio_id, duration, artwork_url, bitrate):
         # creating empty metadata object
         metadata = Metadata()
-        #print("in parse from custom method")
-        #print(str(json_formdata))
+
         #convert json_formdata to dict
         data = json.loads(json_formdata)
         metadata.audio_id = audio_id
@@ -237,7 +235,3 @@ class Metadata:
         metadata.created_at = str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
         return metadata.parse_to_json()
-
-
-
-
