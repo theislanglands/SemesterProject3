@@ -40,6 +40,3 @@ class domainController:
 
     def get_custom_json(self, data, audio_id, duration, artwork_url, bitrate):
         return self.custom_audio.get_json(data, audio_id, duration, artwork_url, bitrate)
-
-#dc = domainController()
-#print(dc.store_mp3('IJLj1aTmSxw'))
