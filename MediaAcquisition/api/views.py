@@ -11,11 +11,11 @@ import json
 from django.shortcuts import render
 from api.forms import AudioForm
 from mutagen.mp3 import MP3
-import logging
+# import logging
 
 
 ##logging
-logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.DEBUG)
+# logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.DEBUG)
 
 def add_youtube_audio(request, link):
     globalController = domainController()
