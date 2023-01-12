@@ -136,7 +136,7 @@ class Metadata:
         self._updated_at = updated_at
 
     def sort_meta_data(self, data):
-        # if no track in json - use video title & uploader
+        # if no track in json - use video title & uploader - NOT USED
 
         print(str(data))
 

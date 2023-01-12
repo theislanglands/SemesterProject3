@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="65307d06-52d2-4f60-9504-c03413c47d0c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MediaAcquisition/.idea/MediaAcquisition.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../MediaAcquisition/.idea/MediaAcquisition.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MediaAcquisition/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../MediaAcquisition/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MediaAcquisition/api/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/../MediaAcquisition/api/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,6 +44,7 @@
       <workItem from="1637747618705" duration="511000" />
       <workItem from="1637914610123" duration="113000" />
       <workItem from="1637914758640" duration="1546000" />
+      <workItem from="1638539567305" duration="21000" />
     </task>
     <servers />
   </component>
